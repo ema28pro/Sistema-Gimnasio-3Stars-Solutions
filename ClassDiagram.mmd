@@ -1,0 +1,92 @@
+classDiagram
+
+%% =========================
+%% SUBGRUPO: GIMNASIO Y SU ECOSISTEMA
+%% =========================
+
+class Gimnasio {
+  <<Entidad Principal>>
+  +String nombre
+  +String direccion
+  +int telefono
+  +String correo_electronico
+  +float efectivo
+  +int numero_clientes
+  +int historico_clientes
+  +List~Cliente~ clientes
+  +List~Membresia~ membresias
+  +List~Entrenador~ entrenadores
+  +List~SesionEspecial~ sesiones
+  --
+  +ver_inf()
+  +registrar_cliente()
+  +consultar_membresia()
+  +registrar_entrada()
+  +visualizar_membresias()
+  +analisis_financiero()
+  +reporte_diario()
+  +informe_entrada()
+}
+
+%% =========================
+%% SUBGRUPO: CLIENTES Y MEMBRESÍAS
+%% =========================
+
+class Cliente {
+  <<Usuario>>
+  +int id_cliente
+  +String nombre_completo
+  +int documento_identidad
+  +int numero_telefono
+  +String fecha_registro
+  +Membresia id_membresía
+  +SesionEspecial sesion_especial
+  --
+  +adquirir_membresia()
+  +pago_ingreso_unico()
+  +pagar_membresia()
+  +solicitar_sesion()
+}
+
+class Membresia {
+  <<Plan>>
+  +int id_membresia
+  +String estado
+  +String fecha_inicio
+  +String fecha_fin
+  --
+  +calcular_dias_restantes()
+}
+
+%% =========================
+%% SUBGRUPO: ENTRENADORES Y SESIONES
+%% =========================
+
+class Entrenador {
+  <<Personal>>
+  +int id_entrenador
+  +String nombre
+  +int telefono
+  +String especialidad
+}
+
+class SesionEspecial {
+  <<Evento>>
+  +Entrenador id_entrenador
+  +int cupos
+  +String fecha
+  +int maximo_cupos
+  +List~Cliente~ inscritos
+}
+
+%% =========================
+%% RELACIONES PRINCIPALES
+%% =========================
+
+Gimnasio "1" o--> "0..*" Cliente : contiene
+Gimnasio "1" o--> "0..*" Membresia : ofrece
+Gimnasio "1" o--> "0..*" Entrenador : contrata
+Gimnasio "1" o--> "0..*" SesionEspecial : programa
+Cliente "1" *--> "1" Membresia : posee
+SesionEspecial "1" o--> "0..*" Cliente : inscritos
+SesionEspecial "1" *--> "1" Entrenador : guiada por
