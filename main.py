@@ -20,8 +20,9 @@ class Gimnasio:
         
         Notas:
         - Necesitaremos un contador para membresias y para entrenadores?
+        - Pensar en los registros y como lo llevaremos
     """    
-    def __init__(self, nombre: str, direccion: str, telefono: int, correo: str, efectivo: float = 0):   
+    def __init__(self, nombre: str, direccion: str, telefono: str, correo: str, efectivo: float = 0):   
         self.__nombre = nombre
         self.__direccion = direccion
         self.__telefono = telefono
@@ -29,7 +30,7 @@ class Gimnasio:
         self.__efectivo = efectivo
 
         self.__numero_clientes = 0
-        self.__historia_clientes = 0
+        self.__historico_clientes = 0
         self.__clientes = np.full(50, None, dtype=object)
         self.__membresias = np.full(50, None, dtype=object)
         self.__entrenadores = np.full(5, None, dtype=object)
@@ -44,8 +45,40 @@ class Gimnasio:
         """        
         print(f"Gimnasio {self.__nombre}, Tel: {self.__telefono},\nCorreo: {self.__correo_electronico}, nos encontramos ubicados en {self.__direccion}")
 
-    def registrar_cliente(self, cliente):
-        nuevo_cliente = Cliente()
+    def registrar_cliente(self, nombre, documento, telefono=None):
+        
+        #Validaciones
+        
+        if self.__numero_clientes >= 50:
+            print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
+            return
+        if not nombre or not documento:
+            print("Nombre y documento son obligatorios.")
+            return
+        if telefono and (telefono.isalpha() or not telefono.isdigit()):
+            print("El teléfono debe ser un número válido.")
+            return
+        if nombre.isdigit() or not nombre.isalpha():
+            print("El nombre no debe contener números ni símbolos ni espacios.")
+            return
+        if documento.isalpha() or not documento.isdigit():
+            print("El documento no debe contener letras ni símbolos ni espacios.")
+            return
+        
+        id_cliente = self.__historico_clientes + 1
+        fecha_registro = date.today()
+        nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono if telefono else None)
+        # Forma 1, buscar un espacio vacío en el array de clientes
+        for i in range(50):
+            if self.__clientes[i] is None:
+                self.__clientes[i] = nuevo_cliente
+                break
+        # # Forma 2, asignar directamente al índice del contador de clientes
+        # self.__clientes[self.__numero_clientes] = nuevo_cliente
+
+        self.__numero_clientes += 1
+        self.__historico_clientes += 1
+        print(f"ID {id_cliente} : Cliente {nombre} registrado exitosamente. {fecha_registro}")
 
     def consultar_membresia(self, id_cliente):
         pass
@@ -54,6 +87,21 @@ class Gimnasio:
         # lógica para registrar entrada de un cliente
         pass
 
+    def visualizar_clientes(self):
+        """_summary_
+        
+        
+        
+        """        
+        print("\n=== Membresías Registradas ===")
+        total_membresias = 0
+        for cliente in self.__clientes:
+            if cliente is not None:
+                total_membresias += 1
+                print(f"ID: {cliente.get_id_c()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+        
+        print(f"\nNumero de membresias : {total_membresias}")
+    
     def visualizar_membresias(self):
         pass
 
@@ -83,16 +131,42 @@ class Cliente:
         __fecha_registro (str): Fecha de registro del cliente en el gimnasio.
         __id_membresia (Membresia, optional): Ideantificador unico de la membresía asociada al cliente. Defaults to None.
         __sesion_especial (SesionEspecial, optional): Sesión especial solicitada por el cliente. Defaults to None.
+        
+    Notas:
+        - Pensar si es necesario el atributo __sesion_especial, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
+        - Pensar si Guardaremos el nombre completo o solo el nombre.
     """
-    def __init__(self, id_cliente: int, nombre: str, documento: int, fecha_registro: str, telefono: int = None):   
+    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):   
         self.__id_cliente = id_cliente
         self.__nombre = nombre
-        self.__documento_identidad = documento
+        self.__documento = documento
         self.__telefono = telefono
         self.__fecha_registro = fecha_registro
 
         self.__id_membresia = None
-        self.__sesion_especial = None # Es necesario?
+        self.__sesiones_especiales = [] # Pendiente
+        
+    # Métodos de acceso
+    
+    def get_id_c(self):
+        return self.__id_cliente
+    
+    def get_nombre_c(self):
+        return self.__nombre
+    
+    def get_documento_c(self):
+        return self.__documento
+    
+    def get_telefono_c(self):
+        return self.__telefono
+    
+    def get_fecha_registro_c(self):
+        return self.__fecha_registro
+    
+    def get_id_membresia(self):
+        return self.__id_membresia
+    
+    # Métodos
 
     def adquirir_membresia(self):
         pass
@@ -137,7 +211,7 @@ class Entrenador:
         __telefono (int, optional): Número de teléfono del entrenador. Defaults to None.
         __especialidad (set): Especialidades del entrenador (Boxeo, Yoga, Aeróbicos).
     """
-    def __init__(self, id_entrenador: int, nombre: str, especialidad: set, telefono: int = None):
+    def __init__(self, id_entrenador: int, nombre: str, especialidad: set, telefono: str = None):
         self.__id_entrenador = id_entrenador
         self.__nombre = nombre
         self.__telefono = telefono
@@ -164,8 +238,12 @@ class SesionEspecial:
 
 
 
-Gym = Gimnasio("Body Force","Barrio Candelilla", 3001234545, "body@force.com", 45000)
-Gym.ver_inf()
-print(Gym.get())
+def main():
+    Gym = Gimnasio("Body Force","Barrio Candelilla", 3001234545, "body@force.com", 45000)
+    # Gym.ver_inf()
+    Gym.registrar_cliente("Emanuel", "21554", "0")
+    print(Gym.get())
+    Gym.visualizar_membresias()
 
+main()
 
