@@ -38,6 +38,18 @@ class Gimnasio:
         
     def get(self):
         return self.__clientes, self.__membresias, self.__entrenadores, self.__sesiones
+    
+    # Métodos accesores y modificadores
+    
+    def set_membresias(self, membresia):
+        """_summary_
+            Agrega una membresía al gimnasio.
+        """
+        for i in range(50):
+            if self.__membresias[i] is None:
+                self.__membresias[i] = membresia
+                # Tinking
+                break
 
     def ver_inf(self):
         """_summary_
@@ -87,23 +99,25 @@ class Gimnasio:
         # lógica para registrar entrada de un cliente
         pass
 
-    def visualizar_clientes(self):
-        """_summary_
-        
-        
-        
-        """        
-        print("\n=== Membresías Registradas ===")
-        total_membresias = 0
+    def visualizar_clientes(self):      
+        print("\n=== Clientes Registrados ===")
+        total_clientes = 0
         for cliente in self.__clientes:
             if cliente is not None:
-                total_membresias += 1
+                total_clientes += 1
                 print(f"ID: {cliente.get_id_c()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
         
-        print(f"\nNumero de membresias : {total_membresias}")
+        print(f"\nNumero de Clientes : {total_clientes}")
     
     def visualizar_membresias(self):
-        pass
+        print("\n=== Membresías Registradas ===")
+        total_membresias = 0
+        for membresia in self.__membresias:
+            if membresia is not None:
+                total_membresias += 1
+                print(f"ID: {membresia.get_id_m()}, Estado: {membresia.get_estado_m()}, Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}")
+        
+        print(f"\nNumero de membresias : {total_membresias}")
 
     def analisis_financiero(self):
         # lógica de análisis
@@ -169,6 +183,7 @@ class Cliente:
     # Métodos
 
     def adquirir_membresia(self):
+        
         pass
 
     def pago_ingreso_unico(self):
@@ -195,6 +210,22 @@ class Membresia:
         self.__estado = estado
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin
+        
+    # Métodos de acceso
+    
+    def get_id_m(self):
+        return self.__id_membresia
+    
+    def get_estado_m(self):
+        return self.__estado
+    
+    def get_fecha_inicio_m(self):
+        return self.__fecha_inicio
+    
+    def get_fecha_fin_m(self):
+        return self.__fecha_fin
+    
+    # Métodos
 
     def calcular_dias_restantes(self):
         return (self.fecha_fin - date.today()).days
