@@ -53,8 +53,18 @@ class Cliente:
     # Métodos
 
     def adquirir_membresia(self):
+        pago = input("Pago inmediato? (Si/No) : ").lower()
         
-        pass
+        if pago not in ["si", "no", "sí"]:
+            print("Respuesta no válida, por favor ingrese 'Si' o 'No'.")
+            return
+        
+        if pago in ["si", "sí"]:
+            print("Procesando pago inmediato...")
+            # Aquí iría la lógica para crear la membresía
+        else:
+            print("Se registra deuda pendiente...")
+            # Aquí iría la lógica para crear membresía con estado "Debe"
 
     def pago_ingreso_unico(self):
         pass

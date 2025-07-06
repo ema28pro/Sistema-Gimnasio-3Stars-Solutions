@@ -18,6 +18,8 @@ class Gimnasio:
         __historia_clientes (int): Contador de clientes históricos.
         __clientes (np.ndarray): Array que almacena los clientes registrados.
         __membresias (np.ndarray): Array que almacena las membresías registradas.
+        __numero_membresias (int): Contador de membresías registradas.
+        __historico_membresias (int): Contador de membresías históricas.
         __entrenadores (np.ndarray): Array que almacena los entrenadores registrados.
         __sesiones (np.ndarray): Array que almacena las sesiones especiales programadas.
         
@@ -35,6 +37,8 @@ class Gimnasio:
         self.__numero_clientes = 0
         self.__historico_clientes = 0
         self.__clientes = np.full(50, None, dtype=object)
+        self.__numero_membresias = 0
+        self.__historico_membresias = 0
         self.__membresias = np.full(50, None, dtype=object)
         self.__entrenadores = np.full(5, None, dtype=object)
         self.__sesiones = np.full(10, None,dtype=object)
