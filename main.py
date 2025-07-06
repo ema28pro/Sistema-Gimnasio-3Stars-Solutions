@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import date
+from datetime import date, timedelta
 
 class Gimnasio:
     """_summary_
@@ -29,6 +29,7 @@ class Gimnasio:
         self.__direccion = direccion
         self.__telefono = telefono
         self.__correo_electronico = correo
+        
         self.__efectivo = efectivo
 
         self.__numero_clientes = 0
@@ -43,17 +44,16 @@ class Gimnasio:
     def get(self):
         return self.__clientes, self.__membresias, self.__entrenadores, self.__sesiones
     
-    # Métodos accesores y modificadores
-    
-    # def set_membresias(self, membresia):
-    #     """_summary_
-    #         Agrega una membresía al gimnasio.
-    #     """
-    #     for i in range(50):
-    #         if self.__membresias[i] is None:
-    #             self.__membresias[i] = membresia
-    #             # Tinking
-    #             break
+    def set_efectivo(self, efectivo: float):
+        """_summary_
+            Modifica el efectivo del gimnasio.
+        """
+        if efectivo >= 0:
+            print(f"Efectivo actual: {self.__efectivo}")
+            self.__efectivo = efectivo
+            print(f"Efectivo actualizado a: {self.__efectivo}")
+        else:
+            print("El efectivo no puede ser negativo.")
 
     def ver_inf(self):
         """_summary_
@@ -67,23 +67,29 @@ class Gimnasio:
         
         if self.__numero_clientes >= 50:
             print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
-            return
+            return False
         if not nombre or not documento:
             print("Nombre y documento son obligatorios.")
-            return
+            return False
         if telefono and (telefono.isalpha() or not telefono.isdigit()):
             print("El teléfono debe ser un número válido.")
-            return
+            return False
         if nombre.isdigit() or not nombre.isalpha():
             print("El nombre no debe contener números ni símbolos ni espacios.")
-            return
+            return False
         if documento.isalpha() or not documento.isdigit():
             print("El documento no debe contener letras ni símbolos ni espacios.")
-            return
+            return False
         
         id_cliente = self.__historico_clientes + 1
         
         fecha_registro = date.today()
+        
+        # Verificar si el cliente ya está registrado
+        for cliente in self.__clientes:
+            if cliente is not None and cliente.get_documento_c() == documento:
+                print(f"El cliente con documento {documento} ya está registrado.")
+                return False
         
         nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono if telefono else None)
         # Forma 1, buscar un espacio vacío en el array de clientes
@@ -97,6 +103,62 @@ class Gimnasio:
         self.__numero_clientes += 1
         self.__historico_clientes += 1
         print(f"ID {id_cliente} : Cliente {nombre} registrado exitosamente. {fecha_registro}")
+        return True
+    
+    def buscar_cliente(self):
+        print("======Menu=======")
+        print("Seleccione el tipo de búsqueda :")
+        print("1. Buscar por ID")
+        print("2. Buscar por Nombre")
+        print("3. Buscar por Documento")
+        print("Enter para salir")
+        opcion = input("Seleccione una opción : ")
+        cliente_encontrado = None
+        match opcion:
+            case "1":
+                while True:
+                    id_cliente = input("Ingrese el ID del cliente: ")
+                    if id_cliente.isalpha() or not id_cliente.isdigit():
+                        print("El ID no debe contener letras ni símbolos ni espacios.")
+                    else:
+                        break
+                for cliente in self.__clientes:
+                    if cliente is not None and cliente.get_id_cliente() == int(id_cliente):
+                        cliente_encontrado = cliente
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                if not cliente_encontrado:
+                    print(f"No se encontró un cliente con ID {id_cliente}.")
+            case "2":
+                while True:
+                    nombre_cliente = input("Ingrese el nombre del cliente: ")
+                    if nombre_cliente.isdigit() or not nombre_cliente.isalpha():
+                        print("El nombre no debe contener números ni símbolos ni espacios.")
+                    else:
+                        break
+                for cliente in self.__clientes:
+                    if cliente is not None and cliente.get_nombre_c() == nombre_cliente.lower():
+                        cliente_encontrado = cliente
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                if not cliente_encontrado:
+                    print(f"No se encontró un cliente con nombre {nombre_cliente}.")
+            case "3":
+                while True:
+                    documento = input("Ingrese el documento del cliente: ")
+                    if documento.isalpha() or not documento.isdigit():
+                        print("El documento no debe contener letras ni símbolos ni espacios.")
+                    else:
+                        break
+                for cliente in self.__clientes:
+                    if cliente is not None and cliente.get_documento_c() == documento:
+                        cliente_encontrado = cliente
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                if not cliente_encontrado:
+                    print(f"No se encontró un cliente con documento {documento}.")
+            case "":
+                print("Saliendo del menú de búsqueda.")
+        
+
+
 
     def consultar_membresia(self, id_cliente):
         pass
@@ -111,7 +173,7 @@ class Gimnasio:
         for cliente in self.__clientes:
             if cliente is not None:
                 total_clientes += 1
-                print(f"ID: {cliente.get_id_c()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
         
         print(f"\nNumero de Clientes Registradas : {total_clientes}")
     
@@ -125,6 +187,8 @@ class Gimnasio:
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
 
+    #! Tarea de Emanuel
+
     def analisis_financiero(self):
         # lógica de análisis
         pass
@@ -137,9 +201,78 @@ class Gimnasio:
         # reporte de entradas diarias
         pass
     
-    # def crear_membresia(self, ):
-    #     for cliente in self.__clientes:
-    #         if 
+    #? 
+    
+    def crear_membresia(self, nombre: str, documento: str):
+        
+        # Validaciones
+        
+        if self.__numero_membresias >= 50:
+            print("No se pueden registrar más membresias, el gimnasio ha alcanzado su capacidad máxima.")
+            return
+        if not nombre or not documento:
+            print("Nombre y documento son obligatorios.")
+            return
+        if nombre.isdigit() or not nombre.isalpha():
+            print("El nombre no debe contener números ni símbolos ni espacios.")
+            return
+        if documento.isalpha() or not documento.isdigit():
+            print("El documento no debe contener letras ni símbolos ni espacios.")
+            return
+        
+        nombre = nombre.lower()
+        
+        cliente_encontrado = None
+        for cliente in self.__clientes:
+            if cliente is not None:
+                if nombre == cliente.get_nombre_c() and documento == cliente.get_documento_c():
+                    cliente_encontrado = cliente
+
+        if cliente_encontrado is None:
+            print("Cliente no Encontrado")
+            crear = input("¿Desea crearlo? (si/no)\nR// ")
+            if not "no" in crear.lower():
+                telefono = input("Telefono, enter para omitir")
+                print(nombre, documento, telefono if telefono else "None")
+                if not self.registrar_cliente(nombre, documento, telefono):
+                    print(f"No se pudo registrar el cliente {nombre}, {documento}.")
+                    return
+                # Buscar el cliente recién creado
+                for cliente in self.__clientes:
+                    if cliente is not None:
+                        if nombre == cliente.get_nombre_c() and documento == cliente.get_documento_c():
+                            cliente_encontrado = cliente
+                            break
+            else:
+                print("No se puede crear una membresía a un cliente no registrado.")
+                return
+        
+        id_membresia = self.__historico_membresias + 1
+        fecha_inicio = date.today()
+        fecha_fin = fecha_inicio + timedelta(days=30)
+        
+        pagar = input("Desea pagar inmediatamente. (si/no)\nR// ")
+        if not "no" in pagar.lower():
+            print(f"Efectivo actual: {self.__efectivo}")
+            self.__efectivo += 50000
+            print(f"Efectivo actualizado a: {self.__efectivo}")
+            nueva_membresia = Membresia(id_membresia, fecha_inicio, fecha_fin, "Pagada")
+        else:
+            nueva_membresia = Membresia(id_membresia, fecha_inicio, fecha_fin)
+        
+        # Agregar la membresía al array de membresías
+        for i in range(50):
+            if self.__membresias[i] is None:
+                self.__membresias[i] = nueva_membresia
+                break
+        
+        self.__numero_membresias += 1
+        self.__historico_membresias +=1
+        print(f"Cliente {nombre}, la membresia con ID {id_membresia} fue creada con finalizacion : {fecha_fin}")
+        
+        cliente_encontrado.set_id_membresia(id_membresia)
+        print(f"Cliente {cliente_encontrado.get_nombre_c()} ahora tiene la membresía con ID {cliente_encontrado.get_id_membresia()}.")
+
 
 # ==== CLIENTES Y MEMBRESÍA ====
 
@@ -172,7 +305,7 @@ class Cliente:
         
     # Métodos de acceso
     
-    def get_id_c(self):
+    def get_id_cliente(self):
         return self.__id_cliente
     
     def get_nombre_c(self):
@@ -190,27 +323,30 @@ class Cliente:
     def get_id_membresia(self):
         return self.__id_membresia
     
+    def set_id_membresia(self, id_membresia):
+        self.__id_membresia = id_membresia
+    
+    
     # Métodos
-
-    def adquirir_membresia(self):
-        pago = input("Pago inmediato? (Si/No) : ").lower()
-        
-        if pago not in ["si", "no", "sí"]:
-            print("Respuesta no válida, por favor ingrese 'Si' o 'No'.")
-            return
-        
-        if pago in ["si", "sí"]:
-            print("Procesando pago inmediato...")
-            # Aquí iría la lógica para crear la membresía
-        else:
-            print("Se registra deuda pendiente...")
-            # Aquí iría la lógica para crear membresía con estado "Debe"
 
     def pago_ingreso_unico(self):
         pass
 
     def pagar_membresia(self):
-        pass
+        if self.__id_membresia is None:
+            print("No tiene una membresía asociada.")
+            return
+        else:
+            for membresia in self.__membresias:
+                if membresia.get_id_memebresia() == self.__id_membresia:
+                    if membresia.get_estado_m() == "Pagada":
+                        print("La membresía ya está pagada.")
+                        return
+                    else:
+                        # Cambiar estado de la membresía a "Pagada"
+                        membresia.set_estado_m("Pagada")
+                        print(f"Membresía {membresia.get_id_m()} pagada exitosamente.")
+                        return
 
     def solicitar_sesion(self):
         pass
@@ -221,11 +357,11 @@ class Membresia:
     
     Atributos:
         __id_membresia (int): Identificador único de la membresía.
-        __estado (str, optional): Estado de la membresía (Activa, Debe). Defaults to "Activa".
+        __estado (str, optional): Estado de la membresía (Pagada, Debe). Defaults to "Pagada".
         __fecha_inicio (str): Fecha de inicio de la membresía.
         __fecha_fin (str): Fecha de finalización de la membresía.
     """
-    def __init__(self, id_membresia: int, fecha_inicio: str, fecha_fin: str, estado: str = "Activa"):
+    def __init__(self, id_membresia: int, fecha_inicio: str, fecha_fin: str, estado: str = "Debe"):
         self.__id_membresia = id_membresia
         self.__estado = estado
         self.__fecha_inicio = fecha_inicio
@@ -233,7 +369,7 @@ class Membresia:
         
     # Métodos de acceso
     
-    def get_id_m(self):
+    def get_id_membresia(self):
         return self.__id_membresia
     
     def get_estado_m(self):
@@ -244,6 +380,15 @@ class Membresia:
     
     def get_fecha_fin_m(self):
         return self.__fecha_fin
+    
+    def set_estado_m(self, estado: str):
+        """_summary_
+        Modifica el estado de la membresía.
+        """
+        if estado.lower() in ["pagada", "debe"]:
+            self.__estado = estado
+        else:
+            print("Estado no válido. Debe ser 'Pagada' o 'Debe'")
     
     # Métodos
 
@@ -288,12 +433,24 @@ class SesionEspecial:
         self.__maximo_cupos = maximo_cupos
         self.__inscritos = np.full(maximo_cupos, None, dtype=object)
 
+
+def menu():
+    print("\n=== Menú del Gimnasio ===")
+    print("Gestionar CLientes")
+    print("Gestionar Sesiones Especiales")
+    
+    opcion = input("Seleccione una opción: ")
+    
+    return opcion
+
 def main():
     Gym = Gimnasio("Body Force","Barrio Candelilla", 3001234545, "body@force.com", 45000)
-    # # Gym.ver_inf()
-    # Gym.registrar_cliente("Emanuel", "21554", "0")
-    # print(Gym.get())
-    # Gym.visualizar_clientes()
+    Gym.ver_inf()
+    Gym.registrar_cliente("Emanuel", "21554", "333333")
     print(Gym.get())
+    Gym.visualizar_clientes()
+    print(Gym.get())
+    # Gym.crear_membresia("Emanuel", "21554")
+    Gym.buscar_cliente()
 
 main()
