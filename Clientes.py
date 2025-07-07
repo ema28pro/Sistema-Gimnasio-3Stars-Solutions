@@ -1,5 +1,6 @@
 import numpy as np
 from datetime import date
+import Utils as u
 
 # ==== CLIENTES Y MEMBRESÍA ====
 
@@ -8,7 +9,7 @@ class Cliente:
     Clase que representa un cliente del gimnasio, contiene información personal y métodos para gestionar membresías y sesiones especiales.
     
     Atributos:
-        __id_cliente (int): Identificador único del cliente.
+        __id_cliente (str): Identificador único del cliente.
         __nombre (str): Nombre completo del cliente.
         __documento_identidad (int): Documento de identidad del cliente.
         __telefono (int, optional): Número de teléfono del cliente. Defaults to None.
@@ -20,7 +21,7 @@ class Cliente:
         - Pensar si es necesario el atributo __sesion_especial, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
         - Pensar si Guardaremos el nombre completo o solo el nombre.
     """
-    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):   
+    def __init__(self, id_cliente: str, nombre: str, documento: str, fecha_registro: str, telefono: str = None):   
         self.__id_cliente = id_cliente
         self.__nombre = nombre
         self.__documento = documento
@@ -28,11 +29,11 @@ class Cliente:
         self.__fecha_registro = fecha_registro
 
         self.__id_membresia = None
-        self.__sesiones_especiales = [] # Pendiente
+        self.__sesiones_especiales = [] # Pendiente. Pensar si es necesario este atributo, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
         
-    # Métodos de acceso
+    # Métodos de acceso y modificación
     
-    def get_id_c(self):
+    def get_id_cliente(self):
         return self.__id_cliente
     
     def get_nombre_c(self):
@@ -50,26 +51,13 @@ class Cliente:
     def get_id_membresia(self):
         return self.__id_membresia
     
+    def set_id_membresia(self, id_membresia):
+        self.__id_membresia = id_membresia
+    
+    
     # Métodos
 
-    def adquirir_membresia(self):
-        pago = input("Pago inmediato? (Si/No) : ").lower()
-        
-        if pago not in ["si", "no", "sí"]:
-            print("Respuesta no válida, por favor ingrese 'Si' o 'No'.")
-            return
-        
-        if pago in ["si", "sí"]:
-            print("Procesando pago inmediato...")
-            # Aquí iría la lógica para crear la membresía
-        else:
-            print("Se registra deuda pendiente...")
-            # Aquí iría la lógica para crear membresía con estado "Debe"
-
     def pago_ingreso_unico(self):
-        pass
-
-    def pagar_membresia(self):
         pass
 
     def solicitar_sesion(self):
@@ -80,24 +68,24 @@ class Membresia:
     Clase que representa una membresía de gimnasio, contiene información sobre el estado, fechas y métodos para gestionar la membresía.
     
     Atributos:
-        __id_membresia (int): Identificador único de la membresía.
-        __estado (str, optional): Estado de la membresía (Activa, Debe). Defaults to "Activa".
+        __id_membresia (str): Identificador único de la membresía.
+        __pago (bool): Indica si la membresía ha sido pagada o no. Defaults to False.
         __fecha_inicio (str): Fecha de inicio de la membresía.
         __fecha_fin (str): Fecha de finalización de la membresía.
     """
-    def __init__(self, id_membresia: int, fecha_inicio: str, fecha_fin: str, estado: str = "Activa"):
+    def __init__(self, id_membresia: str, fecha_inicio: str, fecha_fin: str, pago: bool = False):
         self.__id_membresia = id_membresia
-        self.__estado = estado
+        self.__pago = pago
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin
         
-    # Métodos de acceso
+    # Métodos de acceso y modificación
     
-    def get_id_m(self):
+    def get_id_membresia(self):
         return self.__id_membresia
     
-    def get_estado_m(self):
-        return self.__estado
+    def get_pago_m(self):
+        return self.__pago
     
     def get_fecha_inicio_m(self):
         return self.__fecha_inicio
@@ -105,7 +93,11 @@ class Membresia:
     def get_fecha_fin_m(self):
         return self.__fecha_fin
     
+    def set_pago(self, estado: str):
+        self.__pago = estado
+    
     # Métodos
 
     def calcular_dias_restantes(self):
         return (self.fecha_fin - date.today()).days
+    
