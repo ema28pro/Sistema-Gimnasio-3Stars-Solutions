@@ -1,3 +1,9 @@
+# ===== CONSTANTES DEL SISTEMA =====
+PRECIO_MEMBRESIA = 50000  # Precio mensual de la membresía
+PRECIO_ENTRADA_UNICA = 8000  # Precio de entrada por día
+
+# ===== FUNCIONES DE VALIDACIÓN =====
+
 def is_number(numero: str, tipo = None):
     # Adveritencia
     
@@ -46,6 +52,7 @@ def is_string(texto: str, tipo = None):
     else:
         return True
 
+# no usamos correo XD
 def is_email(email: str):
     # Validacion
     
@@ -70,3 +77,10 @@ def yes_no(respuesta: str):
     else:
         return True
 
+# ===== UTILIDADES =====
+
+def sp(i: int = None):
+    if i:
+        print("\n"*i)
+    else:
+        print("\n"*10)

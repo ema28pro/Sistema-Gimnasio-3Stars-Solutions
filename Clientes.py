@@ -12,9 +12,9 @@ class Cliente:
         __id_cliente (str): Identificador único del cliente.
         __nombre (str): Nombre completo del cliente.
         __documento_identidad (int): Documento de identidad del cliente.
-        __telefono (int, optional): Número de teléfono del cliente. Defaults to None.
+        __telefono (str, optional): Número de teléfono del cliente. Defaults to None.
         __fecha_registro (str): Fecha de registro del cliente en el gimnasio.
-        __id_membresia (Membresia, optional): Ideantificador unico de la membresía asociada al cliente. Defaults to None.
+        __id_membresia (str, optional): Ideantificador unico de la membresía asociada al cliente. Defaults to None.
         __sesion_especial (SesionEspecial, optional): Sesión especial solicitada por el cliente. Defaults to None.
         
     Notas:
@@ -51,9 +51,46 @@ class Cliente:
     def get_id_membresia(self):
         return self.__id_membresia
     
+    def get_sesiones_especiales(self):
+        return self.__sesiones_especiales
+    
     def set_id_membresia(self, id_membresia):
         self.__id_membresia = id_membresia
     
+    # Métodos para gestionar sesiones especiales
+    def agregar_sesion(self, id_sesion):
+        """
+        Agrega una sesión especial a la lista del cliente.
+        
+        Args:
+            id_sesion (int): ID de la sesión especial
+        """
+        if id_sesion not in self.__sesiones_especiales:
+            self.__sesiones_especiales.append(id_sesion)
+            print(f"Sesión {id_sesion} agregada al cliente {self.__nombre}")
+        else:
+            print(f"El cliente {self.__nombre} ya está inscrito en la sesión {id_sesion}.")
+    
+    def remover_sesion(self, id_sesion):
+        """
+        Remueve una sesión especial de la lista del cliente.
+        
+        Args:
+            id_sesion (int): ID de la sesión especial
+        """
+        if id_sesion in self.__sesiones_especiales:
+            self.__sesiones_especiales.remove(id_sesion)
+            print(f"Sesión {id_sesion} removida del cliente {self.__nombre}")
+    
+    def mostrar_sesiones_inscritas(self):
+        """Muestra todas las sesiones en las que está inscrito el cliente"""
+        if not self.__sesiones_especiales:
+            print(f"El cliente {self.__nombre} no tiene sesiones especiales inscritas.")
+        else:
+            print(f"\n=== Sesiones de {self.__nombre} ===")
+            for id_sesion in self.__sesiones_especiales:
+                print(f"  - Sesión ID: {id_sesion}")
+            print("="*30)
     
     # Métodos
 
@@ -93,11 +130,10 @@ class Membresia:
     def get_fecha_fin_m(self):
         return self.__fecha_fin
     
-    def set_pago(self, estado: str):
+    def set_pago(self, estado: bool):
         self.__pago = estado
     
     # Métodos
 
     def calcular_dias_restantes(self):
         return (self.fecha_fin - date.today()).days
-    
