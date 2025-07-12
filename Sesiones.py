@@ -33,10 +33,9 @@ class Entrenador:
         return self.__especialidad
     
     # Métodos para mostrar información
-    def mostrar_info(self):
-        especialidades = ", ".join(self.__especialidad)
+    def mostrar_info_e(self):
         telefono = f"Tel: {self.__telefono}" if self.__telefono else "Sin teléfono"
-        print(f"Entrenador {self.__nombre} (ID: {self.__id_entrenador}) - {especialidades} - {telefono}")
+        print(f"Entrenador {self.__nombre} (ID: {self.__id_entrenador}) - {self.__especialidad} - {telefono}")
 
 
 class SesionEspecial:
@@ -133,7 +132,7 @@ class SesionEspecial:
         print(f"El cliente {cliente.get_nombre_c()} no está inscrito en esta sesión.")
         return False
     
-    def mostrar_info(self):
+    def mostrar_info_se(self):
         """Muestra información completa de la sesión"""
         print(f"\n=== Sesión Especial ID: {self.__id_sesion} ===")
         print(f"Entrenador ID: {self.__id_entrenador}")

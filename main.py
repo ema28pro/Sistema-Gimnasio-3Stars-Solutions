@@ -121,7 +121,8 @@ def App():
         print("3. Registrar Cliente")
         print("4. Buscar Cliente")
         print("5. Exportar Datos a JSON")
-        print("6. Crear Sesión Especial")
+        print("6. Crear Entrenador")
+        print("7. Ver Entrenadores")
         print("Enter para salir")
         opcion = input("Ingrese una opcion : ")
         ut.sp(2)
@@ -211,6 +212,12 @@ def App():
                 if archivo_creado:
                     print(f"Los datos se han guardado en: {archivo_creado}")
                 input("\nPresione Enter para continuar...")
+            case "6":
+                Gym.crear_entrenador()
+                input("\nPresione Enter para continuar...")
+            case "7":
+                Gym.mostrar_entrenadores()
+                input("\nPresione Enter para continuar...")
             case "":
                 break
     
@@ -220,6 +227,6 @@ def App():
     # print(Gym.get())
 
 if __name__ == "__main__":
-Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
-Gym.ver_inf()
-App()
+    Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
+    Gym.ver_inf()
+    App()

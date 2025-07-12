@@ -46,7 +46,7 @@ class Gimnasio:
         self.__entrenadores = []
         self.__historico_sesiones = 0
         self.__sesiones = []
-        self.__sesiones_especiales = ["Boxeo", "Yoga", "Aeróbicos"]
+        self.__sesiones_especiales = ["boxeo", "yoga", "aerobicos"]
         
     # Métodos accesores y modificadores
     
@@ -184,14 +184,17 @@ class Gimnasio:
         
         if not nombre or not especialidad:
             while True:
-                nombre = input("Ingrese el Nombre del Cliente : ")
+                nombre = input("Ingrese el Nombre del Entrenador : ")
                 if ut.is_string(nombre, "Nombre"):
                     break
             
             while True:
-                documento = input("Ingrese el Documento del Cliente : ")
-                if ut.is_number(documento, "Documento"):
-                    break
+                especialidad = input(f"Ingrese la especialidad del Entrenador {self.__sesiones_especiales} : ").lower()
+                if ut.is_string(nombre, "Especialidad"):
+                    if especialidad in self.__sesiones_especiales:
+                        break
+                    else:
+                        print(f"Especialidad no válida. Debe ser una de las siguientes: {self.__sesiones_especiales}")
             
             while True:
                 telefono = input("Ingrese el numero de telefono del Cliente (Enter para Omitir) : ")
@@ -200,12 +203,22 @@ class Gimnasio:
                         break
                 else:
                     break
+        else:
+            if telefono and ( not ut.is_number(telefono, "Telefono")):
+                return False
+            if not (ut.is_string(nombre, "Nombre") and ut.is_string(especialidad, "Especialidad")):
+                return False
+            else:
+                if not especialidad in self.__sesiones_especiales:
+                    print(f"Especialidad no válida. Debe ser una de las siguientes: {self.__sesiones_especiales}")
+                return False
+        
         
         id_entrenador = self.__historico_entrenadores + 1
         nuevo_entrenador = Entrenador(id_entrenador, nombre, especialidad, telefono)
-        self.__entrenadores.append(nuevo_entrenador)
+        self.__entrenadores+=[nuevo_entrenador]
         self.__historico_entrenadores += 1
-        print(f"Entrenador {nombre} registrado con ID: {id_entrenador}")
+        print(f"Entrenador {nombre} especializado en {especialidad} registrado con ID: {id_entrenador}")
         return nuevo_entrenador
     
     def crear_sesion_especial(self, id_entrenador: int, fecha: str, maximo_cupos: int = 25):
@@ -360,15 +373,17 @@ class Gimnasio:
                 sesion.mostrar_info()
     
     def mostrar_entrenadores(self):
-        """Muestra todos los entrenadores registrados"""
         if not self.__entrenadores:
             print("No hay entrenadores registrados.")
             return
         else:    
             print("\n=== Entrenadores Registrados ===")
-            
+            total_entrenadores = 0
             for entrenador in self.__entrenadores:
-                entrenador.mostrar_info()
+                entrenador.mostrar_info_e()
+                total_entrenadores += 1
+                
+            print(f"\nNumero de Entrenadores Registrados : {total_entrenadores}")
     
     
     
