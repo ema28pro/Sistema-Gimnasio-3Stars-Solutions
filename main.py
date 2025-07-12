@@ -16,6 +16,55 @@ def menu():
     
     return opcion
 
+# Pensar en  Clase APP y lo que implica
+# class Main:
+#     def __init__(self, gimnasio: Gimnasio):
+#         self.gimnasio = gimnasio
+    
+    
+    
+    
+    
+def menu_cliente(cliente):
+    while True:
+        print("\n=== ¿Que desea hacer? ===")
+        print(f"Cliente : {cliente.get_nombre_c()} , ID : {cliente.get_id_cliente()}")
+        print(30*"=")
+        print("1. Adquirir Membresía" , "(Sin Membresia)" if cliente.get_membresia() is None else "(Con Membresia)")
+        print("2. Consultar Membresía")
+        print("3. Pago Ingreso Único")
+        print("4. Agendar Sesión Especial")
+        print("5. Cancelar Sesión Especial")
+        print("6. Registrar Entrada")
+        print("7. Eliminar Cliente")
+        print("Enter para salir")
+        opcion_cliente = input("Seleccione una opción : ")
+        print(30*"=")
+        ut.sp(2)
+        
+        match opcion_cliente:
+            case "1":
+                Gym.crear_membresia(cliente)
+            case "2":
+                # Menu Acciones con Membresia
+                membresia = Gym.consultar_membresia(cliente)
+                print("====== ¿Que desea hacer? =====")
+                print(30*"=")
+                print("1. Pagar Membresía" , "(Paga)" if membresia.get_pago_m() else "(Pendiente)")
+                print("2. Eliminar Membresia")
+                print("Enter para salir")
+                opcion_membresia = input("Seleccione una opción : ")
+                
+                match opcion_membresia:
+                    case "1":
+                        Gym.pagar_membresia(membresia)
+                    case "2":
+                        Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
+                    case "":
+                        print("Saliendo del menú de membresía.")
+                        break
+
+
 def exportar_datos_rapido(gimnasio):
     """
     Función auxiliar para exportar datos rápidamente sin pasar por el menú
@@ -25,8 +74,8 @@ def exportar_datos_rapido(gimnasio):
     return archivo
 
 def App():
-    Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
-    Gym.ver_inf()
+    # Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
+    # Gym.ver_inf()
     
     ut.sp()
     
@@ -83,8 +132,9 @@ def App():
                 Gym.visualizar_membresias()
                 input("\nPresione Enter para continuar...")
             case "3":
-                Gym.crear_cliente()
+                cliente = Gym.crear_cliente()
                 input("\nPresione Enter para continuar...")
+                menu_cliente(cliente)
             case "4":
                 # Menu Acciones con Cliente
                 cliente = Gym.buscar_cliente()
@@ -125,7 +175,7 @@ def App():
                                     Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
                                 case "":
                                     print("Saliendo del menú de membresía.")
-                                    
+                                    break
                         case "3":
                             Gym.pago_ingreso_unico(cliente)
                         case "4":
@@ -135,8 +185,13 @@ def App():
                         case "6":
                             cliente.registrar_entrada()
                         case "7":
-                            Gym.eliminar_cliente(cliente)
-                            print(f"Cliente {cliente.get_nombre_c()} eliminado.")
+                            if eliminar is None:
+                                while True: # Ciclo para Ingreso correcto del pago
+                                    eliminar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
+                                    if ut.valid_yes_no(eliminar):
+                                        print(f"Cliente {cliente.get_nombre_c()} eliminado.")
+                                        Gym.eliminar_cliente(cliente)
+                                        break
                             break
                         case "":
                             print("Saliendo del menú de cliente.")
@@ -159,4 +214,7 @@ def App():
     
     # print(Gym.get())
 
+if __name__ == "__main__":
+Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
+Gym.ver_inf()
 App()

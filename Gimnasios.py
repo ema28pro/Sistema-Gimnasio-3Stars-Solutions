@@ -79,7 +79,7 @@ class Gimnasio:
                     break
             
             while True:
-                telefono = input("Ingrese el numero del Cliente (Enter para Omitir) : ")
+                telefono = input("Ingrese el numero de telefono del Cliente (Enter para Omitir) : ")
                 if telefono:
                     if ut.is_number(telefono, "Telefono"):
                         break
@@ -229,13 +229,14 @@ class Gimnasio:
         print(30*"=")
         print("Seleccione el tipo de búsqueda :")
         print("1. Buscar por ID")
-        print("2. Buscar por Nombre")
+        print("2. Buscar por Nombre") # Listar si hay mas de 1 cliente con el mismo nombre
         print("3. Buscar por Documento")
         print("Enter para salir")
         opcion_busqueda = input("Seleccione una opción : ")
         print(30*"=")
         
         cliente_encontrado = None # Variable para almacenar el cliente encontrado o None si no se encuentra
+        
         
         # Swich case para manejar las opciones de búsqueda
         match opcion_busqueda:
@@ -354,13 +355,17 @@ class Gimnasio:
     
     #? ============================== Metodos de Modificacion ==============================
 
-    def ingreso_caja(self, efectivo: float):
+    def ingreso_caja(self, efectivo: float): #pendieten pedir el tipo para el registro en persitencia
         """_summary_
             Modifica el efectivo del gimnasio.
         """
         print(f"Efectivo actual: ${self.__efectivo:,} + ${float(efectivo):,}")
         self.__efectivo += float(efectivo)
         print(f"Efectivo actualizado a: ${self.__efectivo:,}")
+        
+        # registro = f"{tipo} - Ingreso: ${float(efectivo):,}, Fecha: {date.today().strftime('%Y-%m-%d')}\n"
+        
+        
 
     
     def pagar_membresia(self, membresia_encontrada: Membresia):
@@ -629,6 +634,7 @@ class Gimnasio:
             print(f"✗ Error al leer el archivo: {str(e)}")
             return False
 
+        lineas_error=[]
         for i in range(1, rows):
             linea = lineas[i].strip().split(";")
             if len(linea) < 7:
@@ -636,6 +642,8 @@ class Gimnasio:
                 continue
 
             try:
+                print("="*30)
+                print(f"Procesando línea {i+1}: {linea}")
                 # Crear el cliente primero
                 cliente_creado = self.crear_cliente(
                     nombre=linea[0],
@@ -652,10 +660,16 @@ class Gimnasio:
                         fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date(),
                         pago=pago_bool
                     )
+                else:
+                    lineas_error+=[i+1]
+                    print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
+                    continue
                 
             except Exception as error:
                 print(f"✗ Error procesando línea {i+1}: {str(error)}")
                 continue
+            
+        print(f"Lineas con errores : {lineas_error}")
         return True
 
 
