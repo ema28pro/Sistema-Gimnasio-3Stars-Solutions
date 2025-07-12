@@ -23,17 +23,17 @@ class Entrenador:
     def get_id_entrenador(self):
         return self.__id_entrenador
     
-    def get_nombre_e(self):
+    def get_nombre(self):
         return self.__nombre
     
-    def get_telefono_e(self):
+    def get_telefono(self):
         return self.__telefono
     
-    def get_especialidad_e(self):
+    def get_especialidad(self):
         return self.__especialidad
     
     # Métodos para mostrar información
-    def mostrar_info_e(self):
+    def mostrar_info(self):
         telefono = f"Tel: {self.__telefono}" if self.__telefono else "Sin teléfono"
         print(f"Entrenador {self.__nombre} (ID: {self.__id_entrenador}) - {self.__especialidad} - {telefono}")
 
@@ -65,16 +65,16 @@ class SesionEspecial:
     def get_id_entrenador(self):
         return self.__id_entrenador
     
-    def get_fecha_se(self):
+    def get_fecha(self):
         return self.__fecha
     
-    def get_cupos_se(self):
+    def get_cupos(self):
         return self.__cupos
     
-    def get_maximo_cupos_se(self):
+    def get_maximo_cupos(self):
         return self.__maximo_cupos
     
-    def get_inscritos_se(self):
+    def get_inscritos(self):
         return self.__inscritos
     
     def get_cupos_disponibles(self):
@@ -98,13 +98,13 @@ class SesionEspecial:
         # Verificar si ya está inscrito
         for i in range(self.__cupos):
             if self.__inscritos[i] is not None and self.__inscritos[i].get_id_cliente() == cliente.get_id_cliente():
-                print(f"El cliente {cliente.get_nombre_c()} ya está inscrito en esta sesión.")
+                print(f"El cliente {cliente.get_nombre()} ya está inscrito en esta sesión.")
                 return False
         
         # Inscribir cliente
         self.__inscritos[self.__cupos] = cliente
         self.__cupos += 1
-        print(f"Cliente {cliente.get_nombre_c()} inscrito exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")
+        print(f"Cliente {cliente.get_nombre()} inscrito exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")
         return True
     
     def cancelar_inscripcion(self, cliente):
@@ -126,10 +126,10 @@ class SesionEspecial:
                 # Limpiar la última posición
                 self.__inscritos[self.__cupos - 1] = None
                 self.__cupos -= 1
-                print(f"Inscripción de {cliente.get_nombre_c()} cancelada. Cupos: {self.__cupos}/{self.__maximo_cupos}")
+                print(f"Inscripción de {cliente.get_nombre()} cancelada. Cupos: {self.__cupos}/{self.__maximo_cupos}")
                 return True
         
-        print(f"El cliente {cliente.get_nombre_c()} no está inscrito en esta sesión.")
+        print(f"El cliente {cliente.get_nombre()} no está inscrito en esta sesión.")
         return False
     
     def mostrar_info(self):
@@ -144,7 +144,7 @@ class SesionEspecial:
             print("Clientes inscritos:")
             for i in range(self.__cupos):
                 if self.__inscritos[i] is not None:
-                    print(f"  - {self.__inscritos[i].get_nombre_c()} (ID: {self.__inscritos[i].get_id_cliente()})")
+                    print(f"  - {self.__inscritos[i].get_nombre()} (ID: {self.__inscritos[i].get_id_cliente()})")
         else:
             print("No hay clientes inscritos.")
         print("="*40)

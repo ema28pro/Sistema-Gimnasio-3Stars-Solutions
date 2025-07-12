@@ -7,28 +7,20 @@ from Gimnasios import Gimnasio
 from Clientes import Cliente, Membresia
 from Sesiones import Entrenador, SesionEspecial
 
-def menu():
-    print("\n=== Menú del Gimnasio ===")
-    print("Gestionar Clientes")
-    print("Gestionar Sesiones Especiales")
+# def menu():
+#     print("\n=== Menú del Gimnasio ===")
+#     print("Gestionar Clientes")
+#     print("Gestionar Sesiones Especiales")
     
-    opcion = input("Seleccione una opción: ")
+#     opcion = input("Seleccione una opción: ")
     
-    return opcion
+#     return opcion
 
-# Pensar en  Clase APP y lo que implica
-# class Main:
-#     def __init__(self, gimnasio: Gimnasio):
-#         self.gimnasio = gimnasio
-    
-    
-    
-    
-    
 def menu_cliente(cliente):
+    # Menu Acciones con Cliente
     while True:
         print("\n=== ¿Que desea hacer? ===")
-        print(f"Cliente : {cliente.get_nombre_c()} , ID : {cliente.get_id_cliente()}")
+        print(f"Cliente : {cliente.get_nombre()} , ID : {cliente.get_id_cliente()}")
         print(30*"=")
         print("1. Adquirir Membresía" , "(Sin Membresia)" if cliente.get_membresia() is None else "(Con Membresia)")
         print("2. Consultar Membresía")
@@ -41,29 +33,102 @@ def menu_cliente(cliente):
         opcion_cliente = input("Seleccione una opción : ")
         print(30*"=")
         ut.sp(2)
-        
+        if opcion not in ["1", "2", "3", "4", "5", "6", "7", ""]:
+            print("Opción fuera de rango. Por favor, ingrese una opción válida.")
         match opcion_cliente:
             case "1":
                 Gym.crear_membresia(cliente)
             case "2":
-                # Menu Acciones con Membresia
                 membresia = Gym.consultar_membresia(cliente)
+                # Menu Acciones con Membresia
+                menu_membresia(membresia)
+            case "3":
+                Gym.pago_ingreso_unico(cliente)
+            case "4":
+                Gym.agendar_sesion(cliente)
+            case "5":
+                Gym.cancelar_sesion(cliente)
+            case "6":
+                cliente.registrar_entrada()
+            case "7":
+                eliminar = None
+                while eliminar is None:
+                    eliminar = input("¿Esta seguro de eliminar el Cliente? (si/no)\nR// ")
+                    if ut.valid_yes_no(eliminar):
+                        if ut.yes_no(eliminar):
+                            print(f"Cliente {cliente.get_nombre()} eliminando.")
+                            Gym.eliminar_cliente(cliente)
+                        else:
+                            print(f"Cliente {cliente.get_nombre()} no eliminado.")
+                        break
+                    else:
+                        eliminar = None
+                break
+            case "":
+                print("Saliendo del menú de cliente.")
+                break
+
+def menu_membresia(membresia):
+    # Menu Acciones con Membresia
+    print("====== ¿Que desea hacer? =====")
+        print(30*"=")
+        print("1. Pagar Membresía" , "(Paga)" if membresia.get_pago() else "(Pendiente)")
+        print("2. Eliminar Membresia")
+        print("Enter para salir")
+        opcion_membresia = input("Seleccione una opción : ")
+        
+        if opcion_membresia not in ["1", "2", ""]:
+            print("Opción fuera de rango. Por favor, ingrese una opción válida.")
+            return
+        
+        match opcion_membresia:
+            case "1":
+                Gym.pagar_membresia(membresia)
+            case "2":
+                Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
+            case "":
+                print("Saliendo del menú de membresía.")
+                break
+
+def menu_eventos():
+    while True:
+        print("\n=== Menú de Eventos ===")
+        print("1. Crear Entrenador")
+        print("2. Ver Entrenadores")
+        print("3. Buscar Entrenador")
+        print("4. Ver Sesiones Especiales")
+        print("Enter para salir")
+        menu = input("Seleccione una opción: ")
+        
+        match menu:
+            case "1":
+                Gym.crear_entrenador()
+                input("\nPresione Enter para continuar...")
+            case "2":
+                Gym.mostrar_entrenadores()
+                input("\nPresione Enter para continuar...")
+            case "3":
+                entrenador = Gym.buscar_entrenador()
                 print("====== ¿Que desea hacer? =====")
                 print(30*"=")
-                print("1. Pagar Membresía" , "(Paga)" if membresia.get_pago_m() else "(Pendiente)")
-                print("2. Eliminar Membresia")
+                print("1. Crear Sesion")
+                print("2. Eliminar Entrenador")
                 print("Enter para salir")
-                opcion_membresia = input("Seleccione una opción : ")
-                
-                match opcion_membresia:
+                opcion_entrenador = input("Seleccione una opción : ")
+                match opcion_entrenador:
                     case "1":
-                        Gym.pagar_membresia(membresia)
+                        Gym.crear_sesion_especial(entrenador.get_id_entrenador())
                     case "2":
-                        Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
+                        Gym.eliminar_entrenador(entrenador.get_id_entrenador())
                     case "":
-                        print("Saliendo del menú de membresía.")
+                        print("Saliendo del menú de entrenador.")
                         break
-
+            case "4":
+                entrenador = Gym.mostrar_sesiones()
+                input("\nPresione Enter para continuar...")
+            case "":
+                print("Saliendo del menú de eventos.")
+                break
 
 def exportar_datos_rapido(gimnasio):
     """
@@ -120,11 +185,15 @@ def App():
         print("2. Ver Membresias")
         print("3. Registrar Cliente")
         print("4. Buscar Cliente")
-        print("5. Exportar Datos a JSON")
+        print("5. Gestionar Eventos")
+        print("6. Exportar Datos a JSON")
         print("Enter para salir")
         opcion = input("Ingrese una opcion : ")
         ut.sp(2)
-        # Validar numeros fuera de rango en todos los match
+        # Validar números fuera de rango en todos los match (ahora hasta opción 6)
+        if opcion not in ["1", "2", "3", "4", "5", "6", ""]:
+            print("Opción fuera de rango. Por favor, ingrese una opción válida.")
+            continue
         match opcion:
             case "1":
                 Gym.visualizar_clientes()
@@ -142,7 +211,7 @@ def App():
                 input("\nPresione Enter para continuar...")
                 while True:
                     print("\n=== ¿Que desea hacer? ===")
-                    print(f"Cliente : {cliente.get_nombre_c()} , ID : {cliente.get_id_cliente()}")
+                    print(f"Cliente : {cliente.get_nombre()} , ID : {cliente.get_id_cliente()}")
                     print(30*"=")
                     print("1. Adquirir Membresía" , "(Sin Membresia)" if cliente.get_membresia() is None else "")
                     print("2. Consultar Membresía")
@@ -159,55 +228,15 @@ def App():
                     match opcion_cliente:
                         case "1":
                             Gym.crear_membresia(cliente)
-                        case "2":
-                            # Menu Acciones con Membresia
-                            membresia = Gym.consultar_membresia(cliente)
-                            print("====== ¿Que desea hacer? =====")
-                            print(30*"=")
-                            print("1. Pagar Membresía" , "(Paga)" if membresia.get_pago_m() else "(Pendiente)")
-                            print("2. Eliminar Membresia")
-                            print("Enter para salir")
-                            opcion_membresia = input("Seleccione una opción : ")
-                            
-                            match opcion_membresia:
-                                case "1":
-                                    Gym.pagar_membresia(membresia)
-                                case "2":
-                                    Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
-                                case "":
-                                    print("Saliendo del menú de membresía.")
-                                    break
-                        case "3":
-                            Gym.pago_ingreso_unico(cliente)
-                        case "4":
-                            Gym.agendar_sesion(cliente)
-                        case "5":
-                            Gym.cancelar_sesion(cliente)
-                        case "6":
-                            cliente.registrar_entrada()
-                        case "7":
-                            eliminar = None
-                            while eliminar is None:
-                                eliminar = input("¿Esta seguro de eliminar el Cliente? (si/no)\nR// ")
-                                if ut.valid_yes_no(eliminar):
-                                    if ut.yes_no(eliminar):
-                                        print(f"Cliente {cliente.get_nombre_c()} eliminando.")
-                                        Gym.eliminar_cliente(cliente)
-                                    else:
-                                        print(f"Cliente {cliente.get_nombre_c()} no eliminado.")
-                                    break
-                                else:
-                                    eliminar = None
-                            break
-                        case "":
-                            print("Saliendo del menú de cliente.")
-                            break
+                        
             case "5":
+                menu_eventos()
+            case "6":
                 print("\n=== Exportar Datos a JSON ===")
                 nombre_archivo = input("Nombre del archivo (opcional, presione Enter para generar automáticamente): ").strip()
                 if nombre_archivo == "":
                     nombre_archivo = None
-                
+
                 archivo_creado = Gym.exportar_datos_json(nombre_archivo)
                 if archivo_creado:
                     print(f"Los datos se han guardado en: {archivo_creado}")
@@ -220,48 +249,9 @@ def App():
     
     # print(Gym.get())
 
-def menu_eventos():
-    while True:
-        print("\n=== Menú de Eventos ===")
-        print("1. Crear Entrenador")
-        print("2. Ver Entrenadores")
-        print("3. Buscar Entrenador")
-        print("4. Ver Sesiones Especiales")
-        print("Enter para salir")
-        menu = input("Seleccione una opción: ")
-        
-        match menu:
-            case "1":
-                Gym.crear_entrenador()
-                input("\nPresione Enter para continuar...")
-            case "2":
-                Gym.mostrar_entrenadores()
-                input("\nPresione Enter para continuar...")
-            case "3":
-                entrenador = Gym.buscar_entrenador()
-                print("====== ¿Que desea hacer? =====")
-                print(30*"=")
-                print("1. Crear Sesion")
-                print("2. Eliminar Entrenador")
-                print("Enter para salir")
-                opcion_entrenador = input("Seleccione una opción : ")
-                match opcion_entrenador:
-                    case "1":
-                        Gym.crear_sesion_especial(entrenador.get_id_entrenador())
-                    case "2":
-                        Gym.eliminar_entrenador(entrenador.get_id_entrenador())
-                    case "":
-                        print("Saliendo del menú de entrenador.")
-                        break
-            case "4":
-                entrenador = Gym.mostrar_sesiones()
-                input("\nPresione Enter para continuar...")
-            case "":
-                print("Saliendo del menú de eventos.")
-                break
 
 if __name__ == "__main__":
     Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
     Gym.ver_inf()
-    # App()
-    menu_eventos()
+    App()
+    # menu_eventos()

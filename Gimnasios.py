@@ -106,7 +106,7 @@ class Gimnasio:
         
         # Verificar si el cliente ya está registrado
         for cliente in self.__clientes:
-            if cliente is not None and cliente.get_documento_c() == documento:
+            if cliente is not None and cliente.get_documento() == documento:
                 print(f"\n!!! El cliente con documento {documento} ya está registrado.")
                 return False
         
@@ -166,7 +166,7 @@ class Gimnasio:
         # Crear la membresía
         nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago)
         cliente_encontrado.set_membresia(nueva_membresia)
-        print(f"Membresía creada para {cliente_encontrado.get_nombre_c()} con ID {cliente_encontrado.get_id_cliente()}")
+        print(f"Membresía creada para {cliente_encontrado.get_nombre()} con ID {cliente_encontrado.get_id_cliente()}")
         print(f"Vigencia: {fecha_inicio} hasta {fecha_fin}")
         print(f"Estado: {'Pagada' if pago else 'Pendiente de pago'}")
         
@@ -294,7 +294,7 @@ class Gimnasio:
                     if cliente is not None and cliente.get_id_cliente() == int(id_cliente): # Buscar coincidencia
                         cliente_encontrado = cliente # Guardar el cliente encontrado
                         # Imprimir los detalles del cliente encontrado
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
                 if not cliente_encontrado: # Si no se encontró el cliente, informar al usuario
                     print(f"No se encontró un cliente con ID {id_cliente}.")
                     return
@@ -304,9 +304,9 @@ class Gimnasio:
                     if ut.is_string(nombre_cliente, "Nombre"):
                         break
                 for cliente in self.__clientes:
-                    if cliente is not None and cliente.get_nombre_c() == nombre_cliente.lower():
+                    if cliente is not None and cliente.get_nombre() == nombre_cliente.lower():
                         cliente_encontrado = cliente
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con nombre {nombre_cliente}.")
                     return
@@ -316,9 +316,9 @@ class Gimnasio:
                     if ut.is_number(documento, "Documento"):
                         break
                 for cliente in self.__clientes:
-                    if cliente is not None and cliente.get_documento_c() == documento:
+                    if cliente is not None and cliente.get_documento() == documento:
                         cliente_encontrado = cliente
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con documento {documento}.")
                     return
@@ -334,17 +334,17 @@ class Gimnasio:
 
     def consultar_membresia(self, cliente_encontrado: Cliente):
         if cliente_encontrado.get_membresia() is None:
-            print(f"El cliente {cliente_encontrado.get_nombre_c()} no tiene una membresía activa.")
+            print(f"El cliente {cliente_encontrado.get_nombre()} no tiene una membresía activa.")
             return
         else:
             membresia_encontrada = cliente_encontrado.get_membresia()
         
         # Mostrar información de la membresía
         print(f"\n=== Información de Membresía ===")
-        print(f"Cliente: {cliente_encontrado.get_nombre_c()}")
-        print(f"Estado de pago: {'Pagada' if membresia_encontrada.get_pago_m() else 'Pendiente'}") 
-        print(f"Fecha de inicio: {membresia_encontrada.get_fecha_inicio_m()}")
-        print(f"Fecha de fin: {membresia_encontrada.get_fecha_fin_m()}")
+        print(f"Cliente: {cliente_encontrado.get_nombre()}")
+        print(f"Estado de pago: {'Pagada' if membresia_encontrada.get_pago() else 'Pendiente'}") 
+        print(f"Fecha de inicio: {membresia_encontrada.get_fecha_inicio()}")
+        print(f"Fecha de fin: {membresia_encontrada.get_fecha_fin()}")
         # print(f"Días restantes: {}")
         print("="*30)
         
@@ -371,7 +371,7 @@ class Gimnasio:
         
         for entrenador in self.__entrenadores:
             if entrenador.get_id_entrenador() == id_entrenador:
-                print(f"Entrenador : ID: {entrenador.get_id_entrenador()}, Nombre: {entrenador.get_nombre_e()}, Especialidad: {entrenador.get_especialidad_e()}")
+                print(f"Entrenador : ID: {entrenador.get_id_entrenador()}, Nombre: {entrenador.get_nombre()}, Especialidad: {entrenador.get_especialidad()}")
                 return entrenador
         print(f"No se encontró un entrenador con ID {id_entrenador}.")
         return None
@@ -382,7 +382,7 @@ class Gimnasio:
         for cliente in self.__clientes:
             if cliente is not None:
                 total_clientes += 1
-                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
         
         print(f"\nNumero de Clientes Registradas : {total_clientes}")
     
@@ -393,8 +393,8 @@ class Gimnasio:
             if cliente is not None and cliente.get_membresia() is not None:
                 membresia = cliente.get_membresia()
                 total_membresias += 1
-                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Registrado: {cliente.get_fecha_registro_c()}
-                        Membresia => Estado: { 'Paga' if membresia.get_pago_m() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}, Dias Restantes: {membresia.calcular_dias_restantes()} \n""")
+                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_registro_c()}
+                        Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {membresia.calcular_dias_restantes()} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
     
@@ -417,7 +417,7 @@ class Gimnasio:
             print("\n=== Entrenadores Registrados ===")
             total_entrenadores = 0
             for entrenador in self.__entrenadores:
-                entrenador.mostrar_info_e()
+                entrenador.mostrar_info()
                 total_entrenadores += 1
                 
             print(f"\nNumero de Entrenadores Registrados : {total_entrenadores}")
@@ -442,75 +442,103 @@ class Gimnasio:
 
     
     def pagar_membresia(self, membresia_encontrada: Membresia):
-        if membresia_encontrada.get_pago_m():
+        if membresia_encontrada.get_pago():
             print("La membresía ya ha sido pagada.")
             return
         else:
             print(f"El cliente tiene una membresía que aún no ha sido pagada.")
             self.ingreso_caja(PRECIO_MEMBRESIA)
-            membresia_encontrada.set_pago_m(True)
+            membresia_encontrada.set_pago(True)
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
     def pago_ingreso_unico(self, cliente_encontrado: Cliente):
         pass
     
 
-    def agendar_sesion(self, cliente):
+    def agendar_sesion(self, cliente, id_sesion: int= None):
         """
         Permite a un cliente inscribirse en una sesión especial.
         
         Args:
             cliente: Objeto Cliente que se quiere inscribir
         """
-        if not self.__sesiones:
+        if not self.__sesiones or len(self.__sesiones) == 0:
             print("No hay sesiones especiales disponibles.")
             return
         
-        print("\n=== Sesiones Especiales Disponibles ===")
-        sesiones_disponibles = []
-        
-        for i, sesion in enumerate(self.__sesiones):
-            if sesion.get_cupos_disponibles() > 0:
-                sesiones_disponibles.append(sesion)
-                # Buscar el entrenador
-                entrenador = None
-                for ent in self.__entrenadores:
-                    if ent.get_id_entrenador() == sesion.get_id_entrenador():
-                        entrenador = ent
-                        break
-                
-                print(f"{len(sesiones_disponibles)}. Sesión ID: {sesion.get_id_sesion()}")
-                print(f"   Fecha: {sesion.get_fecha()}")
-                print(f"   Entrenador: {entrenador.get_nombre() if entrenador else 'No encontrado'}")
-                print(f"   Cupos disponibles: {sesion.get_cupos_disponibles()}")
-                print()
-        
-        if not sesiones_disponibles:
-            print("No hay sesiones con cupos disponibles.")
+        if id_sesion is not None:
+            # Buscar la sesión por ID
+            for sesion in self.__sesiones:
+                if sesion.get_id_sesion() == id_sesion:
+                    if sesion.get_cupos_disponibles() > 0:
+                        # Inscribir en la sesión (esto actualiza la sesión)
+                        if sesion.inscribir_cliente(cliente):
+                            print(f"¡Inscripción exitosa en la sesión del {sesion.get_fecha()}!")
+                        else:
+                            print("No se pudo inscribir en la sesión. Verifique los datos.")
+                        return
+                    else:
+                        print("No hay cupos disponibles para esta sesión.")
+                        return
+            print(f"No se encontró una sesión con ID {id_sesion}.")
             return
-        
-        try:
-            print("Ingrese 0 para cancelar")
-            opcion = int(input("Seleccione una sesión: "))
+        else:
+            print("\n=== Sesiones Especiales Disponibles ===")
+            sesiones_disponibles = []
             
-            if opcion == 0:
-                print("Operación cancelada.")
+            for sesion in self.__sesiones:
+                if sesion.get_cupos_disponibles() > 0:
+                    sesiones_disponibles+=[sesion]
+                    # Buscar el entrenador
+                    entrenador = None
+                    for ent in self.__entrenadores:
+                        if ent.get_id_entrenador() == sesion.get_id_entrenador():
+                            entrenador = ent
+                            break
+                    
+                    print(f"{len(sesiones_disponibles)}. Sesión ID: {sesion.get_id_sesion()}")
+                    print(f"   Fecha: {sesion.get_fecha()}")
+                    print(f"   Entrenador: {entrenador.get_nombre() if entrenador else 'No encontrado'}")
+                    print(f"   Cupos disponibles: {sesion.get_cupos_disponibles()}")
+                    
+            print(f"\n\nSesiones Disponibles :{len(sesiones_disponibles)}")
+            
+            if not sesiones_disponibles:
+                print("No hay sesiones con cupos disponibles.")
                 return
             
-            if 1 <= opcion <= len(sesiones_disponibles):
-                sesion_elegida = sesiones_disponibles[opcion - 1]
+            sesion_ids = [sesion.get_id_sesion() for sesion in sesiones_disponibles]
+            
+            while True:
+                id_sesion = input("Ingrese el ID de la sesión a la que desea inscribirse (o '0' para cancelar): ")
+                if ut.is_number(id_sesion, "ID"):
+                    id_sesion = int(id_sesion)
+                    if id_sesion == 0:
+                        print("Operación cancelada.")
+                        return
+                        # Validar que el id_sesion esté en las sesiones disponibles
+                    else:
+                        if id_sesion not in sesion_ids:
+                            print("El ID de sesión ingresado no está en las sesiones disponibles.")
+                            continue
+                        else:
+                            break
+                else:
+                    print("Por favor ingrese un número válido.")
+                    
+            # Buscar la sesión seleccionada
+            for sesion in sesiones_disponibles:
+                if sesion.get_id_sesion() == id_sesion:
+                    if sesion.inscribir_cliente(cliente):
+                        print(f"¡Inscripción exitosa en la sesión del {sesion.get_fecha()}!")
+                        break
+                    else:
+                        print("No se pudo inscribir en la sesión. Verifique los datos.")
                 
-                # Inscribir en la sesión (esto actualiza la sesión)
-                if sesion_elegida.inscribir_cliente(cliente):
-                    # También agregar la sesión al cliente (esto actualiza el cliente)
-                    cliente.agregar_sesion(sesion_elegida.get_id_sesion())
-                    print(f"¡Inscripción exitosa en la sesión del {sesion_elegida.get_fecha()}!")
-            else:
-                print("Opción inválida.")
+
+            
                 
-        except ValueError:
-            print("Por favor ingrese un número válido.")
-    
+            
     def cancelar_sesion(self, cliente):
         """
         Permite a un cliente cancelar su inscripción en una sesión especial.
@@ -521,10 +549,10 @@ class Gimnasio:
         sesiones_cliente = cliente.get_sesiones_especiales()
         
         if not sesiones_cliente:
-            print(f"El cliente {cliente.get_nombre_c()} no tiene sesiones inscritas.")
+            print(f"El cliente {cliente.get_nombre()} no tiene sesiones inscritas.")
             return
         
-        print(f"\n=== Sesiones de {cliente.get_nombre_c()} ===")
+        print(f"\n=== Sesiones de {cliente.get_nombre()} ===")
         sesiones_encontradas = []
         
         for id_sesion in sesiones_cliente:
@@ -541,7 +569,7 @@ class Gimnasio:
                     
                     print(f"{len(sesiones_encontradas)}. Sesión ID: {sesion.get_id_sesion()}")
                     print(f"   Fecha: {sesion.get_fecha()}")
-                    print(f"   Entrenador: {entrenador.get_nombre_e() if entrenador else 'No encontrado'}")
+                    print(f"   Entrenador: {entrenador.get_nombre() if entrenador else 'No encontrado'}")
                     print()
                     break
         
@@ -584,7 +612,7 @@ class Gimnasio:
         
         for i in range(len(self.__entrenadores)):
             if self.__entrenadores[i].get_id_entrenador() == id_entrenador:
-                print(f"Entrenador con ID {id_entrenador} y nombre {self.__entrenadores[i].get_nombre_e()}.")
+                print(f"Entrenador con ID {id_entrenador} y nombre {self.__entrenadores[i].get_nombre()}.")
                 confirmar = input("¿Está seguro de eliminar este entrenador? (si/no): ").strip().lower()
                 if confirmar == 'si':
                     self.__entrenadores.pop(i)
@@ -654,9 +682,9 @@ class Gimnasio:
                 # Datos básicos del cliente
                 datos_cliente = {
                     "id_cliente": cliente.get_id_cliente(),
-                    "nombre": cliente.get_nombre_c(),
-                    "documento": cliente.get_documento_c(),
-                    "telefono": cliente.get_telefono_c(),
+                    "nombre": cliente.get_nombre(),
+                    "documento": cliente.get_documento(),
+                    "telefono": cliente.get_telefono(),
                     "fecha_registro": cliente.get_fecha_registro_c(),
                     "membresia": None
                 }
@@ -665,9 +693,9 @@ class Gimnasio:
                 membresia = cliente.get_membresia()
                 if membresia is not None:
                     datos_cliente["membresia"] = {
-                        "pago": membresia.get_pago_m(),
-                        "fecha_inicio": membresia.get_fecha_inicio_m(),
-                        "fecha_fin": membresia.get_fecha_fin_m(),
+                        "pago": membresia.get_pago(),
+                        "fecha_inicio": membresia.get_fecha_inicio(),
+                        "fecha_fin": membresia.get_fecha_fin(),
                         "dias_restantes": membresia.calcular_dias_restantes()
                     }
                 
