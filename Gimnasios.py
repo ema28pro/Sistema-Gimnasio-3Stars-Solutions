@@ -41,9 +41,6 @@ class Gimnasio:
         self.__numero_clientes = 0
         self.__historico_clientes = 0
         self.__clientes = np.full(self.__maximo_clientes, None, dtype=object)
-        self.__numero_membresias = 0
-        self.__historico_membresias = 0
-        self.__membresias = np.full(self.__maximo_clientes, None, dtype=object)
         self.__historico_entrenadores = 0
         self.__entrenadores = []
         self.__historico_sesiones = 0
@@ -52,16 +49,7 @@ class Gimnasio:
     # Métodos accesores y modificadores
     
     def get(self):
-        return self.__clientes, self.__membresias, self.__entrenadores, self.__sesiones
-    
-    def set_efectivo(self, efectivo: float):
-        """_summary_
-            Modifica el efectivo del gimnasio.
-        """
-        if ut.is_positve(efectivo, "Efectivo"):
-            print(f"Efectivo actual: ${self.__efectivo:,} + ${float(efectivo):,}")
-            self.__efectivo += float(efectivo)
-            print(f"Efectivo actualizado a: ${self.__efectivo:,}")
+        return self.__clientes, self.__entrenadores, self.__sesiones
 
     def ver_inf(self):
         """_summary_
@@ -69,7 +57,7 @@ class Gimnasio:
         """        
         print(f"Gimnasio {self.__nombre}, Tel: {self.__telefono},\nCorreo: {self.__correo_electronico}, nos encontramos ubicados en {self.__direccion}")
 
-    # Metodos
+    #? ============================== Metodos De Creacion ==============================
 
     # R1
     def crear_cliente(self, nombre, documento, telefono=None):
@@ -141,47 +129,91 @@ class Gimnasio:
         else:
             print("\nError al registrar el cliente")
             return False
-    
-    
+
     # R3
     def crear_membresia(self, cliente_encontrado: Cliente):
         
         # Validaciones
         
-        if self.__numero_membresias >= self.__maximo_clientes:
-            print("No se pueden registrar más membresias, el gimnasio ha alcanzado su capacidad máxima.")
-            return
+        if cliente_encontrado.get_membresia():
+            print("El cliente ya tiene membresia.")
+            cliente_encontrado.info_membresia()
+            return False
         
-        id_membresia = self.__historico_membresias + 1
         fecha_inicio = date.today()
         fecha_fin = fecha_inicio + timedelta(days=30)
         
-        while True: # Ciclo para el correcto ingreso del ID
-            pagar = input("Desea pagar inmediatamente. (si/no)\nR// ")
+        while True: # Ciclo para Ingreso correcto del pago
+            pagar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
             if ut.valid_yes_no(pagar):
                 break
         
-        if ut.yes_no(pagar):
+        pago_inmediato = ut.yes_no(pagar)
+        
+        if pago_inmediato:
             self.ingreso_caja(PRECIO_MEMBRESIA)
-            print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
-            nueva_membresia = Membresia(id_membresia, fecha_inicio, fecha_fin, True)
-        else:
-            nueva_membresia = Membresia(id_membresia, fecha_inicio, fecha_fin)
+
+        # Crear la membresía
+        nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago_inmediato)
+        cliente_encontrado.set_membresia(nueva_membresia)
         
-        # cliente_encontrado.membresia =  nueva_membresia
+        print(f"Membresía creada para {cliente_encontrado.get_nombre_c()} con ID {cliente_encontrado.get_id_cliente()}")
+        print(f"Vigencia: {fecha_inicio} hasta {fecha_fin}")
+        print(f"Estado: {'Pagada' if pago_inmediato else 'Pendiente de pago'}")
         
-        # Agregar la membresía al array de membresías
-        for i in range(self.__maximo_clientes):
-            if self.__membresias[i] is None:
-                self.__membresias[i] = nueva_membresia
+        return
+    
+    def crear_entrenador(self, nombre: str, especialidad: set, telefono: str = None):
+        """
+        Registra un nuevo entrenador en el gimnasio.
+        
+        Args:
+            nombre (str): Nombre del entrenador
+            especialidad (set): Conjunto de especialidades del entrenador
+            telefono (str, optional): Teléfono del entrenador
+        """
+        id_entrenador = self.__historico_entrenadores + 1
+        nuevo_entrenador = Entrenador(id_entrenador, nombre, especialidad, telefono)
+        self.__entrenadores.append(nuevo_entrenador)
+        self.__historico_entrenadores += 1
+        print(f"Entrenador {nombre} registrado con ID: {id_entrenador}")
+        return nuevo_entrenador
+    
+    
+    
+    def crear_sesion_especial(self, id_entrenador: int, fecha: str, maximo_cupos: int = 25):
+        """
+        Crea una nueva sesión especial.
+        
+        Args:
+            id_entrenador (int): ID del entrenador que dirigirá la sesión
+            fecha (str): Fecha de la sesión
+            maximo_cupos (int, optional): Número máximo de cupos. Defaults to 25.
+        """
+        # Verificar que el entrenador existe
+        entrenador_encontrado = None
+        for entrenador in self.__entrenadores:
+            if entrenador.get_id_entrenador() == id_entrenador:
+                entrenador_encontrado = entrenador
                 break
         
-        self.__numero_membresias += 1
-        self.__historico_membresias +=1
-        print(f"Cliente {cliente_encontrado.get_nombre_c()}, la membresia con ID {id_membresia} fue creada con finalizacion : {fecha_fin}")
+        if not entrenador_encontrado:
+            print(f"No se encontró un entrenador con ID {id_entrenador}")
+            return None
         
-        cliente_encontrado.set_id_membresia(id_membresia)
-        print(f"Cliente {cliente_encontrado.get_nombre_c()} ahora tiene la membresía con ID {cliente_encontrado.get_id_membresia()}.")
+        id_sesion = self.__historico_sesiones + 1
+        nueva_sesion = SesionEspecial(id_sesion, id_entrenador, fecha, maximo_cupos)
+        self.__sesiones.append(nueva_sesion)
+        self.__historico_sesiones += 1
+        print(f"Sesión especial creada con ID: {id_sesion} para el {fecha}")
+        return nueva_sesion
+    
+    
+    
+    
+    
+    
+    #? ============================== Metodos De Busqueda y Visualizacion ==============================
     
     def buscar_cliente(self, op=None):
         
@@ -240,105 +272,32 @@ class Gimnasio:
                     return
             case "":
                 print("Saliendo del menú de búsqueda.")
-        
-        print("\n"*3)
-        
-        # Acciones con el cliente encontrado
-        while True:
-            print("\n=== ¿Que desea hacer? ===")
-            print(30*"=")
-            print("1. Adquirir Membresía")
-            print("2. Pagar Membresía")
-            print("3. Consultar Membresía")
-            print("4. Registrar Entrada")
-            print("6. Pago Ingreso Único")
-            print("7. Solicitar Sesión Especial")
-            print("8. Cancelar Sesión Especial")
-            print("Enter para salir")
-            opcion_cliente = input("Seleccione una opción : ")
-            print(30*"=")
-            
-            match opcion_cliente:
-                case "1":
-                    self.crear_membresia(cliente_encontrado)
-                case "2":
-                    self.pagar_membresia(cliente_encontrado)
-                case "3":
-                    self.consultar_membresia(cliente_encontrado)
-                case "4":
-                    cliente_encontrado.registrar_entrada()
-                case "6":
-                    cliente_encontrado.pago_ingreso_unico()
-                case "7":
-                    self.agendar_sesion(cliente_encontrado)
-                case "8":
-                    self.cancelar_sesion(cliente_encontrado)
-                case "":
-                    print("Saliendo del menú de cliente.")
-                    break
+                
+        if cliente_encontrado is None:
+            print("No se encontró ningún cliente.")
+            return
+        else:
+            return cliente_encontrado
+
 
     def consultar_membresia(self, cliente_encontrado: Cliente):
-        if cliente_encontrado.get_id_membresia() is None:
+        if cliente_encontrado.get_membresia() is None:
             print(f"El cliente {cliente_encontrado.get_nombre_c()} no tiene una membresía activa.")
             return
-        id_membresia = cliente_encontrado.get_id_membresia()
-        membresia_encontrada = None
-        for membresia in self.__membresias:
-            if membresia is not None and membresia.get_id_membresia() == id_membresia:
-                membresia_encontrada = membresia
-                print(f"Membresía encontrada: ID: {membresia.get_id_membresia()}, Estado: {membresia.get_pago_m()}, Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}")
-                break
-        if not membresia_encontrada:
-            print(f"No se encontró una membresía con ID {id_membresia}.")
-            return
         else:
-            # Mostrar información de la membresía
-            print(f"\n=== Información de Membresía ===")
-            print(f"Cliente: {cliente_encontrado.get_nombre_c()}")
-            print(f"ID Membresía: {membresia_encontrada.get_id_membresia()}")
-            print(f"Fecha de inicio: {membresia_encontrada.get_fecha_inicio_m()}")
-            print(f"Fecha de fin: {membresia_encontrada.get_fecha_fin_m()}")
-            print(f"Estado de pago: {'Pagada' if membresia_encontrada.get_pago_m() else 'Pendiente'}")
-            print("="*30)
-            
-            # Menu membresia
-            print("\n=== ¿Que desea hacer? ===")
-            print(30*"=")
-            print("1. Eliminar Membresia")
-            print("2. Pagar Membresía" if not membresia_encontrada.get_pago_m() else "Membresía ya pagada")
-            print("Enter para salir")
-            opcion_membresia = input("Seleccione una opción : ")
-            
-            match opcion_membresia:
-                case "1":
-                    self.elminar_membresia(membresia_encontrada)
-                case "2":
-                    self.pagar_membresia(membresia_encontrada)
-                case "":
-                    print("Saliendo del menú de membresía.")
-
-    def pagar_membresia(self, membresia_encontrada: Membresia):
-        """_summary_
-            Paga la membresía encontrada y actualiza su estado.
-        """
+            membresia_encontrada = cliente_encontrado.get_membresia()
         
-        # No se coloca en la clase Membresia para no dar acceso a la modificación del efectivo desde la clase Membresia y porque el pago se gestiona desde el gimnasio.
+        # Mostrar información de la membresía
+        print(f"\n=== Información de Membresía ===")
+        print(f"Cliente: {cliente_encontrado.get_nombre_c()}")
+        print(f"Estado de pago: {'Pagada' if membresia_encontrada.get_pago_m() else 'Pendiente'}") 
+        print(f"Fecha de inicio: {membresia_encontrada.get_fecha_inicio_m()}")
+        print(f"Fecha de fin: {membresia_encontrada.get_fecha_fin_m()}")
+        # print(f"Días restantes: {}")
+        print("="*30)
         
-        if membresia_encontrada.get_pago_m():
-            print("La membresía ya ha sido pagada.")
-            return
-        else:
-            print(f"El cliente tiene una membresía con ID {membresia_encontrada.get_id_membresia()} qudee aún no ha sido pagada.")   
-            self.set_efectivo(PRECIO_MEMBRESIA)
-            membresia_encontrada.set_pago_m(True)
-            print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
+        return membresia_encontrada
         
-
-    def registrar_entrada(self, cliente_encontrado: Cliente):
-        pass
-
-    def pago_ingreso_unico(self, cliente_encontrado: Cliente):
-        pass
     
     def visualizar_clientes(self):      
         print("\n=== Clientes Registrados ===")
@@ -353,83 +312,64 @@ class Gimnasio:
     def visualizar_membresias(self):
         print("\n=== Membresías Registradas ===")
         total_membresias = 0
-        for membresia in self.__membresias:
-            if membresia is not None:
+        for cliente in self.__clientes:
+            if cliente is not None and cliente.get_membresia() is not None:
+                membresia = cliente.get_membresia()
                 total_membresias += 1
-                print(f"ID: {membresia.get_id_membresia()}, Estado: {membresia.get_pago_m()}, Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}")
+                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre_c()}, Registrado: {cliente.get_fecha_registro_c()} Estado Membresia: { 'Paga' if membresia.get_pago_m() else 'Pendiente' }
+                        Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}, Dias Restantes: {membresia.calcular_dias_restantes()} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
-        
     
+    def mostrar_sesiones(self):
+        """Muestra todas las sesiones especiales disponibles"""
+        if not self.__sesiones:
+            print("No hay sesiones especiales programadas.")
+            return
+        else:
+            print("\n=== Todas las Sesiones Especiales ===")
+            for sesion in self.__sesiones:
+                sesion.mostrar_info()
+    
+    def mostrar_entrenadores(self):
+        """Muestra todos los entrenadores registrados"""
+        if not self.__entrenadores:
+            print("No hay entrenadores registrados.")
+            return
+        else:    
+            print("\n=== Entrenadores Registrados ===")
+            for entrenador in self.__entrenadores:
+                entrenador.mostrar_info()
+    
+    
+    
+    
+    
+    #? ============================== Metodos de Modificacion ==============================
+
     def ingreso_caja(self, efectivo: float):
         """_summary_
             Modifica el efectivo del gimnasio.
         """
-        if efectivo >= 0:
-            print(f"Efectivo actual: {self.__efectivo} + {efectivo}")
-            self.__efectivo += efectivo
-            print(f"Efectivo actualizado a: {self.__efectivo}")
+        print(f"Efectivo actual: ${self.__efectivo:,} + ${float(efectivo):,}")
+        self.__efectivo += float(efectivo)
+        print(f"Efectivo actualizado a: ${self.__efectivo:,}")
+
+    
+    def pagar_membresia(self, membresia_encontrada: Membresia):
+        if membresia_encontrada.get_pago_m():
+            print("La membresía ya ha sido pagada.")
+            return
         else:
-            print("El efectivo no puede ser negativo.")
-
-    #! Tarea de Emanuel
-
-    def analisis_financiero(self):
-        # lógica de análisis
-        pass
-
-    def reporte_diario(self):
-        # generar un resumen del día
-        pass
-
-    def informe_entrada(self):
-        # reporte de entradas diarias
-        pass
-
-    # Métodos para gestionar entrenadores
-    def registrar_entrenador(self, nombre: str, especialidad: set, telefono: str = None):
-        """
-        Registra un nuevo entrenador en el gimnasio.
-        
-        Args:
-            nombre (str): Nombre del entrenador
-            especialidad (set): Conjunto de especialidades del entrenador
-            telefono (str, optional): Teléfono del entrenador
-        """
-        id_entrenador = self.__historico_entrenadores + 1
-        nuevo_entrenador = Entrenador(id_entrenador, nombre, especialidad, telefono)
-        self.__entrenadores.append(nuevo_entrenador)
-        self.__historico_entrenadores += 1
-        print(f"Entrenador {nombre} registrado con ID: {id_entrenador}")
-        return nuevo_entrenador
+            print(f"El cliente tiene una membresía que aún no ha sido pagada.")
+            self.ingreso_caja(PRECIO_MEMBRESIA)
+            membresia_encontrada.set_pago_m(True)
+            print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
-    def crear_sesion_especial(self, id_entrenador: int, fecha: str, maximo_cupos: int = 25):
-        """
-        Crea una nueva sesión especial.
-        
-        Args:
-            id_entrenador (int): ID del entrenador que dirigirá la sesión
-            fecha (str): Fecha de la sesión
-            maximo_cupos (int, optional): Número máximo de cupos. Defaults to 25.
-        """
-        # Verificar que el entrenador existe
-        entrenador_encontrado = None
-        for entrenador in self.__entrenadores:
-            if entrenador.get_id_entrenador() == id_entrenador:
-                entrenador_encontrado = entrenador
-                break
-        
-        if not entrenador_encontrado:
-            print(f"No se encontró un entrenador con ID {id_entrenador}")
-            return None
-        
-        id_sesion = self.__historico_sesiones + 1
-        nueva_sesion = SesionEspecial(id_sesion, id_entrenador, fecha, maximo_cupos)
-        self.__sesiones.append(nueva_sesion)
-        self.__historico_sesiones += 1
-        print(f"Sesión especial creada con ID: {id_sesion} para el {fecha}")
-        return nueva_sesion
+    def pago_ingreso_unico(self, cliente_encontrado: Cliente):
+        pass
     
+
     def agendar_sesion(self, cliente):
         """
         Permite a un cliente inscribirse en una sesión especial.
@@ -542,24 +482,24 @@ class Gimnasio:
         except ValueError:
             print("Por favor ingrese un número válido.")
     
-    def mostrar_sesiones_disponibles(self):
-        """Muestra todas las sesiones especiales disponibles"""
-        if not self.__sesiones:
-            print("No hay sesiones especiales programadas.")
-            return
-        
-        print("\n=== Todas las Sesiones Especiales ===")
-        for sesion in self.__sesiones:
-            sesion.mostrar_info()
-    
-    def mostrar_entrenadores(self):
-        """Muestra todos los entrenadores registrados"""
-        if not self.__entrenadores:
-            print("No hay entrenadores registrados.")
-            return
-        
-        print("\n=== Entrenadores Registrados ===")
-        for entrenador in self.__entrenadores:
-            entrenador.mostrar_info()
 
+    #! ============================== Metodos Opcionales ==============================
+
+    def registrar_entrada(self, cliente_encontrado: Cliente):
+        pass
+
+    #! Tarea de Emanuel
+
+    def analisis_financiero(self):
+        # lógica de análisis
+        pass
+
+    def reporte_diario(self):
+        # generar un resumen del día
+        pass
+
+    def informe_entrada(self):
+        # reporte de entradas diarias
+        pass
+    
 
