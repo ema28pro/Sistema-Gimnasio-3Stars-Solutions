@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import Utils as ut
 from Utils import PRECIO_MEMBRESIA
 
@@ -36,6 +36,13 @@ class Membresia:
     # Métodos
 
     def calcular_dias_restantes(self):
+        # Si fecha_fin es string, convertirla a date
+        # if isinstance(self.__fecha_fin, str):
+        #     fecha_fin_obj = datetime.strptime(self.__fecha_fin, "%Y-%m-%d").date()
+        #     self.__fecha_fin = fecha_fin_obj  # Actualizar el atributo para que sea un objeto date
+        # else:
+        #     fecha_fin_obj = self.__fecha_fin
+        
         return (self.__fecha_fin - date.today()).days
 
 class Cliente:
@@ -55,15 +62,15 @@ class Cliente:
         - Pensar si es necesario el atributo __sesiones_especiales, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
         - Pensar si guardaremos el nombre completo o solo el nombre.
     """
-    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):   
+    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None, membresia: Membresia = None):
         self.__id_cliente = id_cliente
         self.__nombre = nombre
         self.__documento = documento
         self.__telefono = telefono
         self.__fecha_registro = fecha_registro
 
-        self.__membresia = None
-        self.__sesiones_especiales = [] # Pendiente. Pensar si es necesario este atributo, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
+        self.__membresia = membresia
+        # Se elimina la lista de sesiones especiales, ya que de eliminar una sesión especial, se tendrá que eliminar de la lista de cada cliente.
         
     # Métodos de acceso y modificación
     

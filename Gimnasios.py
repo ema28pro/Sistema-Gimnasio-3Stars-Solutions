@@ -1,6 +1,6 @@
 import numpy as np
 import json
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import Utils as ut
 from Utils import PRECIO_MEMBRESIA, PRECIO_ENTRADA_UNICA
 
@@ -61,21 +61,44 @@ class Gimnasio:
     #? ============================== Metodos De Creacion ==============================
 
     # R1
-    def crear_cliente(self, nombre, documento, telefono=None):
-        
-        #Validaciones
+    def crear_cliente(self, nombre=None, documento=None, telefono=None, fecha_registro=None, id_cliente=None, membresia=None):
         
         if self.__numero_clientes >= self.__maximo_clientes:
             print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
             return False
-        if telefono and ( not ut.is_number(telefono, "Telefono")):
-            return False
-        if not (ut.is_string(nombre, "Nombre") and ut.is_number(documento, "Documento")):
-            return False
         
-        id_cliente = self.__historico_clientes + 1
+        if not nombre or not documento:
+            while True:
+                nombre = input("Ingrese el Nombre del Cliente : ")
+                if ut.is_string(nombre, "Nombre"):
+                    break
+            
+            while True:
+                documento = input("Ingrese el Documento del Cliente : ")
+                if ut.is_number(documento, "Documento"):
+                    break
+            
+            while True:
+                telefono = input("Ingrese el numero del Cliente (Enter para Omitir) : ")
+                if telefono:
+                    if ut.is_number(telefono, "Telefono"):
+                        break
+                else:
+                    break
+            
+        else:
+            if telefono and ( not ut.is_number(telefono, "Telefono")):
+                return False
+            if not (ut.is_string(nombre, "Nombre") and ut.is_number(documento, "Documento")):
+                return False
         
-        fecha_registro = date.today()
+        if not id_cliente:
+            id_cliente = self.__historico_clientes + 1
+        
+        if not fecha_registro:
+            fecha_registro = date.today().strftime("%Y-%m-%d")
+        elif isinstance(fecha_registro, date):
+            fecha_registro = fecha_registro.strftime("%Y-%m-%d")
         
         # Verificar si el cliente ya está registrado
         for cliente in self.__clientes:
@@ -83,7 +106,7 @@ class Gimnasio:
                 print(f"\n!!! El cliente con documento {documento} ya está registrado.")
                 return False
         
-        nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono if telefono else None)
+        nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono, membresia)
         # Forma 1, buscar un espacio vacío en el array de clientes
         for i in range(self.__maximo_clientes):
             if self.__clientes[i] is None:
@@ -95,44 +118,10 @@ class Gimnasio:
         self.__numero_clientes += 1
         self.__historico_clientes += 1
         print(f"ID {id_cliente} : Cliente {nombre} registrado exitosamente. {fecha_registro}")
-        return True
-    
-    def registrar_cliente(self):
-        print("===== Registrando Cliente =====")
-        
-        if self.__numero_clientes >= len(self.__clientes):
-            print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
-            return False
-        
-        
-        while True:
-            nombre = input("Ingrese el Nombre del CLiente : ")
-            if ut.is_string(nombre, "Nombre"):
-                break
-        
-        while True:
-            documento = input("Ingrese el Documento del Cliente : ")
-            if ut.is_number(documento, "Documento"):
-                break
-        
-        
-        while True:
-            telefono = input("Ingrese el numero del Cliente (Enter para Omitir) : ")
-            if telefono:
-                if ut.is_number(telefono, "Telefono"):
-                    break
-            else:
-                break
-        
-        if self.crear_cliente(nombre,documento,telefono):
-            print("\nCliente registrado exitosamente")
-            return True
-        else:
-            print("\nError al registrar el cliente")
-            return False
+        return nuevo_cliente
 
     # R3
-    def crear_membresia(self, cliente_encontrado: Cliente):
+    def crear_membresia(self, cliente_encontrado: Cliente, fecha_inicio = None, fecha_fin = None, pago: bool = False):
         
         # Validaciones
         
@@ -141,26 +130,30 @@ class Gimnasio:
             cliente_encontrado.info_membresia()
             return False
         
-        fecha_inicio = date.today()
-        fecha_fin = fecha_inicio + timedelta(days=30)
+        if not fecha_inicio:
+            fecha_inicio = date.today()
         
-        while True: # Ciclo para Ingreso correcto del pago
-            pagar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
-            if ut.valid_yes_no(pagar):
-                break
+        if not fecha_fin:
+            fecha_fin = fecha_inicio + timedelta(days=30)
         
-        pago_inmediato = ut.yes_no(pagar)
-        
-        if pago_inmediato:
-            self.ingreso_caja(PRECIO_MEMBRESIA)
+        if pago is None:
+            while True: # Ciclo para Ingreso correcto del pago
+                pagar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
+                if ut.valid_yes_no(pagar):
+                    break
+            
+            pago = ut.yes_no(pagar)
+            
+            if pago:
+                self.ingreso_caja(PRECIO_MEMBRESIA)
 
         # Crear la membresía
-        nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago_inmediato)
+        nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago)
         cliente_encontrado.set_membresia(nueva_membresia)
         
         print(f"Membresía creada para {cliente_encontrado.get_nombre_c()} con ID {cliente_encontrado.get_id_cliente()}")
         print(f"Vigencia: {fecha_inicio} hasta {fecha_fin}")
-        print(f"Estado: {'Pagada' if pago_inmediato else 'Pendiente de pago'}")
+        print(f"Estado: {'Pagada' if pago else 'Pendiente de pago'}")
         
         return
     
@@ -317,8 +310,8 @@ class Gimnasio:
             if cliente is not None and cliente.get_membresia() is not None:
                 membresia = cliente.get_membresia()
                 total_membresias += 1
-                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre_c()}, Registrado: {cliente.get_fecha_registro_c()} Estado Membresia: { 'Paga' if membresia.get_pago_m() else 'Pendiente' }
-                        Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}, Dias Restantes: {membresia.calcular_dias_restantes()} \n""")
+                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre_c()}, Documento: {cliente.get_documento_c()}, Registrado: {cliente.get_fecha_registro_c()}
+                        Membresia => Estado: { 'Paga' if membresia.get_pago_m() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio_m()}, Fecha Fin: {membresia.get_fecha_fin_m()}, Dias Restantes: {membresia.calcular_dias_restantes()} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
     
@@ -503,6 +496,8 @@ class Gimnasio:
         # reporte de entradas diarias
         pass
     
+    #* ============================== Exportar e Importar Datos ==============================
+    
     def exportar_datos_json(self, nombre_archivo: str = None):
         """
         Guarda todos los datos de clientes y sus membresías en un archivo JSON.
@@ -572,8 +567,8 @@ class Gimnasio:
             
             return nombre_archivo
             
-        except Exception as e:
-            print(f"✗ Error al guardar el archivo JSON: {str(e)}")
+        except Exception as error:
+            print(f"✗ Error al guardar el archivo JSON: {str(error)}")
             return None
     
     def cargar_datos_json(self, nombre_archivo: str):
@@ -603,8 +598,30 @@ class Gimnasio:
         except json.JSONDecodeError:
             print(f"✗ Error al leer el archivo JSON: formato inválido")
             return None
-        except Exception as e:
-            print(f"✗ Error al cargar el archivo: {str(e)}")
+        except Exception as error:
+            print(f"✗ Error al cargar el archivo: {str(error)}")
             return None
+    
+    def cargar_clientes(self,nombre_archivo):
+        with open(nombre_archivo,"r") as archivo:
+            lineas = archivo.readlines()
+            rows = len(lineas)
+            columns = len(lineas[0].strip().split(";"))
+            print(f"Número de líneas : {rows}")
+            print(f"Número de columnas : {columns}")
+        
+        for i in range(1,rows):
+            linea = lineas[i].strip().split(";")
+            
+            # Crear cliente primero
+            cliente_creado = self.crear_cliente(nombre=linea[0], documento=linea[1], telefono=linea[2], fecha_registro=datetime.strptime(linea[3], "%Y-%m-%d").date())
+            
+            if cliente_creado:
+                # Convertir pago a boolean de forma simple
+                pago_bool = linea[4].lower() == 'true'
+                
+                # Crear membresía (las fechas se pasan como strings y la clase Membresia las convierte)
+                self.crear_membresia(cliente_encontrado=cliente_creado, pago=pago_bool, fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(), fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date())
+
 
 

@@ -18,6 +18,17 @@ Este sistema fue creado para mejorar la gestión administrativa del gimnasio Bod
 
 El programa permite registrar clientes, gestionar membresías, llevar el control de entradas y generar reportes financieros básicos.
 
+### Problema
+**Proyecto 5**: Un Gimnasio tiene como objetivo mejorar la gestión y funcionamiento
+de sus procesos. Actualmente, enfrenta desafíos en el registro de nuevos miembros,
+seguimiento de membresías existentes y análisis financiero. Se busca una solución
+que optimice estas áreas, proporcionando una experiencia más eficiente tanto para
+los clientes como para el personal del gimnasio.
+La solución requerida debe abordar los siguientes aspectos clave: registro y gestión
+de clientes, seguimiento de membresías y pagos, así como la generación de
+informes diarios que incluyan datos relevantes para la toma de decisiones del
+negocio, como el número de clientes atendidos y los ingresos generados y demás
+información relevante para el negocio.
 
 ## ⚙️ Funcionalidades Principales
 - Registro y gestión de clientes.
