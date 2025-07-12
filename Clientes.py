@@ -112,6 +112,7 @@ class Membresia:
     """
     def __init__(self, id_membresia: str, fecha_inicio: str, fecha_fin: str, pago: bool = False):
         self.__id_membresia = id_membresia
+        self.__id_cliente = 
         self.__pago = pago
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin

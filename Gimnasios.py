@@ -37,12 +37,13 @@ class Gimnasio:
         
         self.__efectivo = efectivo
 
+        self.__maximo_clientes = 50
         self.__numero_clientes = 0
         self.__historico_clientes = 0
-        self.__clientes = np.full(50, None, dtype=object)
+        self.__clientes = np.full(self.__maximo_clientes, None, dtype=object)
         self.__numero_membresias = 0
         self.__historico_membresias = 0
-        self.__membresias = np.full(50, None, dtype=object)
+        self.__membresias = np.full(self.__maximo_clientes, None, dtype=object)
         self.__historico_entrenadores = 0
         self.__entrenadores = []
         self.__historico_sesiones = 0
@@ -71,15 +72,15 @@ class Gimnasio:
     # Metodos
 
     # R1
-    def registrar_cliente(self, nombre, documento, telefono=None):
+    def crear_cliente(self, nombre, documento, telefono=None):
         
         #Validaciones
         
-        if self.__numero_clientes >= 50:
+        if self.__numero_clientes >= self.__maximo_clientes:
             print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
             return False
         if telefono and ( not ut.is_number(telefono, "Telefono")):
-            return
+            return False
         if not (ut.is_string(nombre, "Nombre") and ut.is_number(documento, "Documento")):
             return False
         
@@ -90,12 +91,12 @@ class Gimnasio:
         # Verificar si el cliente ya está registrado
         for cliente in self.__clientes:
             if cliente is not None and cliente.get_documento_c() == documento:
-                print(f"El cliente con documento {documento} ya está registrado.")
+                print(f"\n!!! El cliente con documento {documento} ya está registrado.")
                 return False
         
         nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono if telefono else None)
         # Forma 1, buscar un espacio vacío en el array de clientes
-        for i in range(50):
+        for i in range(self.__maximo_clientes):
             if self.__clientes[i] is None:
                 self.__clientes[i] = nuevo_cliente
                 break
@@ -107,12 +108,47 @@ class Gimnasio:
         print(f"ID {id_cliente} : Cliente {nombre} registrado exitosamente. {fecha_registro}")
         return True
     
+    def registrar_cliente(self):
+        print("===== Registrando Cliente =====")
+        
+        if self.__numero_clientes >= len(self.__clientes):
+            print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
+            return False
+        
+        
+        while True:
+            nombre = input("Ingrese el Nombre del CLiente : ")
+            if ut.is_string(nombre, "Nombre"):
+                break
+        
+        while True:
+            documento = input("Ingrese el Documento del Cliente : ")
+            if ut.is_number(documento, "Documento"):
+                break
+        
+        
+        while True:
+            telefono = input("Ingrese el numero del Cliente (Enter para Omitir) : ")
+            if telefono:
+                if ut.is_number(telefono, "Telefono"):
+                    break
+            else:
+                break
+        
+        if self.crear_cliente(nombre,documento,telefono):
+            print("\nCliente registrado exitosamente")
+            return True
+        else:
+            print("\nError al registrar el cliente")
+            return False
+    
+    
     # R3
     def crear_membresia(self, cliente_encontrado: Cliente):
         
         # Validaciones
         
-        if self.__numero_membresias >= 50:
+        if self.__numero_membresias >= self.__maximo_clientes:
             print("No se pueden registrar más membresias, el gimnasio ha alcanzado su capacidad máxima.")
             return
         
@@ -132,8 +168,10 @@ class Gimnasio:
         else:
             nueva_membresia = Membresia(id_membresia, fecha_inicio, fecha_fin)
         
+        # cliente_encontrado.membresia =  nueva_membresia
+        
         # Agregar la membresía al array de membresías
-        for i in range(50):
+        for i in range(self.__maximo_clientes):
             if self.__membresias[i] is None:
                 self.__membresias[i] = nueva_membresia
                 break
@@ -145,7 +183,7 @@ class Gimnasio:
         cliente_encontrado.set_id_membresia(id_membresia)
         print(f"Cliente {cliente_encontrado.get_nombre_c()} ahora tiene la membresía con ID {cliente_encontrado.get_id_membresia()}.")
     
-    def buscar_cliente(self):
+    def buscar_cliente(self, op=None):
         
         # Buqueda por ID, Nombre o Documento
         
@@ -206,37 +244,38 @@ class Gimnasio:
         print("\n"*3)
         
         # Acciones con el cliente encontrado
-        
-        print("\n=== ¿Que desea hacer? ===")
-        print(30*"=")
-        print("1. Adquirir Membresía")
-        print("2. Pagar Membresía")
-        print("3. Consultar Membresía")
-        print("4. Registrar Entrada")
-        print("6. Pago Ingreso Único")
-        print("7. Solicitar Sesión Especial")
-        print("8. Cancelar Sesión Especial")
-        print("Enter para salir")
-        opcion_cliente = input("Seleccione una opción : ")
-        print(30*"=")
-        
-        match opcion_cliente:
-            case "1":
-                self.crear_membresia(cliente_encontrado)
-            case "2":
-                self.pagar_membresia(cliente_encontrado)
-            case "3":
-                self.consultar_membresia(cliente_encontrado)
-            case "4":
-                cliente_encontrado.registrar_entrada()
-            case "6":
-                cliente_encontrado.pago_ingreso_unico()
-            case "7":
-                self.agendar_sesion(cliente_encontrado)
-            case "8":
-                self.cancelar_sesion(cliente_encontrado)
-            case "":
-                print("Saliendo del menú de cliente.")
+        while True:
+            print("\n=== ¿Que desea hacer? ===")
+            print(30*"=")
+            print("1. Adquirir Membresía")
+            print("2. Pagar Membresía")
+            print("3. Consultar Membresía")
+            print("4. Registrar Entrada")
+            print("6. Pago Ingreso Único")
+            print("7. Solicitar Sesión Especial")
+            print("8. Cancelar Sesión Especial")
+            print("Enter para salir")
+            opcion_cliente = input("Seleccione una opción : ")
+            print(30*"=")
+            
+            match opcion_cliente:
+                case "1":
+                    self.crear_membresia(cliente_encontrado)
+                case "2":
+                    self.pagar_membresia(cliente_encontrado)
+                case "3":
+                    self.consultar_membresia(cliente_encontrado)
+                case "4":
+                    cliente_encontrado.registrar_entrada()
+                case "6":
+                    cliente_encontrado.pago_ingreso_unico()
+                case "7":
+                    self.agendar_sesion(cliente_encontrado)
+                case "8":
+                    self.cancelar_sesion(cliente_encontrado)
+                case "":
+                    print("Saliendo del menú de cliente.")
+                    break
 
     def consultar_membresia(self, cliente_encontrado: Cliente):
         if cliente_encontrado.get_id_membresia() is None:
