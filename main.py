@@ -121,9 +121,11 @@ def App():
         print("3. Registrar Cliente")
         print("4. Buscar Cliente")
         print("5. Exportar Datos a JSON")
+        print("6. Crear Sesión Especial")
         print("Enter para salir")
         opcion = input("Ingrese una opcion : ")
         ut.sp(2)
+        # Validar numeros fuera de rango en todos los match
         match opcion:
             case "1":
                 Gym.visualizar_clientes()
@@ -189,8 +191,11 @@ def App():
                                 while True: # Ciclo para Ingreso correcto del pago
                                     eliminar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
                                     if ut.valid_yes_no(eliminar):
-                                        print(f"Cliente {cliente.get_nombre_c()} eliminado.")
-                                        Gym.eliminar_cliente(cliente)
+                                        if ut.yes_no(eliminar):
+                                            print(f"Cliente {cliente.get_nombre_c()} eliminado.")
+                                            Gym.eliminar_cliente(cliente)
+                                        else:
+                                            print(f"Cliente {cliente.get_nombre_c()} no eliminado.")
                                         break
                             break
                         case "":

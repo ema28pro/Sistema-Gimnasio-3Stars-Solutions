@@ -46,6 +46,7 @@ class Gimnasio:
         self.__entrenadores = []
         self.__historico_sesiones = 0
         self.__sesiones = []
+        self.__sesiones_especiales = ["Boxeo", "Yoga", "Aeróbicos"]
         
     # Métodos accesores y modificadores
     
@@ -171,7 +172,7 @@ class Gimnasio:
         
         return nueva_membresia
     
-    def crear_entrenador(self, nombre: str, especialidad: set, telefono: str = None):
+    def crear_entrenador(self, nombre: str = None, especialidad: str = None, telefono: str = None):
         """
         Registra un nuevo entrenador en el gimnasio.
         
@@ -180,6 +181,26 @@ class Gimnasio:
             especialidad (set): Conjunto de especialidades del entrenador
             telefono (str, optional): Teléfono del entrenador
         """
+        
+        if not nombre or not especialidad:
+            while True:
+                nombre = input("Ingrese el Nombre del Cliente : ")
+                if ut.is_string(nombre, "Nombre"):
+                    break
+            
+            while True:
+                documento = input("Ingrese el Documento del Cliente : ")
+                if ut.is_number(documento, "Documento"):
+                    break
+            
+            while True:
+                telefono = input("Ingrese el numero de telefono del Cliente (Enter para Omitir) : ")
+                if telefono:
+                    if ut.is_number(telefono, "Telefono"):
+                        break
+                else:
+                    break
+        
         id_entrenador = self.__historico_entrenadores + 1
         nuevo_entrenador = Entrenador(id_entrenador, nombre, especialidad, telefono)
         self.__entrenadores.append(nuevo_entrenador)
