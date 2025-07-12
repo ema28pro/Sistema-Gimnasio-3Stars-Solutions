@@ -97,8 +97,12 @@ class Gimnasio:
         
         if not fecha_registro:
             fecha_registro = date.today().strftime("%Y-%m-%d")
-        elif isinstance(fecha_registro, date):
-            fecha_registro = fecha_registro.strftime("%Y-%m-%d")
+        else:
+            if isinstance(fecha_registro, str):
+                fecha_registro = datetime.strptime(fecha_registro, "%Y-%m-%d").date()
+            elif not isinstance(fecha_registro, date):
+                print("Fecha de registro inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
+                return False
         
         # Verificar si el cliente ya está registrado
         for cliente in self.__clientes:
@@ -121,7 +125,7 @@ class Gimnasio:
         return nuevo_cliente
 
     # R3
-    def crear_membresia(self, cliente_encontrado: Cliente, fecha_inicio = None, fecha_fin = None, pago: bool = False):
+    def crear_membresia(self, cliente_encontrado: Cliente, fecha_inicio = None, fecha_fin = None, pago: bool = None):
         
         # Validaciones
         
@@ -132,9 +136,21 @@ class Gimnasio:
         
         if not fecha_inicio:
             fecha_inicio = date.today()
+        else:
+            if isinstance(fecha_inicio, str):
+                fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+            elif not isinstance(fecha_inicio, date):
+                print("Fecha de inicio inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
+                return False
         
         if not fecha_fin:
             fecha_fin = fecha_inicio + timedelta(days=30)
+        else:
+            if isinstance(fecha_fin, str):
+                fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+            elif not isinstance(fecha_fin, date):
+                print("Fecha de fin inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
+                return False
         
         if pago is None:
             while True: # Ciclo para Ingreso correcto del pago
@@ -172,8 +188,6 @@ class Gimnasio:
         self.__historico_entrenadores += 1
         print(f"Entrenador {nombre} registrado con ID: {id_entrenador}")
         return nuevo_entrenador
-    
-    
     
     def crear_sesion_especial(self, id_entrenador: int, fecha: str, maximo_cupos: int = 25):
         """
@@ -332,6 +346,7 @@ class Gimnasio:
             return
         else:    
             print("\n=== Entrenadores Registrados ===")
+            
             for entrenador in self.__entrenadores:
                 entrenador.mostrar_info()
     
@@ -525,7 +540,7 @@ class Gimnasio:
             "estadisticas": {
                 "total_clientes": self.__numero_clientes,
                 "historico_clientes": self.__historico_clientes,
-                "fecha_exportacion": date.today().isoformat()
+                "fecha_exportacion": date.today().strftime("%Y-%m-%d")
             },
             "clientes": []
         }
@@ -540,8 +555,7 @@ class Gimnasio:
                     "nombre": cliente.get_nombre_c(),
                     "documento": cliente.get_documento_c(),
                     "telefono": cliente.get_telefono_c(),
-                    "fecha_registro": cliente.get_fecha_registro_c().isoformat(),
-                    "sesiones_especiales": cliente.get_sesiones_especiales(),
+                    "fecha_registro": cliente.get_fecha_registro_c(),
                     "membresia": None
                 }
                 
@@ -550,8 +564,8 @@ class Gimnasio:
                 if membresia is not None:
                     datos_cliente["membresia"] = {
                         "pago": membresia.get_pago_m(),
-                        "fecha_inicio": membresia.get_fecha_inicio_m().isoformat(),
-                        "fecha_fin": membresia.get_fecha_fin_m().isoformat(),
+                        "fecha_inicio": membresia.get_fecha_inicio_m(),
+                        "fecha_fin": membresia.get_fecha_fin_m(),
                         "dias_restantes": membresia.calcular_dias_restantes()
                     }
                 
@@ -602,26 +616,46 @@ class Gimnasio:
             print(f"✗ Error al cargar el archivo: {str(error)}")
             return None
     
-    def cargar_clientes(self,nombre_archivo):
-        with open(nombre_archivo,"r") as archivo:
-            lineas = archivo.readlines()
-            rows = len(lineas)
-            columns = len(lineas[0].strip().split(";"))
-            print(f"Número de líneas : {rows}")
-            print(f"Número de columnas : {columns}")
-        
-        for i in range(1,rows):
+    def cargar_clientes(self, nombre_archivo):
+        try:
+            with open(nombre_archivo, "r", encoding="utf-8") as archivo:
+                lineas = archivo.readlines()
+                rows = len(lineas)
+                columns = len(lineas[0].strip().split(";"))
+                print(f"Número de líneas : {rows}")
+                print(f"Número de columnas : {columns}")
+        except FileNotFoundError:
+            print(f"✗ Archivo {nombre_archivo} no encontrado.")
+            return False
+        except Exception as e:
+            print(f"✗ Error al leer el archivo: {str(e)}")
+            return False
+
+        for i in range(1, rows):
             linea = lineas[i].strip().split(";")
-            
-            # Crear cliente primero
-            cliente_creado = self.crear_cliente(nombre=linea[0], documento=linea[1], telefono=linea[2], fecha_registro=datetime.strptime(linea[3], "%Y-%m-%d").date())
-            
-            if cliente_creado:
-                # Convertir pago a boolean de forma simple
-                pago_bool = linea[4].lower() == 'true'
-                
-                # Crear membresía (las fechas se pasan como strings y la clase Membresia las convierte)
-                self.crear_membresia(cliente_encontrado=cliente_creado, pago=pago_bool, fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(), fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date())
+            if len(linea) < 7:
+                print(f"✗ Línea {i+1} malformada: {lineas[i]}")
+                continue
+
+            try:
+                cliente_creado = self.crear_cliente(
+                    nombre=linea[0],
+                    documento=linea[1],
+                    telefono=linea[2],
+                    fecha_registro=datetime.strptime(linea[3], "%Y-%m-%d").date()
+                )
+                if cliente_creado:
+                    pago_bool = linea[4].strip().lower() == 'true'
+                    self.crear_membresia(
+                        cliente_encontrado=cliente_creado,
+                        pago=pago_bool,
+                        fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(),
+                        fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date()
+                    )
+            except Exception as e:
+                print(f"✗ Error procesando línea {i+1}: {str(e)}")
+                continue
+        return True
 
 
 

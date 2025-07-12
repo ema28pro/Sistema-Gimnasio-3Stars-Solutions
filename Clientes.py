@@ -14,7 +14,7 @@ class Membresia:
         __fecha_inicio (str): Fecha de inicio de la membresía.
         __fecha_fin (str): Fecha de finalización de la membresía.
     """
-    def __init__(self, fecha_inicio: str, fecha_fin: str, pago: bool = False):
+    def __init__(self, fecha_inicio, fecha_fin, pago: bool = False):
         self.__pago = pago
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin
@@ -25,10 +25,12 @@ class Membresia:
         return self.__pago
     
     def get_fecha_inicio_m(self):
-        return self.__fecha_inicio
+        # Retornar como string
+        return self.__fecha_inicio.strftime("%Y-%m-%d")
     
     def get_fecha_fin_m(self):
-        return self.__fecha_fin
+        # Retornar como string
+        return self.__fecha_fin.strftime("%Y-%m-%d")
     
     def set_pago_m(self, estado: bool):
         self.__pago = estado
@@ -87,13 +89,11 @@ class Cliente:
         return self.__telefono
     
     def get_fecha_registro_c(self):
-        return self.__fecha_registro
+        # Retornar como string para compatibilidad con JSON
+        return self.__fecha_registro.strftime("%Y-%m-%d")
     
     def get_membresia(self):
         return self.__membresia
-    
-    def get_sesiones_especiales(self):
-        return self.__sesiones_especiales
     
     # Getters para acceder a la membresía
     
@@ -120,7 +120,7 @@ class Cliente:
     def set_membresia(self, membresia : Membresia):
         self.__membresia = membresia
     
-    # Metodos
+    # Metodos sin uso
     
     def agregar_sesion(self, id_sesion):
         """
