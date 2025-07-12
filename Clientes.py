@@ -64,14 +64,14 @@ class Cliente:
         - Pensar si es necesario el atributo __sesiones_especiales, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
         - Pensar si guardaremos el nombre completo o solo el nombre.
     """
-    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None, membresia: Membresia = None):
+    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):
         self.__id_cliente = id_cliente
         self.__nombre = nombre
         self.__documento = documento
         self.__telefono = telefono
         self.__fecha_registro = fecha_registro
 
-        self.__membresia = membresia
+        self.__membresia = None  # Inicialmente sin membresía
         # Se elimina la lista de sesiones especiales, ya que de eliminar una sesión especial, se tendrá que eliminar de la lista de cada cliente.
         
     # Métodos de acceso y modificación
@@ -120,7 +120,7 @@ class Cliente:
     def set_membresia(self, membresia : Membresia):
         self.__membresia = membresia
     
-    # Metodos sin uso
+    # Metodos ah eliminar
     
     def agregar_sesion(self, id_sesion):
         """

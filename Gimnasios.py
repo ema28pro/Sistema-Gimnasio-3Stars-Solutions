@@ -61,7 +61,7 @@ class Gimnasio:
     #? ============================== Metodos De Creacion ==============================
 
     # R1
-    def crear_cliente(self, nombre=None, documento=None, telefono=None, fecha_registro=None, id_cliente=None, membresia=None):
+    def crear_cliente(self, nombre=None, documento=None, telefono=None, fecha_registro=None):
         
         if self.__numero_clientes >= self.__maximo_clientes:
             print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
@@ -92,8 +92,7 @@ class Gimnasio:
             if not (ut.is_string(nombre, "Nombre") and ut.is_number(documento, "Documento")):
                 return False
         
-        if not id_cliente:
-            id_cliente = self.__historico_clientes + 1
+        id_cliente = self.__historico_clientes + 1
         
         if not fecha_registro:
             fecha_registro = date.today().strftime("%Y-%m-%d")
@@ -110,7 +109,7 @@ class Gimnasio:
                 print(f"\n!!! El cliente con documento {documento} ya está registrado.")
                 return False
         
-        nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono, membresia)
+        nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono)
         # Forma 1, buscar un espacio vacío en el array de clientes
         for i in range(self.__maximo_clientes):
             if self.__clientes[i] is None:
@@ -166,12 +165,11 @@ class Gimnasio:
         # Crear la membresía
         nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago)
         cliente_encontrado.set_membresia(nueva_membresia)
-        
         print(f"Membresía creada para {cliente_encontrado.get_nombre_c()} con ID {cliente_encontrado.get_id_cliente()}")
         print(f"Vigencia: {fecha_inicio} hasta {fecha_fin}")
         print(f"Estado: {'Pagada' if pago else 'Pendiente de pago'}")
         
-        return
+        return nueva_membresia
     
     def crear_entrenador(self, nombre: str, especialidad: set, telefono: str = None):
         """
@@ -638,22 +636,25 @@ class Gimnasio:
                 continue
 
             try:
+                # Crear el cliente primero
                 cliente_creado = self.crear_cliente(
                     nombre=linea[0],
                     documento=linea[1],
                     telefono=linea[2],
                     fecha_registro=datetime.strptime(linea[3], "%Y-%m-%d").date()
                 )
+                
                 if cliente_creado:
                     pago_bool = linea[4].strip().lower() == 'true'
                     self.crear_membresia(
                         cliente_encontrado=cliente_creado,
-                        pago=pago_bool,
                         fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(),
-                        fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date()
+                        fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date(),
+                        pago=pago_bool
                     )
-            except Exception as e:
-                print(f"✗ Error procesando línea {i+1}: {str(e)}")
+                
+            except Exception as error:
+                print(f"✗ Error procesando línea {i+1}: {str(error)}")
                 continue
         return True
 
