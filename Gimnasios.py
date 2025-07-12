@@ -1,4 +1,5 @@
 import numpy as np
+import json
 from datetime import date, timedelta
 import Utils as ut
 from Utils import PRECIO_MEMBRESIA, PRECIO_ENTRADA_UNICA
@@ -502,4 +503,108 @@ class Gimnasio:
         # reporte de entradas diarias
         pass
     
+    def exportar_datos_json(self, nombre_archivo: str = None):
+        """
+        Guarda todos los datos de clientes y sus membresías en un archivo JSON.
+        
+        Args:
+            nombre_archivo (str, optional): Nombre del archivo JSON. Si no se especica se genera automáticamente con la fecha actual.
+        
+        Returns:
+            str: Ruta del archivo creado
+        """
+        # Generar nombre de archivo si no se proporciona
+        if nombre_archivo is None:
+            fecha_actual = date.today().strftime("%Y%m%d")
+            nombre_archivo = f"datos_gimnasio_{fecha_actual}.json"
+        
+        # Crear estructura de datos para exportar
+        datos_exportar = {
+            "gimnasio": {
+                "nombre": self.__nombre,
+                "direccion": self.__direccion,
+                "telefono": self.__telefono,
+                "correo": self.__correo_electronico,
+                "efectivo": self.__efectivo
+            },
+            "estadisticas": {
+                "total_clientes": self.__numero_clientes,
+                "historico_clientes": self.__historico_clientes,
+                "fecha_exportacion": date.today().isoformat()
+            },
+            "clientes": []
+        }
+        
+        # Procesar cada cliente registrado
+        for i in range(self.__numero_clientes):
+            cliente = self.__clientes[i]
+            if cliente is not None:
+                # Datos básicos del cliente
+                datos_cliente = {
+                    "id_cliente": cliente.get_id_cliente(),
+                    "nombre": cliente.get_nombre_c(),
+                    "documento": cliente.get_documento_c(),
+                    "telefono": cliente.get_telefono_c(),
+                    "fecha_registro": cliente.get_fecha_registro_c().isoformat(),
+                    "sesiones_especiales": cliente.get_sesiones_especiales(),
+                    "membresia": None
+                }
+                
+                # Agregar datos de membresía si existe
+                membresia = cliente.get_membresia()
+                if membresia is not None:
+                    datos_cliente["membresia"] = {
+                        "pago": membresia.get_pago_m(),
+                        "fecha_inicio": membresia.get_fecha_inicio_m().isoformat(),
+                        "fecha_fin": membresia.get_fecha_fin_m().isoformat(),
+                        "dias_restantes": membresia.calcular_dias_restantes()
+                    }
+                
+                datos_exportar["clientes"].append(datos_cliente)
+        
+        # Guardar archivo JSON
+        try:
+            with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
+                json.dump(datos_exportar, archivo, indent=4, ensure_ascii=False)
+            
+            print(f"✓ Datos exportados exitosamente a: {nombre_archivo}")
+            print(f"✓ Total de clientes exportados: {len(datos_exportar['clientes'])}")
+            
+            return nombre_archivo
+            
+        except Exception as e:
+            print(f"✗ Error al guardar el archivo JSON: {str(e)}")
+            return None
+    
+    def cargar_datos_json(self, nombre_archivo: str):
+        """
+        Carga datos de clientes desde un archivo JSON (método complementario).
+        
+        Args:
+            nombre_archivo (str): Nombre del archivo JSON a cargar
+        
+        Returns:
+            bool: True si la carga fue exitosa, False en caso contrario
+        """
+        try:
+            with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
+                datos = json.load(archivo)
+            
+            print(f"✓ Archivo {nombre_archivo} cargado exitosamente")
+            print(f"✓ Datos del gimnasio: {datos['gimnasio']['nombre']}")
+            print(f"✓ Total de clientes en archivo: {len(datos['clientes'])}")
+            print(f"✓ Fecha de exportación: {datos['estadisticas']['fecha_exportacion']}")
+            
+            return datos
+            
+        except FileNotFoundError:
+            print(f"✗ Archivo {nombre_archivo} no encontrado")
+            return None
+        except json.JSONDecodeError:
+            print(f"✗ Error al leer el archivo JSON: formato inválido")
+            return None
+        except Exception as e:
+            print(f"✗ Error al cargar el archivo: {str(e)}")
+            return None
+
 

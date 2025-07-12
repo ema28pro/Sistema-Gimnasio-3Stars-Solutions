@@ -16,6 +16,14 @@ def menu():
     
     return opcion
 
+def exportar_datos_rapido(gimnasio):
+    """
+    Función auxiliar para exportar datos rápidamente sin pasar por el menú
+    """
+    print("\n=== Exportación Rápida de Datos ===")
+    archivo = gimnasio.exportar_datos_json()
+    return archivo
+
 def App():
     Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
     Gym.ver_inf()
@@ -25,7 +33,7 @@ def App():
     # Registro de 20 clientes diferentes
     print("=== Registrando clientes ===")
     
-    Gym.crear_cliente("Emanuel", "21254", "333333").crear_membresia("2025-07-12", "2025-08-11")
+    Gym.crear_cliente("Emanuel", "21254", "333333")
     Gym.crear_cliente("Sofia", "10234567", "3201234567")
     Gym.crear_cliente("Carlos", "20345678", "3112345678")
     Gym.crear_cliente("Maria", "30456789", "3223456789")
@@ -61,6 +69,7 @@ def App():
         print("2. Ver Membresias")
         print("3. Registrar Cliente")
         print("4. Buscar Cliente")
+        print("5. Exportar Datos a JSON")
         print("Enter para salir")
         opcion = input("Ingrese una opcion : ")
         ut.sp(2)
@@ -116,7 +125,7 @@ def App():
                                     print("Saliendo del menú de membresía.")
                                     
                         case "3":
-                            cliente.pago_ingreso_unico()
+                            Gym.pago_ingreso_unico(cliente)
                         case "4":
                             Gym.agendar_sesion(cliente)
                         case "5":
@@ -130,8 +139,23 @@ def App():
                         case "":
                             print("Saliendo del menú de cliente.")
                             break
+            case "5":
+                print("\n=== Exportar Datos a JSON ===")
+                nombre_archivo = input("Nombre del archivo (opcional, presione Enter para generar automáticamente): ").strip()
+                if nombre_archivo == "":
+                    nombre_archivo = None
+                
+                archivo_creado = Gym.exportar_datos_json(nombre_archivo)
+                if archivo_creado:
+                    print(f"Los datos se han guardado en: {archivo_creado}")
+                input("\nPresione Enter para continuar...")
             case "":
                 break
+    
+    # Ejemplo de exportación automática al finalizar (opcional)
+    
     # print(Gym.get())
 
-App()
+# App()
+
+exportar_datos_rapido(Gym)
