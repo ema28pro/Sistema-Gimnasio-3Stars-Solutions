@@ -6,30 +6,49 @@ classDiagram
 
 class Gimnasio {
   <<Entidad Principal>>
-  +String nombre
-  +String direccion
-  +int telefono
-  +String correo_electronico
-  +float efectivo
-  +int numero_clientes
-  +int historico_clientes
-  +List~Cliente~ clientes
-  +List~Membresia~ membresias
-  +List~Entrenador~ entrenadores
-  +List~SesionEspecial~ sesiones
-  --
-  +ver_inf()
-  +registrar_cliente()
-  +buscar_cliente()
-  +consultar_membresia()
-  +registrar_entrada()
-  +visualizar_membresias()
-  +analisis_financiero()
-  +reporte_diario()
-  +informe_entrada()
+  - String nombre
+  - String direccion
+  - Strinf telefono
+  - String correo_electronico
+  - float efectivo
+  - int numero_clientes
+  - int historica_clientes
+  - List~Cliente~ clientes
+  - int numero_membresias
+  - int historico_membresias
+  - List~Membresia~ membresias
+  - int historico_entrenadores
+  - List~Entrenador~ entrenadores
+  - int historico_sesiones
+  - List~SesionEspecial~ sesiones
+  
+  + get()
+  + ver_inf()
+  + crear_cliente()
+  + registrar_cliente()
+  + crear_membresia()
+  + buscar_cliente()
+  + consultar_membresia()
+  + pagar_membresia()
 
-  +crear_membresia()
+  + registrar_entrada()
+  + pago_ingreso_unico()
 
+  + visualizar_clientes()
+  + visualizar_membresias()
+
+  + ingreso_caja()
+
+  + analisis_financiero()
+  + reporte_diario()
+  + informe_entrada()
+
+  + registrar_entrenador()
+  + crear_sesion_especial()
+  + agendar_sesion()
+  + cancelar_sesion()
+  + mostrar_sesiones_disponibles()
+  + mostrar_entrenadores()
 }
 
 %% =========================
@@ -38,27 +57,32 @@ class Gimnasio {
 
 class Cliente {
   <<Usuario>>
-  +int id_cliente
-  +String nombre_completo
-  +int documento_identidad
-  +int numero_telefono
-  +String fecha_registro
-  +Membresia id_membresía
-  +SesionEspecial sesion_especial
-  --
-  +pago_ingreso_unico()
-  +pagar_membresia()
-  +solicitar_sesion()
+  - int id_cliente
+  - String nombre
+  - String documento
+  - String numero_telefono
+  - String fecha_registro
+
+  - String id_membresía %% Pensar en guardar el objeto membresia
+  - List~id_sesion_especial~ Sesiones_especiales
+  
+  %% +pago_ingreso_unico()
+  %% +pagar_membresia()
+  %% +solicitar_sesion()
+
+  + agregar_sesion()
+  + remover_sesion()
+  + mostrar_sesiones_inscritas()
 }
 
 class Membresia {
   <<Plan>>
-  +int id_membresia
-  +String estado
-  +String fecha_inicio
-  +String fecha_fin
-  --
-  +calcular_dias_restantes()
+  - int id_membresia
+  - Boolean pago
+  - String fecha_inicio
+  - String fecha_fin
+  
+  + calcular_dias_restantes()
 }
 
 %% =========================
@@ -67,19 +91,22 @@ class Membresia {
 
 class Entrenador {
   <<Personal>>
-  +int id_entrenador
-  +String nombre
-  +int telefono
-  +String especialidad
+  - int id_entrenador
+  - String nombre
+  - String telefono
+  - String especialidad
+
+  + mostrar_info()
 }
 
 class SesionEspecial {
   <<Evento>>
-  +Entrenador id_entrenador
-  +int cupos
-  +String fecha
-  +int maximo_cupos
-  +List~Cliente~ inscritos
+  - id_sesion
+  - Entrenador id_entrenador
+  - int cupos
+  - String fecha
+  - int maximo_cupos
+  - List~is_cliente~ inscritos
 }
 
 %% =========================

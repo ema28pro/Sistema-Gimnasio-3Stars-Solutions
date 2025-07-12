@@ -9,9 +9,9 @@ class Cliente:
     Clase que representa un cliente del gimnasio, contiene información personal y métodos para gestionar membresías y sesiones especiales.
     
     Atributos:
-        __id_cliente (str): Identificador único del cliente.
+        __id_cliente (int): Identificador único del cliente.
         __nombre (str): Nombre completo del cliente.
-        __documento_identidad (int): Documento de identidad del cliente.
+        __documento (str): Documento de identidad del cliente.
         __telefono (str, optional): Número de teléfono del cliente. Defaults to None.
         __fecha_registro (str): Fecha de registro del cliente en el gimnasio.
         __id_membresia (str, optional): Ideantificador unico de la membresía asociada al cliente. Defaults to None.
@@ -21,7 +21,7 @@ class Cliente:
         - Pensar si es necesario el atributo __sesion_especial, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
         - Pensar si Guardaremos el nombre completo o solo el nombre.
     """
-    def __init__(self, id_cliente: str, nombre: str, documento: str, fecha_registro: str, telefono: str = None):   
+    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):   
         self.__id_cliente = id_cliente
         self.__nombre = nombre
         self.__documento = documento
@@ -112,7 +112,7 @@ class Membresia:
     """
     def __init__(self, id_membresia: str, fecha_inicio: str, fecha_fin: str, pago: bool = False):
         self.__id_membresia = id_membresia
-        self.__id_cliente = 
+        # self.__id_cliente = 
         self.__pago = pago
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin
