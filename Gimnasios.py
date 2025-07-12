@@ -197,7 +197,7 @@ class Gimnasio:
                         print(f"Especialidad no válida. Debe ser una de las siguientes: {self.__sesiones_especiales}")
             
             while True:
-                telefono = input("Ingrese el numero de telefono del Cliente (Enter para Omitir) : ")
+                telefono = input("Ingrese el numero de telefono del Entrenador (Enter para Omitir) : ")
                 if telefono:
                     if ut.is_number(telefono, "Telefono"):
                         break
@@ -221,7 +221,7 @@ class Gimnasio:
         print(f"Entrenador {nombre} especializado en {especialidad} registrado con ID: {id_entrenador}")
         return nuevo_entrenador
     
-    def crear_sesion_especial(self, id_entrenador: int, fecha: str, maximo_cupos: int = 25):
+    def crear_sesion_especial(self, id_entrenador: int, fecha: str=None, maximo_cupos: int = 25):
         """
         Crea una nueva sesión especial.
         
@@ -237,15 +237,26 @@ class Gimnasio:
                 entrenador_encontrado = entrenador
                 break
         
+        if not fecha:
+            while True:
+                fecha = input("Ingrese la fecha de la sesión especial (YYYY-MM-DD): ")
+                try:
+                    fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
+                    break
+                except Exception as error:
+                    print("Fecha inválida. Debe ser en formato 'YYYY-MM-DD'.")
+                    print(f"Error : {str(error)}")
+                    continue
+        
         if not entrenador_encontrado:
             print(f"No se encontró un entrenador con ID {id_entrenador}")
             return None
         
         id_sesion = self.__historico_sesiones + 1
         nueva_sesion = SesionEspecial(id_sesion, id_entrenador, fecha, maximo_cupos)
-        self.__sesiones.append(nueva_sesion)
+        self.__sesiones+=[nueva_sesion]
         self.__historico_sesiones += 1
-        print(f"Sesión especial creada con ID: {id_sesion} para el {fecha}")
+        print(f"Sesión especial creada con ID: {id_sesion} para la fecha {fecha}")
         return nueva_sesion
     
     
@@ -340,6 +351,31 @@ class Gimnasio:
         return membresia_encontrada
         
     
+    def buscar_entrenador(self, id_entrenador: int = None):
+        """
+        Busca un entrenador por su ID.
+        
+        Args:
+            id_entrenador (int): ID del entrenador a buscar
+        
+        Returns:
+            Entrenador: Objeto Entrenador si se encuentra, None si no se encuentra
+        """
+        
+        if id_entrenador is None:
+            while True:
+                id_entrenador = input("Ingrese el ID del entrenador: ")
+                if ut.is_number(id_entrenador, "ID"):
+                    id_entrenador = int(id_entrenador)
+                    break
+        
+        for entrenador in self.__entrenadores:
+            if entrenador.get_id_entrenador() == id_entrenador:
+                print(f"Entrenador : ID: {entrenador.get_id_entrenador()}, Nombre: {entrenador.get_nombre_e()}, Especialidad: {entrenador.get_especialidad_e()}")
+                return entrenador
+        print(f"No se encontró un entrenador con ID {id_entrenador}.")
+        return None
+    
     def visualizar_clientes(self):      
         print("\n=== Clientes Registrados ===")
         total_clientes = 0
@@ -364,16 +400,17 @@ class Gimnasio:
     
     def mostrar_sesiones(self):
         """Muestra todas las sesiones especiales disponibles"""
-        if not self.__sesiones:
+        if not self.__sesiones or len(self.__sesiones) == 0:
             print("No hay sesiones especiales programadas.")
             return
         else:
             print("\n=== Todas las Sesiones Especiales ===")
             for sesion in self.__sesiones:
-                sesion.mostrar_info()
+                entrenador = sesion.mostrar_info()
+                self.buscar_entrenador(entrenador)
     
     def mostrar_entrenadores(self):
-        if not self.__entrenadores:
+        if not self.__entrenadores or len(self.__entrenadores) == 0:
             print("No hay entrenadores registrados.")
             return
         else:    
@@ -504,7 +541,7 @@ class Gimnasio:
                     
                     print(f"{len(sesiones_encontradas)}. Sesión ID: {sesion.get_id_sesion()}")
                     print(f"   Fecha: {sesion.get_fecha()}")
-                    print(f"   Entrenador: {entrenador.get_nombre() if entrenador else 'No encontrado'}")
+                    print(f"   Entrenador: {entrenador.get_nombre_e() if entrenador else 'No encontrado'}")
                     print()
                     break
         
@@ -530,6 +567,32 @@ class Gimnasio:
         except ValueError:
             print("Por favor ingrese un número válido.")
     
+
+    #! ============================== Metodos de Eliminacion ==============================
+    
+    def eliminar_entrenador(self, id_entrenador: int=None):
+        if not self.__entrenadores:
+            print("No hay entrenadores registrados para eliminar.")
+            return
+        
+        if id_entrenador is None:
+            while True:
+                id_entrenador = input("Ingrese el ID del entrenador: ")
+                if ut.is_number(id_entrenador, "ID"):
+                    id_entrenador = int(id_entrenador)
+                    break
+        
+        for i in range(len(self.__entrenadores)):
+            if self.__entrenadores[i].get_id_entrenador() == id_entrenador:
+                print(f"Entrenador con ID {id_entrenador} y nombre {self.__entrenadores[i].get_nombre_e()}.")
+                confirmar = input("¿Está seguro de eliminar este entrenador? (si/no): ").strip().lower()
+                if confirmar == 'si':
+                    self.__entrenadores.pop(i)
+                else:
+                    print("Eliminación cancelada.")
+                break
+
+
 
     #! ============================== Metodos Opcionales ==============================
 
@@ -562,7 +625,7 @@ class Gimnasio:
         Returns:
             str: Ruta del archivo creado
         """
-        # Generar nombre de archivo si no se proporciona
+        # Generar nombre de achivo si no se proporciona
         if nombre_archivo is None:
             fecha_actual = date.today().strftime("%Y%m%d")
             nombre_archivo = f"datos_gimnasio_{fecha_actual}.json"

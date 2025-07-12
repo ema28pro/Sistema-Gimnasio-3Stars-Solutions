@@ -9,7 +9,7 @@ from Sesiones import Entrenador, SesionEspecial
 
 def menu():
     print("\n=== Menú del Gimnasio ===")
-    print("Gestionar CLientes")
+    print("Gestionar Clientes")
     print("Gestionar Sesiones Especiales")
     
     opcion = input("Seleccione una opción: ")
@@ -121,8 +121,6 @@ def App():
         print("3. Registrar Cliente")
         print("4. Buscar Cliente")
         print("5. Exportar Datos a JSON")
-        print("6. Crear Entrenador")
-        print("7. Ver Entrenadores")
         print("Enter para salir")
         opcion = input("Ingrese una opcion : ")
         ut.sp(2)
@@ -188,16 +186,18 @@ def App():
                         case "6":
                             cliente.registrar_entrada()
                         case "7":
-                            if eliminar is None:
-                                while True: # Ciclo para Ingreso correcto del pago
-                                    eliminar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
-                                    if ut.valid_yes_no(eliminar):
-                                        if ut.yes_no(eliminar):
-                                            print(f"Cliente {cliente.get_nombre_c()} eliminado.")
-                                            Gym.eliminar_cliente(cliente)
-                                        else:
-                                            print(f"Cliente {cliente.get_nombre_c()} no eliminado.")
-                                        break
+                            eliminar = None
+                            while eliminar is None:
+                                eliminar = input("¿Esta seguro de eliminar el Cliente? (si/no)\nR// ")
+                                if ut.valid_yes_no(eliminar):
+                                    if ut.yes_no(eliminar):
+                                        print(f"Cliente {cliente.get_nombre_c()} eliminando.")
+                                        Gym.eliminar_cliente(cliente)
+                                    else:
+                                        print(f"Cliente {cliente.get_nombre_c()} no eliminado.")
+                                    break
+                                else:
+                                    eliminar = None
                             break
                         case "":
                             print("Saliendo del menú de cliente.")
@@ -212,12 +212,6 @@ def App():
                 if archivo_creado:
                     print(f"Los datos se han guardado en: {archivo_creado}")
                 input("\nPresione Enter para continuar...")
-            case "6":
-                Gym.crear_entrenador()
-                input("\nPresione Enter para continuar...")
-            case "7":
-                Gym.mostrar_entrenadores()
-                input("\nPresione Enter para continuar...")
             case "":
                 break
     
@@ -226,7 +220,48 @@ def App():
     
     # print(Gym.get())
 
+def menu_eventos():
+    while True:
+        print("\n=== Menú de Eventos ===")
+        print("1. Crear Entrenador")
+        print("2. Ver Entrenadores")
+        print("3. Buscar Entrenador")
+        print("4. Ver Sesiones Especiales")
+        print("Enter para salir")
+        menu = input("Seleccione una opción: ")
+        
+        match menu:
+            case "1":
+                Gym.crear_entrenador()
+                input("\nPresione Enter para continuar...")
+            case "2":
+                Gym.mostrar_entrenadores()
+                input("\nPresione Enter para continuar...")
+            case "3":
+                entrenador = Gym.buscar_entrenador()
+                print("====== ¿Que desea hacer? =====")
+                print(30*"=")
+                print("1. Crear Sesion")
+                print("2. Eliminar Entrenador")
+                print("Enter para salir")
+                opcion_entrenador = input("Seleccione una opción : ")
+                match opcion_entrenador:
+                    case "1":
+                        Gym.crear_sesion_especial(entrenador.get_id_entrenador())
+                    case "2":
+                        Gym.eliminar_entrenador(entrenador.get_id_entrenador())
+                    case "":
+                        print("Saliendo del menú de entrenador.")
+                        break
+            case "4":
+                entrenador = Gym.mostrar_sesiones()
+                input("\nPresione Enter para continuar...")
+            case "":
+                print("Saliendo del menú de eventos.")
+                break
+
 if __name__ == "__main__":
     Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
     Gym.ver_inf()
-    App()
+    # App()
+    menu_eventos()

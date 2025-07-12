@@ -23,13 +23,13 @@ class Entrenador:
     def get_id_entrenador(self):
         return self.__id_entrenador
     
-    def get_nombre(self):
+    def get_nombre_e(self):
         return self.__nombre
     
-    def get_telefono(self):
+    def get_telefono_e(self):
         return self.__telefono
     
-    def get_especialidad(self):
+    def get_especialidad_e(self):
         return self.__especialidad
     
     # Métodos para mostrar información
@@ -65,16 +65,16 @@ class SesionEspecial:
     def get_id_entrenador(self):
         return self.__id_entrenador
     
-    def get_fecha(self):
+    def get_fecha_se(self):
         return self.__fecha
     
-    def get_cupos(self):
+    def get_cupos_se(self):
         return self.__cupos
     
-    def get_maximo_cupos(self):
+    def get_maximo_cupos_se(self):
         return self.__maximo_cupos
     
-    def get_inscritos(self):
+    def get_inscritos_se(self):
         return self.__inscritos
     
     def get_cupos_disponibles(self):
@@ -132,7 +132,7 @@ class SesionEspecial:
         print(f"El cliente {cliente.get_nombre_c()} no está inscrito en esta sesión.")
         return False
     
-    def mostrar_info_se(self):
+    def mostrar_info(self):
         """Muestra información completa de la sesión"""
         print(f"\n=== Sesión Especial ID: {self.__id_sesion} ===")
         print(f"Entrenador ID: {self.__id_entrenador}")
@@ -148,3 +148,4 @@ class SesionEspecial:
         else:
             print("No hay clientes inscritos.")
         print("="*40)
+        return self.__id_entrenador
