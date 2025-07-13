@@ -6,7 +6,7 @@ from Utils import PRECIO_MEMBRESIA, PRECIO_ENTRADA_UNICA
 
 from Clientes import Cliente, Membresia
 from Sesiones import Entrenador, SesionEspecial
-import os
+
 
 class Gimnasio:
     """_summary_
@@ -641,7 +641,7 @@ class Gimnasio:
                     confirmacion = input("¿Estas seguro de eliminar el entrenador? (si/no): ")
                     if ut.valid_yes_no(confirmacion):
                         break
-                if ut.yes_no(confirmacion)
+                if ut.yes_no(confirmacion):
                     print(f"Eliminando sesión especial del {self.__sesiones[i].get_fecha()}...")
                     
                     # Eliminamos la referencia del entrenador de la sesión

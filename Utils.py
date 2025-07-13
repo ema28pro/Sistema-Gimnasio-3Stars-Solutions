@@ -62,6 +62,8 @@ def is_email(email: str):
     else:
         return True
 
+# estas funciones se pueden arreglar si se llama una sola funcion que pregunte y retorne un booleano
+
 def valid_yes_no(respuesta: str):
     # Validacion
     
