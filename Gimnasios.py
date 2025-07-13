@@ -215,7 +215,7 @@ class Gimnasio:
         
         
         id_entrenador = self.__historico_entrenadores + 1
-        nuevo_entrenador = Entrenador(id_entrenador, nombre, especialidad, telefono)
+        nuevo_entrenador = Entrenador(id_entrenador, nombre.lower(), especialidad, telefono)
         self.__entrenadores+=[nuevo_entrenador]
         self.__historico_entrenadores += 1
         print(f"Entrenador {nombre} especializado en {especialidad} registrado con ID: {id_entrenador}")
@@ -279,6 +279,9 @@ class Gimnasio:
         print("Enter para salir")
         opcion_busqueda = input("Seleccione una opción : ")
         print(30*"=")
+        if opcion_busqueda not in ["1", "2", "3", ""]:
+            print("Saliendo del menú de búsqueda...")
+            return None
         
         cliente_encontrado = None # Variable para almacenar el cliente encontrado o None si no se encuentra
         
@@ -323,7 +326,7 @@ class Gimnasio:
                     print(f"No se encontró un cliente con documento {documento}.")
                     return
             case "":
-                print("Saliendo del menú de búsqueda.")
+                print("Saliendo del menú de búsqueda...")
                 
         if cliente_encontrado is None:
             print("No se encontró ningún cliente.")
@@ -428,16 +431,22 @@ class Gimnasio:
     
     #? ============================== Metodos de Modificacion ==============================
 
-    def ingreso_caja(self, efectivo: float): #pendieten pedir el tipo para el registro en persitencia
+    def ingreso_caja(self, efectivo: float, motivo:str=None): #pendieten pedir el tipo para el registro en persitencia
         """_summary_
             Modifica el efectivo del gimnasio.
         """
+        # Registrar el ingreso en formato: fecha;hora;tipo;efectivo
+        fecha = datetime.now().strftime('%Y-%m-%d')
+        hora = datetime.now().strftime('%H:%M:%S')
+        tipo = motivo if motivo else "Ingreso"
+        registro = f"{fecha};{hora};{tipo};{float(efectivo):,}\n"
+        
         print(f"Efectivo actual: ${self.__efectivo:,} + ${float(efectivo):,}")
         self.__efectivo += float(efectivo)
         print(f"Efectivo actualizado a: ${self.__efectivo:,}")
         
-        # registro = f"{tipo} - Ingreso: ${float(efectivo):,}, Fecha: {date.today().strftime('%Y-%m-%d')}\n"
-        
+        with open("Caja.txt", "a") as caja_file:
+            caja_file.write(registro)
         
 
     
@@ -746,7 +755,16 @@ class Gimnasio:
             print(f"✗ Error al cargar el archivo: {str(error)}")
             return None
     
-    def cargar_clientes(self, nombre_archivo):
+    def cargar_clientes(self, nombre_archivo=None):
+        
+        if nombre_archivo is None:
+            nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
+        if nombre_archivo == 0 or nombre_archivo == "0" or nombre_archivo == "":
+            print("Operacion cancelada.")
+            return False
+        if nombre_archivo == "1" or nombre_archivo == 1:
+            nombre_archivo = "clientes.txt"
+        
         try:
             with open(nombre_archivo, "r") as archivo:
                 lineas = archivo.readlines()

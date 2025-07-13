@@ -90,37 +90,39 @@ class Cliente:
     
     def get_fecha_registro_c(self):
         # Retornar como string para compatibilidad con JSON
-        return self.__fecha_registro.strftime("%Y-%m-%d")
+        if isinstance(self.__fecha_registro, str):
+            return self.__fecha_registro
+        else:
+            return self.__fecha_registro.strftime("%Y-%m-%d")
     
     def get_membresia(self):
         return self.__membresia
-    
-    # Getters para acceder a la membresía
-    
-    # def get_membresia_pago(self):
-    #     if self.__membresia:
-    #         return self.__membresia.get_pago()
-    #     return False
-    
-    # def get_membresia_fecha_inicio(self):
-    #     if self.__membresia:
-    #         return self.__membresia.get_fecha_inicio()
-    #     return None
-    
-    # def get_membresia_fecha_fin(self):
-    #     if self.__membresia:
-    #         return self.__membresia.get_fecha_fin()
-    #     return None
-    
-    # def get_membresia_dias_restantes(self):
-    #     if self.__membresia:
-    #         return self.__membresia.calcular_dias_restantes()
-    #     return None
     
     def set_membresia(self, membresia : Membresia):
         self.__membresia = membresia
     
     # Métodos
+    
+    def info_cliente(self):
+        """Muestra información del cliente"""
+        print(f"\n=== Información del Cliente ===")
+        print(f"ID: {self.__id_cliente}")
+        print(f"Nombre: {self.__nombre}")
+        print(f"Documento: {self.__documento}")
+        print(f"Teléfono: {self.__telefono if self.__telefono else 'No proporcionado'}")
+        
+        # Manejar tanto objetos date como strings para la fecha
+        if isinstance(self.__fecha_registro, str):
+            print(f"Fecha de Registro: {self.__fecha_registro}")
+        else:
+            print(f"Fecha de Registro: {self.__fecha_registro.strftime('%Y-%m-%d')}")
+            
+        if self.__membresia:
+            print("Membresía Activa:")
+            self.info_membresia()
+        else:
+            print("No tiene membresía activa.")
+        print("="*40)
     
     def info_membresia(self):
         """Muestra información de la membresía del cliente"""

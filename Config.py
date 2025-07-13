@@ -1,3 +1,5 @@
+from Utils import PRECIO_MEMBRESIA, PRECIO_ENTRADA_UNICA
+
 # ===== CONFIGURACIÓN DEL SISTEMA =====
 """
 Opcional?
@@ -136,4 +138,4 @@ def gestionar_precios(self):
         case "3":
             ut.mostrar_precios()
         case "":
-            print("Saliendo de gestión de precios.")
+            print("Saliendo de gestión de precios...")

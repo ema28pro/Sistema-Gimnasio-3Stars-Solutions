@@ -263,7 +263,7 @@
             "id_cliente": 20,
             "nombre": "fernanda",
             "documento": "11012345",
-            "telefono": "3189012346",
+            "telefono": null,
             "fecha_registro": "2025-07-10",
             "membresia": {
                 "pago": true,
