@@ -6,6 +6,7 @@ from Utils import PRECIO_MEMBRESIA, PRECIO_ENTRADA_UNICA
 
 from Clientes import Cliente, Membresia
 from Sesiones import Entrenador, SesionEspecial
+import os
 
 class Gimnasio:
     """_summary_
@@ -445,7 +446,7 @@ class Gimnasio:
         self.__efectivo += float(efectivo)
         print(f"Efectivo actualizado a: ${self.__efectivo:,}")
         
-        with open("Caja.txt", "a") as caja_file:
+        with open("registros/Caja.txt", "a") as caja_file:
             caja_file.write(registro)
         
 
@@ -666,6 +667,7 @@ class Gimnasio:
         if nombre_archivo is None:
             fecha_actual = date.today().strftime("%Y%m%d")
             nombre_archivo = f"datos_gimnasio_{fecha_actual}.json"
+        nombre_archivo = f"registros/{nombre_archivo}"
         
         # Crear estructura de datos para exportar
         datos_exportar = {
@@ -734,6 +736,9 @@ class Gimnasio:
         Returns:
             bool: True si la carga fue exitosa, False en caso contrario
         """
+        
+        nombre_archivo = f"registros/{nombre_archivo}"
+        
         try:
             with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
                 datos = json.load(archivo)
@@ -756,7 +761,12 @@ class Gimnasio:
             return None
     
     def cargar_clientes(self, nombre_archivo=None):
-        
+        if nombre_archivo is None:
+            print("Archivos disponibles en la carpeta 'registros':")
+            archivos = [f for f in os.listdir("registros") if f.endswith(".txt")]
+            for idx, archivo in enumerate(archivos, 1):
+                print(f"{idx}. {archivo}")
+            nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
         if nombre_archivo is None:
             nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
         if nombre_archivo == 0 or nombre_archivo == "0" or nombre_archivo == "":
@@ -765,30 +775,68 @@ class Gimnasio:
         if nombre_archivo == "1" or nombre_archivo == 1:
             nombre_archivo = "clientes.txt"
         
+        nombre_archivo = f"registros/{nombre_archivo}"
+        
+        print("\n")
+        print("="*40)
+        print(f"📂 Cargando datos desde el archivo: {nombre_archivo}\n")
+        
         try:
             with open(nombre_archivo, "r") as archivo:
                 lineas = archivo.readlines()
                 rows = len(lineas)
-                columns = len(lineas[0].strip().split(";"))
+                
+                if rows == 0:
+                    print("✗ El archivo está vacío.")
+                    return False
+                
+                # Validar formato del archivo (debe tener encabezados)
+                primera_linea = lineas[0].strip().split(";")
+                columns = len(primera_linea)
                 print(f"Número de líneas : {rows}")
                 print(f"Número de columnas : {columns}")
+                print(f"Encabezados detectados: {primera_linea}")
+                
+                # Validar que tenga el formato esperado para clientes (7 columnas)
+                if columns != 7:
+                    print(f"⚠️  ADVERTENCIA: Este archivo tiene {columns} columnas.")
+                    print("""📋 Formato esperado para clientes : 
+    Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin""")
+                    print("📋 Formato detectado:", ";".join(primera_linea))
+                
+                # Verificar si hay líneas de datos (más de solo encabezados)
+                if rows <= 1:
+                    print("✗ El archivo solo contiene encabezados, no hay datos para cargar.")
+                    return False
+                    
         except FileNotFoundError:
             print(f"✗ Archivo {nombre_archivo} no encontrado.")
             return False
-        except Exception as e:
-            print(f"✗ Error al leer el archivo: {str(e)}")
+        except Exception as error:
+            print(f"✗ Error al leer el archivo: {str(error)}")
             return False
 
-        lineas_error=[]
+        # Contadores para estadísticas
+        lineas_error = []
+        clientes_cargados = 0
+        membresias_cargadas = 0
+        lineas_procesadas = 0
+        
+        print(f"\n📥 Iniciando carga de {rows-1} líneas de datos...")
+        
         for i in range(1, rows):
+            lineas_procesadas += 1
             linea = lineas[i].strip().split(";")
+            
+            # Validar que la línea tenga suficientes columnas
             if len(linea) < 7:
-                print(f"✗ Línea {i+1} malformada: {lineas[i]}")
+                print(f"✗ Línea {i+1} malformada (solo {len(linea)} columnas): {lineas[i].strip()}")
+                lineas_error.append(i+1)
                 continue
 
             try:
                 print("="*30)
-                print(f"Procesando línea {i+1}: {linea}")
+                print(f"Procesando línea {i+1}/{rows-1}: {linea}")
                 
                 # Validación para teléfono: si es "0", "None", "none" o vacío, se convierte a None
                 telefono = linea[2]
@@ -804,28 +852,45 @@ class Gimnasio:
                 )
                 
                 if cliente_creado:
+                    clientes_cargados += 1
                     pago_bool = linea[4].strip().lower() == 'true'
-                    self.crear_membresia(
+                    membresia_creada = self.crear_membresia(
                         cliente_encontrado=cliente_creado,
                         fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(),
                         fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date(),
                         pago=pago_bool
                     )
+                    if membresia_creada:
+                        membresias_cargadas += 1
+                        print(f"✓ Cliente y membresía cargados exitosamente.")
+                    else:
+                        print(f"⚠️  Cliente creado pero falló la membresía.")
                 else:
-                    lineas_error+=[i+1]
+                    lineas_error.append(i+1)
                     print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
                     continue
                 
             except Exception as error:
                 print(f"✗ Error procesando línea {i+1}: {str(error)}")
+                lineas_error.append(i+1)
                 continue
         
-        print("="*40)
-        print(f"Lineas con errores : {lineas_error}")
-        return True
+        # Mostrar estadísticas finales
+        print("="*60)
+        print("📊 RESUMEN DE CARGA:")
+        print(f"📥 Líneas procesadas: {lineas_procesadas}")
+        print(f"✅ Clientes cargados exitosamente: {clientes_cargados}")
+        print(f"✅ Membresias cargadas exitosamente: {membresias_cargadas}")
+        print(f"❌ Líneas con errores: {len(lineas_error)}")
+        if lineas_error:
+            print(f"🔍 Líneas con errores: {lineas_error}")
+        print(f"📈 Tasa de éxito: {(membresias_cargadas/lineas_procesadas)*100:.1f}%" if lineas_procesadas > 0 else "0%")
+        print("="*60)
+        
+        return membresias_cargadas > 0  # Retorna True si se cargó al menos una línea
     
     def exportar_clientes(self):
-        nombre_archivo = f"clientes_{date.today().strftime('%Y%m%d')}.txt"
+        nombre_archivo = f"registros/clientes_{date.today().strftime('%Y%m%d')}.txt"
         
         with open(nombre_archivo, "w",) as archivo:
             archivo.write("Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin\n")
