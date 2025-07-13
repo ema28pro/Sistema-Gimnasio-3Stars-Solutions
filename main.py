@@ -156,34 +156,73 @@ def menu_eventos():
         
         match opcion_evento:
             case "1":
-                Gym.crear_entrenador()
+                entrenador = Gym.crear_entrenador()
+                if entrenador:
+                    menu_entrenador(entrenador)
                 input("\nPresione Enter para continuar...")
             case "2":
                 entrenador = Gym.buscar_entrenador()
-                print("====== ¿Que desea hacer? =====")
-                print(30*"=")
-                print("1. Crear Sesion")
-                print("2. Eliminar Entrenador")
-                print("Enter para salir")
-                opcion_entrenador = input("Seleccione una opción : ")
-                match opcion_entrenador:
-                    case "1":
-                        Gym.crear_sesion_especial(entrenador.get_id_entrenador())
-                        input("\nPresione Enter para continuar...")
-                    case "2":
-                        Gym.eliminar_entrenador(entrenador.get_id_entrenador())
-                        input("\nPresione Enter para continuar...")
-                    case "":
-                        print("Saliendo del menú de entrenador...")
+                if entrenador:
+                    menu_entrenador(entrenador)
             case "3":
-                Gym.mostrar_entrenadores()
+                entrenador = Gym.mostrar_entrenadores()
+                if entrenador:
+                    menu_entrenador(entrenador)
                 input("\nPresione Enter para continuar...")
             case "4":
-                entrenador = Gym.mostrar_sesiones()
-                input("\nPresione Enter para continuar...")
+                sesion = Gym.mostrar_sesiones()
+                if sesion:
+                    print("\n=== ¿Que desea hacer? ===")
+                    print(30*"=")
+                    print("1. Editar Inscritos")
+                    print("2. Cambiar Entrenador")
+                    print("3. Eliminar Sesión Especial")
+                    print("Enter para salir")
+                    opcion_sesion = input("Seleccione una opción : ")
+                    match opcion_sesion:
+                        case "1":
+                            sesion.editar_inscritos()
+                            input("\nPresione Enter para continuar...")
+                        case "2":
+                            print(f"Sesion con entrenador {sesion.mostrar_entrenador()} :")
+                            while True:
+                                confirmacion = input("¿Estas seguro de cambiar el entrenador? (si/no): ")
+                                if ut.valid_yes_no(confirmacion):
+                                    break
+                            confirmacion = ut.yes_no(confirmacion)
+                            if confirmacion:
+                                entrenador = Gym.mostrar_entrenadores()
+                                sesion.set_entrenador(entrenador)
+                            else:
+                                print("Cambio de entrenador cancelado.")
+                            input("\nPresione Enter para continuar...")
+                        case "3":
+                            Gym.eliminar_sesion_especial(sesion.get_id_sesion())
+                            input("\nPresione Enter para continuar...")
+                        case "":
+                            print("Saliendo del menú de sesión especial...")
+                else:
+                    input("\nPresione Enter para continuar...")
             case "":
                 print("Saliendo del menú de eventos...")
                 break
+
+def menu_entrenador(entrenador):
+    print("====== ¿Que desea hacer? =====")
+    print(30*"=")
+    print("1. Crear Sesion")
+    print("2. Eliminar Entrenador")
+    print("Enter para salir")
+    opcion_entrenador = input("Seleccione una opción : ")
+    match opcion_entrenador:
+        case "1":
+            Gym.crear_sesion_especial(entrenador)
+            input("\nPresione Enter para continuar...")
+        case "2":
+            Gym.eliminar_entrenador(entrenador.get_id_entrenador())
+            input("\nPresione Enter para continuar...")
+        case "":
+            print("Saliendo del menú de entrenador...")
 
 def menu_datos():
     while True:
@@ -213,6 +252,7 @@ def menu_datos():
                 break
 
 def exportar_datos_rapido():
+    # Eliminar
     """
     Función auxiliar para exportar datos rápidamente sin pasar por el menú
     """

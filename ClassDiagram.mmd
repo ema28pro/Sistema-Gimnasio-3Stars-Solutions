@@ -8,47 +8,55 @@ class Gimnasio {
   <<Entidad Principal>>
   - String nombre
   - String direccion
-  - Strinf telefono
+  - String telefono
   - String correo_electronico
+
   - float efectivo
+
+  - int maximo_clientes
   - int numero_clientes
   - int historica_clientes
   - List~Cliente~ clientes
-  - int numero_membresias
-  - int historico_membresias
-  - List~Membresia~ membresias
   - int historico_entrenadores
   - List~Entrenador~ entrenadores
   - int historico_sesiones
   - List~SesionEspecial~ sesiones
+  - List~String~ sesiones_especiales
   
   + get()
   + ver_inf()
+
+  %% Metodos de Creacion
   + crear_cliente()
-  + registrar_cliente()
   + crear_membresia()
+  + crear_entrenador()
+  + crear_sesion_especial()
+
+  %% Metodos de Consulta (Busqueda y Visualizacion)
   + buscar_cliente()
   + consultar_membresia()
-  + pagar_membresia()
-
-  + registrar_entrada()
-  + pago_ingreso_unico()
-
+  + buscar_entrenador()
   + visualizar_clientes()
   + visualizar_membresias()
+  + mostrar_entrenadores()
+  + mostrar_sesiones()
 
+  %% Metdosos de Actualizacion (Modificacion)
   + ingreso_caja()
+  + pagar_membresia()
+  + pago_ingreso_unico()
+  + registrar_entrada()
+  + agendar_sesion()
+
+  %% Metodos de Eliminacion
+  %% + eliminar_cliente()
+  %% + eliminar_membresia()
+  + eliminar_entrenador()
+  %% + eliminar_sesion_especial()
 
   + analisis_financiero()
   + reporte_diario()
   + informe_entrada()
-
-  + registrar_entrenador()
-  + crear_sesion_especial()
-  + agendar_sesion()
-  + cancelar_sesion()
-  + mostrar_sesiones_disponibles()
-  + mostrar_entrenadores()
 }
 
 %% =========================

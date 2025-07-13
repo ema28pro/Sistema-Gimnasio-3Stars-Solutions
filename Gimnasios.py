@@ -222,22 +222,15 @@ class Gimnasio:
         print(f"Entrenador {nombre} especializado en {especialidad} registrado con ID: {id_entrenador}")
         return nuevo_entrenador
     
-    def crear_sesion_especial(self, id_entrenador: int, fecha: str=None, maximo_cupos: int = 25):
+    def crear_sesion_especial(self, entrenador, fecha: str=None, maximo_cupos: int = 25):
         """
         Crea una nueva sesión especial.
         
         Args:
-            id_entrenador (int): ID del entrenador que dirigirá la sesión
+            entrenador: Objeto entrenador que dirigirá la sesión
             fecha (str): Fecha de la sesión
             maximo_cupos (int, optional): Número máximo de cupos. Defaults to 25.
         """
-        # Verificar que el entrenador existe
-        entrenador_encontrado = None
-        for entrenador in self.__entrenadores:
-            if entrenador.get_id_entrenador() == id_entrenador:
-                entrenador_encontrado = entrenador
-                break
-        
         if not fecha:
             while True:
                 fecha = input("Ingrese la fecha de la sesión especial (YYYY-MM-DD): ")
@@ -249,15 +242,16 @@ class Gimnasio:
                     print(f"Error : {str(error)}")
                     continue
         
-        if not entrenador_encontrado:
-            print(f"No se encontró un entrenador con ID {id_entrenador}")
+        if not entrenador:
+            print("No se proporcionó un entrenador válido")
             return None
         
         id_sesion = self.__historico_sesiones + 1
-        nueva_sesion = SesionEspecial(id_sesion, id_entrenador, fecha, maximo_cupos)
+        nueva_sesion = SesionEspecial(id_sesion, entrenador, fecha, maximo_cupos)
         self.__sesiones+=[nueva_sesion]
         self.__historico_sesiones += 1
         print(f"Sesión especial creada con ID: {id_sesion} para la fecha {fecha}")
+        print(f"Entrenador asignado: {entrenador.get_nombre()} ({entrenador.get_especialidad()})")
         return nueva_sesion
     
     
@@ -402,31 +396,81 @@ class Gimnasio:
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
     
+    
+    def mostrar_entrenadores(self):
+        if not self.__entrenadores or len(self.__entrenadores) == 0:
+            print("No hay entrenadores registrados.")
+            return
+        
+        print("\n=== Entrenadores Registrados ===")
+        total_entrenadores = 0
+        for entrenador in self.__entrenadores:
+            entrenador.mostrar_info()
+            total_entrenadores += 1
+            
+        print(f"\nNumero de Entrenadores Registrados : {total_entrenadores}")
+        
+        id_entrenador = input("\nSeleccione un Entrenador o Enter para continuar... ")
+        
+        if id_entrenador == "":
+            print("Saliendo del menú de entrenadores...")
+            return
+        else:
+            # Validar que el ID ingresado sea un número
+            if not ut.is_number(id_entrenador, "ID de Entrenador"):
+                print("ID de entrenador inválido. Debe ser un número.")
+                return
+            if int(id_entrenador) < 1:
+                print(f"ID de entrenador inválido.")
+                return
+            
+            id_entrenador = int(id_entrenador)
+            # Buscar el entrenador por ID
+            entrenador = self.buscar_entrenador(id_entrenador)
+            if not entrenador:
+                print(f"No se encontró un entrenador con ID {id_entrenador}.")
+            else:
+                return entrenador
+    
+    
     def mostrar_sesiones(self):
         """Muestra todas las sesiones especiales disponibles"""
+        total_sesiones = 0
         if not self.__sesiones or len(self.__sesiones) == 0:
             print("No hay sesiones especiales programadas.")
             return
         else:
             print("\n=== Todas las Sesiones Especiales ===")
             for sesion in self.__sesiones:
+                total_sesiones += 1
                 entrenador = sesion.mostrar_info()
-                self.buscar_entrenador(entrenador)
-    
-    def mostrar_entrenadores(self):
-        if not self.__entrenadores or len(self.__entrenadores) == 0:
-            print("No hay entrenadores registrados.")
-            return
-        else:    
-            print("\n=== Entrenadores Registrados ===")
-            total_entrenadores = 0
-            for entrenador in self.__entrenadores:
                 entrenador.mostrar_info()
-                total_entrenadores += 1
-                
-            print(f"\nNumero de Entrenadores Registrados : {total_entrenadores}")
-    
-    
+        
+        id_sesion = input("\nSeleccione una Sesion o Enter para continuar... ")
+        
+        if id_sesion == "":
+            print("Saliendo del menú de sesiones...")
+            return
+        else:
+            # Validar que la sesión ingresada sea un número
+            if not ut.is_number(id_sesion, "ID de Sesión"):
+                print("ID de sesión inválido. Debe ser un número.")
+                return
+            if int(id_sesion) < 1:
+                print(f"ID de sesión inválido. Debe estar entre 1 y {total_sesiones}.")
+                return
+            
+            id_sesion = int(id_sesion)
+            # Buscar la sesión por ID
+            for sesion in self.__sesiones:
+                if sesion.get_id_sesion() == id_sesion:
+                    print(f"\n===== Sesion Seleccionada ====")
+                    print(f"Sesión ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, Cupos disponibles: {sesion.get_cupos_disponibles()}")
+                    entrenador = sesion.mostrar_info()
+                    entrenador.mostrar_info()
+                    return sesion
+            print(f"No se encontró una sesión con ID {id_sesion}.")
+            return
     
     
     
@@ -464,6 +508,8 @@ class Gimnasio:
     def pago_ingreso_unico(self, cliente_encontrado: Cliente):
         pass
     
+    def registrar_entrada(self, cliente_encontrado: Cliente):
+        pass
 
     def agendar_sesion(self, cliente, id_sesion: int= None):
         """
@@ -499,12 +545,8 @@ class Gimnasio:
             for sesion in self.__sesiones:
                 if sesion.get_cupos_disponibles() > 0:
                     sesiones_disponibles+=[sesion]
-                    # Buscar el entrenador
-                    entrenador = None
-                    for ent in self.__entrenadores:
-                        if ent.get_id_entrenador() == sesion.get_id_entrenador():
-                            entrenador = ent
-                            break
+                    # Obtener el entrenador directamente del objeto sesión
+                    entrenador = sesion.get_entrenador()
                     
                     print(f"{len(sesiones_disponibles)}. Sesión ID: {sesion.get_id_sesion()}")
                     print(f"   Fecha: {sesion.get_fecha()}")
@@ -544,67 +586,7 @@ class Gimnasio:
                         break
                     else:
                         print("No se pudo inscribir en la sesión. Verifique los datos.")
-                
 
-            
-                
-            
-    def cancelar_sesion(self, cliente):
-        """
-        Permite a un cliente cancelar su inscripción en una sesión especial.
-        
-        Args:
-            cliente: Objeto Cliente que quiere cancelar
-        """
-        sesiones_cliente = cliente.get_sesiones_especiales()
-        
-        if not sesiones_cliente:
-            print(f"El cliente {cliente.get_nombre()} no tiene sesiones inscritas.")
-            return
-        
-        print(f"\n=== Sesiones de {cliente.get_nombre()} ===")
-        sesiones_encontradas = []
-        
-        for id_sesion in sesiones_cliente:
-            # Buscar la sesión en la lista del gimnasio
-            for sesion in self.__sesiones:
-                if sesion.get_id_sesion() == id_sesion:
-                    sesiones_encontradas.append(sesion)
-                    # Buscar el entrenador
-                    entrenador = None
-                    for ent in self.__entrenadores:
-                        if ent.get_id_entrenador() == sesion.get_id_entrenador():
-                            entrenador = ent
-                            break
-                    
-                    print(f"{len(sesiones_encontradas)}. Sesión ID: {sesion.get_id_sesion()}")
-                    print(f"   Fecha: {sesion.get_fecha()}")
-                    print(f"   Entrenador: {entrenador.get_nombre() if entrenador else 'No encontrado'}")
-                    print()
-                    break
-        
-        try:
-            print("Ingrese 0 para cancelar")
-            opcion = int(input("Seleccione una sesión a cancelar: "))
-            
-            if opcion == 0:
-                print("Operación cancelada.")
-                return
-            
-            if 1 <= opcion <= len(sesiones_encontradas):
-                sesion_elegida = sesiones_encontradas[opcion - 1]
-                
-                # Cancelar en la sesión (esto actualiza la sesión)
-                if sesion_elegida.cancelar_inscripcion(cliente):
-                    # También remover la sesión del cliente (esto actualiza el cliente)
-                    cliente.remover_sesion(sesion_elegida.get_id_sesion())
-                    print(f"¡Cancelación exitosa de la sesión del {sesion_elegida.get_fecha()}!")
-            else:
-                print("Opción inválida.")
-                
-        except ValueError:
-            print("Por favor ingrese un número válido.")
-    
 
     #! ============================== Metodos de Eliminacion ==============================
     
@@ -625,17 +607,59 @@ class Gimnasio:
                 print(f"Entrenador con ID {id_entrenador} y nombre {self.__entrenadores[i].get_nombre()}.")
                 confirmar = input("¿Está seguro de eliminar este entrenador? (si/no): ").strip().lower()
                 if confirmar == 'si':
+                    print(f"Eliminando entrenador {self.__entrenadores[i].get_nombre()}...")
                     self.__entrenadores.pop(i)
+                    
+                    # Buscar sesiones en las que esta
+                    for sesion in self.__sesiones:
+                        if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador:
+                            print(f"Eliminando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
+                            self.eliminar_sesion(sesion)
+                    
                 else:
                     print("Eliminación cancelada.")
+                break
+        
+    def eliminar_sesion(self, sesion=None):
+        if not self.__sesiones or len(self.__sesiones) == 0:
+            print("No hay sesiones especiales programadas para eliminar.")
+            return
+        if sesion is None:
+            while True:
+                id_sesion = input("Ingrese el ID de la sesión a eliminar: ")
+                if ut.is_number(id_sesion, "ID"):
+                    id_sesion = int(id_sesion)
+                    break
+        else:
+            id_sesion = sesion.get_id_sesion()
+        
+        # Buscar la sesión por ID
+        for i in range(len(self.__sesiones)):
+            if self.__sesiones[i].get_id_sesion() == id_sesion:
+                print(f"Sesión especial con ID {id_sesion} y fecha {self.__sesiones[i].get_fecha()}.")
+                while True:
+                    confirmacion = input("¿Estas seguro de eliminar el entrenador? (si/no): ")
+                    if ut.valid_yes_no(confirmacion):
+                        break
+                if ut.yes_no(confirmacion)
+                    print(f"Eliminando sesión especial del {self.__sesiones[i].get_fecha()}...")
+                    
+                    # Eliminamos la referencia del entrenador de la sesión
+                    self.__sesiones[i].set_entrenador(None)
+                    # Eliminamos las referencias de clientes inscritos
+                    self.__sesiones[i].editar_inscritos(0)
+                    # Y finalmente eliminamos la sesión del array
+                    self.__sesiones.pop(i)
+                    return True
+                else:
+                    print("Eliminación cancelada.")
+                    return False
                 break
 
 
 
     #! ============================== Metodos Opcionales ==============================
 
-    def registrar_entrada(self, cliente_encontrado: Cliente):
-        pass
 
     #! Tarea de Emanuel
 

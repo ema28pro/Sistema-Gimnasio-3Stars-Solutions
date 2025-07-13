@@ -1,5 +1,6 @@
 import numpy as np
 from datetime import date
+import Utils as ut
 
 # ==== ENTRENADORES Y SESIONES ====
 
@@ -44,27 +45,37 @@ class SesionEspecial:
     
     Atributos:
         __id_sesion (int): Identificador único de la sesión especial.
-        __id_entrenador (int): Identificador unico del entrenador que dirige la sesión.
+        __entrenador (Entrenador): Objeto entrenador que dirige la sesión.
         __fecha (str): Fecha de la sesión especial.
         __maximo_cupos (int, optional): Numero maximo de cupos. Defaults to 25.
         __cupos (int): Número actual de cupos ocupados.
         __inscritos (np.ndarray): Array que almacena los clientes inscritos en la sesión.
     """
-    def __init__(self, id_sesion: int, id_entrenador: int, fecha: str, maximo_cupos: int = 25):
+    def __init__(self, id_sesion: int, entrenador, fecha: str, maximo_cupos: int = 25):
         self.__id_sesion = id_sesion
-        self.__id_entrenador = id_entrenador
+        self.__entrenador = entrenador  # Ahora guarda el objeto Entrenador completo
         self.__cupos = 0
         self.__fecha = fecha
         self.__maximo_cupos = maximo_cupos
-        self.__inscritos = np.full(maximo_cupos, None, dtype=object)
+        self.__inscritos = np.full(maximo_cupos, None, dtype=object) # Estamos guardando el objeto Cliente
     
     # Métodos getter
     def get_id_sesion(self):
         return self.__id_sesion
     
-    def get_id_entrenador(self):
-        return self.__id_entrenador
+    def get_entrenador(self):
+        if self.__entrenador:
+            return self.__entrenador
+        else:
+            print("No hay entrenador asignado a esta sesión.")
     
+    def get_id_entrenador(self):
+        """Método de compatibilidad para obtener el ID del entrenador"""
+        if self.__entrenador:
+            return self.__entrenador.get_id_entrenador() 
+        else:
+            print("No hay entrenador asignado a esta sesión.")
+        
     def get_fecha(self):
         return self.__fecha
     
@@ -74,14 +85,16 @@ class SesionEspecial:
     def get_maximo_cupos(self):
         return self.__maximo_cupos
     
-    def get_inscritos(self):
-        return self.__inscritos
-    
     def get_cupos_disponibles(self):
         return self.__maximo_cupos - self.__cupos
     
+    def set_entrenador(self, entrenador):
+        if self.__entrenador is None:
+            print("Sesion sin entrenador")
+        self.__entrenador = entrenador  # Asigna el objeto Entrenador completo
+    
     # Métodos para gestionar inscripciones
-    def inscribir_cliente(self, cliente):
+    def inscribir_cliente(self, cliente=None):
         """
         Inscribe un cliente a la sesión especial.
         
@@ -91,9 +104,15 @@ class SesionEspecial:
         Returns:
             bool: True si se inscribió exitosamente, False si no hay cupos
         """
+        
+        
         if self.__cupos >= self.__maximo_cupos:
             print(f"No hay cupos disponibles. Sesión llena ({self.__maximo_cupos}/{self.__maximo_cupos})")
             return False
+        
+        if cliente is None:
+            print("No se proporcionó un cliente para inscribir.")
+            return False 
         
         # Verificar si ya está inscrito
         for i in range(self.__cupos):
@@ -107,7 +126,7 @@ class SesionEspecial:
         print(f"Cliente {cliente.get_nombre()} inscrito exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")
         return True
     
-    def cancelar_inscripcion(self, cliente):
+    def editar_inscritos(self):
         """
         Cancela la inscripción de un cliente de la sesión.
         
@@ -117,25 +136,69 @@ class SesionEspecial:
         Returns:
             bool: True si se canceló exitosamente, False si no estaba inscrito
         """
-        for i in range(self.__cupos):
-            if self.__inscritos[i] is not None and self.__inscritos[i].get_id_cliente() == cliente.get_id_cliente():
-                # Mover todos los elementos una posición hacia atrás
-                for j in range(i, self.__cupos - 1):
-                    self.__inscritos[j] = self.__inscritos[j + 1]
-                
-                # Limpiar la última posición
-                self.__inscritos[self.__cupos - 1] = None
-                self.__cupos -= 1
-                print(f"Inscripción de {cliente.get_nombre()} cancelada. Cupos: {self.__cupos}/{self.__maximo_cupos}")
-                return True
         
-        print(f"El cliente {cliente.get_nombre()} no está inscrito en esta sesión.")
-        return False
+        if not self.__cupos or self.__cupos <= 0:
+            print("No hay clientes inscritos en esta sesión.")
+            return False
+        
+        if self.__cupos > 0:
+            print("Clientes inscritos:")
+            for i in range(self.__cupos):
+                if self.__inscritos[i] is not None:
+                    print(f"  - {self.__inscritos[i].get_nombre()} (ID: {self.__inscritos[i].get_id_cliente()})")
+        
+        while True:
+            id_cliente = input("Ingrese el ID del cliente a cancelar inscripción: ")
+            if id_cliente.isdigit():
+                id_cliente = int(id_cliente)
+                break
+        if id_cliente == 0:
+            while True:
+                confirmacion = input("Estas seguro de cancelar todas las inscripciónes? (si/no) ")
+                if ut.valid_yes_no(confirmacion):
+                    break
+            
+            confirmacion = ut.yes_no(confirmacion)
+        
+            if not confirmacion:
+                print("Cancelación de inscripción cancelada.")
+                return False
+            else:
+                print("Cancelando todas las inscripciones...")
+                self.__inscritos = np.full(self.__maximo_cupos, None, dtype=object)
+                self.__cupos = 0
+                print(f"Todas las inscripciones canceladas. Cupos: {self.__cupos}/{self.__maximo_cupos}")
+                return True
+        else:
+            
+            eliminado = False
+            
+            for i in range(self.__cupos):
+                cliente = self.__inscritos[i]
+                if cliente is not None and cliente.get_id_cliente() == id_cliente:
+                    # Mover todos los elementos una posición hacia atrás
+                    for j in range(i, self.__cupos - 1):
+                        self.__inscritos[j] = self.__inscritos[j + 1]
+                    
+                    # Limpiar la última posición
+                    self.__inscritos[self.__cupos - 1] = None
+                    self.__cupos -= 1
+                    eliminado = True
+            
+            if eliminado:
+                print(f"Inscripción del cliente ID {id_cliente} cancelada exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")
+                return True
+            else:
+                print(f"No se encontró ningún cliente con el ID: {id_cliente} en esta sesión.")
+                return False
     
     def mostrar_info(self):
         """Muestra información completa de la sesión"""
         print(f"\n=== Sesión Especial ID: {self.__id_sesion} ===")
-        print(f"Entrenador ID: {self.__id_entrenador}")
+        if self.__entrenador:
+            print(f"Entrenador: {self.__entrenador.get_nombre()} (ID: {self.__entrenador.get_id_entrenador()}) - {self.__entrenador.get_especialidad()}")
+        else:
+            print("Entrenador: No asignado")
         print(f"Fecha: {self.__fecha}")
         print(f"Cupos: {self.__cupos}/{self.__maximo_cupos}")
         print(f"Cupos disponibles: {self.get_cupos_disponibles()}")
@@ -148,4 +211,11 @@ class SesionEspecial:
         else:
             print("No hay clientes inscritos.")
         print("="*40)
-        return self.__id_entrenador
+        return self.__entrenador
+
+    def mostrar_entrenador(self):
+        """Muestra información del entrenador de la sesión"""
+        if self.__entrenador:
+            self.__entrenador.mostrar_info()
+        else:
+            print("No hay entrenador asignado a esta sesión.")
