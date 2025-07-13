@@ -748,7 +748,7 @@ class Gimnasio:
     
     def cargar_clientes(self, nombre_archivo):
         try:
-            with open(nombre_archivo, "r", encoding="utf-8") as archivo:
+            with open(nombre_archivo, "r") as archivo:
                 lineas = archivo.readlines()
                 rows = len(lineas)
                 columns = len(lineas[0].strip().split(";"))
@@ -771,11 +771,17 @@ class Gimnasio:
             try:
                 print("="*30)
                 print(f"Procesando línea {i+1}: {linea}")
+                
+                # Validación para teléfono: si es "0", "None", "none" o vacío, se convierte a None
+                telefono = linea[2]
+                if telefono and telefono.lower() in ["0", "none", ""]:
+                    telefono = None
+                
                 # Crear el cliente primero
                 cliente_creado = self.crear_cliente(
                     nombre=linea[0],
                     documento=linea[1],
-                    telefono=linea[2],
+                    telefono=telefono,
                     fecha_registro=datetime.strptime(linea[3], "%Y-%m-%d").date()
                 )
                 
@@ -795,9 +801,23 @@ class Gimnasio:
             except Exception as error:
                 print(f"✗ Error procesando línea {i+1}: {str(error)}")
                 continue
-            
+        
+        print("="*40)
         print(f"Lineas con errores : {lineas_error}")
         return True
+    
+    def exportar_clientes(self):
+        nombre_archivo = f"clientes_{date.today().strftime('%Y%m%d')}.txt"
+        
+        with open(nombre_archivo, "w",) as archivo:
+            archivo.write("Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin\n")
+            for i in self.__clientes:
+                if i is not None:
+                    membresia = i.get_membresia()
+                    if membresia:
+                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro_c()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
+                    else:
+                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro_c()};None;None;None\n")
 
 
 
