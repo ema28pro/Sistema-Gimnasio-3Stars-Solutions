@@ -148,9 +148,25 @@ class Cliente:
             print(f"Estado de pago: {'Pagada' if self.__membresia.get_pago() else 'Pendiente'}")
             print("="*40)
 
-    def pago_ingreso_unico(self):
-        pass
+    def registrar_entrada(self,motivo:str=None):
+        """Registra la entrada del cliente al gimnasio"""
+        formato = "Fecha;Hora;ID;Documento;Nombre;Membresía(False/True/None)"
+        
+        fecha = datetime.now().strftime('%Y-%m-%d')
+        hora = datetime.now().strftime('%H:%M:%S')
+        id_cliente = self.__id_cliente
+        documento = self.__documento
+        nombre = self.__nombre
+        estado_membresia = self.__membresia.get_pago() if self.__membresia else "None"
+        
+        # Solución: usar variable auxiliar para evitar anidación de comillas
+        motivo_campo = f";{motivo}" if motivo else ""
+        registro = f"{fecha};{hora};{id_cliente};{documento};{nombre};{estado_membresia}{motivo_campo}\n"
+        
+        with open("registros/Entradas.txt", "a") as entrada_file:
+            entrada_file.write(registro)
+        
+        print(f"✓ Entrada registrada para {nombre} a las {hora}")
 
-    def solicitar_sesion(self):
-        pass
+
 

@@ -105,7 +105,7 @@ def menu_cliente(cliente):
                 Gym.pago_ingreso_unico(cliente)
                 input("\nPresione Enter para continuar...")
             case "6":
-                cliente.registrar_entrada() # Pensar de que clase hacerlo
+                cliente.registrar_entrada("General") # Pensar de que clase hacerlo
                 input("\nPresione Enter para continuar...")
             case "7":
                 eliminar = None
@@ -228,7 +228,7 @@ def menu_sesion(sesion):
     opcion_sesion = input("Seleccione una opción : ")
     if opcion_sesion not in ["1", "2", "3", ""]:
         print("Opción fuera de rango. Por favor, ingrese una opción válida.")
-        continue
+        return
     match opcion_sesion:
         case "1":
             sesion.editar_inscritos()
@@ -263,10 +263,13 @@ def menu_datos():
         print("1. Exportar Gimansio.JSON")
         print("2. Exportar Clientes")
         print("3. Cargar Clientes")
+        print("4. Exportar Entrenadores")
+        print("5. Reporte Diario")
+        print("6. Informe Entradas")
         print("Enter para salir")
-        opcion_datos = input("Seleccione una opción: ")
+        opcion_datos = input("Seleccione una opción : ")
         
-        if opcion_datos not in ["1", "2", "3", ""]:
+        if opcion_datos not in ["1", "2", "3", "4", "5", "6", ""]:
             print("Opción fuera de rango. Por favor, ingrese una opción válida.")
             continue
         
@@ -280,6 +283,14 @@ def menu_datos():
                 Gym.exportar_clientes()
             case "3":
                 Gym.cargar_clientes()
+            case "4":
+                Gym.exportar_entrenadores()
+            case "5":
+                Gym.reporte_diario()
+                input("\nPresione Enter para continuar...")
+            case "6":
+                Gym.informe_entrada()
+                input("\nPresione Enter para continuar...")
             case "":
                 print("Saliendo del menú de datos...")
                 break

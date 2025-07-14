@@ -1,0 +1,30 @@
+{
+    "gimnasio": {
+        "nombre": "Body Force",
+        "fecha_exportacion": "2025-07-13"
+    },
+    "estadisticas": {
+        "total_entrenadores": 1,
+        "total_sesiones": 1
+    },
+    "entrenadores": [
+        {
+            "id_entrenador": 1,
+            "nombre": "emanuel",
+            "especialidad": "boxeo",
+            "telefono": "1038647148",
+            "sesiones": [
+                {
+                    "id_sesion": 1,
+                    "fecha": "2000-10-10",
+                    "maximo_cupos": 25,
+                    "cupos_ocupados": 0,
+                    "cupos_disponibles": 25,
+                    "dias_restantes": null,
+                    "documentos_inscritos": []
+                }
+            ],
+            "total_sesiones": 1
+        }
+    ]
+}

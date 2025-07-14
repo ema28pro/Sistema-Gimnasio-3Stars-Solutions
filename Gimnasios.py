@@ -162,7 +162,7 @@ class Gimnasio:
             pago = ut.yes_no(pagar)
             
             if pago:
-                self.ingreso_caja(PRECIO_MEMBRESIA)
+                self.ingreso_caja(PRECIO_MEMBRESIA, "Membresia")
 
         # Crear la membresía
         nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago)
@@ -222,7 +222,7 @@ class Gimnasio:
         print(f"Entrenador {nombre} especializado en {especialidad} registrado con ID: {id_entrenador}")
         return nuevo_entrenador
     
-    def crear_sesion_especial(self, entrenador, fecha: str=None, maximo_cupos: int = 25):
+    def crear_sesion_especial(self, entrenador=None, fecha: str=None, maximo_cupos: int = 25,id_entrenador: int = None):
         """
         Crea una nueva sesión especial.
         
@@ -243,8 +243,18 @@ class Gimnasio:
                     continue
         
         if not entrenador:
-            print("No se proporcionó un entrenador válido")
-            return None
+            if not id_entrenador:
+                entrenador = self.mostrar_entrenadores()
+                if entrenador is None:
+                    print("No se ha seleccionado un entrenador.")
+                    return None
+                else:
+                    id_entrenador = entrenador.get_id_entrenador()
+            else:
+                entrenador = self.buscar_entrenador(id_entrenador)
+                if entrenador is None:
+                    print(f"No se encontró un entrenador con ID {id_entrenador}.")
+                    return None
         
         id_sesion = self.__historico_sesiones + 1
         nueva_sesion = SesionEspecial(id_sesion, entrenador, fecha, maximo_cupos)
@@ -508,6 +518,7 @@ class Gimnasio:
         """_summary_
             Modifica el efectivo del gimnasio.
         """
+        # Pensar si es necesario el Cliente quien paga, o si es necesario el ID del cliente
         # Registrar el ingreso en formato: fecha;hora;tipo;efectivo
         fecha = datetime.now().strftime('%Y-%m-%d')
         hora = datetime.now().strftime('%H:%M:%S')
@@ -529,16 +540,14 @@ class Gimnasio:
             return
         else:
             print(f"El cliente tiene una membresía que aún no ha sido pagada.")
-            self.ingreso_caja(PRECIO_MEMBRESIA)
+            self.ingreso_caja(PRECIO_MEMBRESIA,"PagoMembresia")
             membresia_encontrada.set_pago(True)
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
     def pago_ingreso_unico(self, cliente_encontrado: Cliente):
-        pass
+        ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico")
+        cliente_encontrado.registrar_entrada("IngresoUnico")
     
-    def registrar_entrada(self, cliente_encontrado: Cliente):
-        pass
-
     def agendar_sesion(self, cliente, id_sesion: int= None):
         """
         Permite a un cliente inscribirse en una sesión especial.
@@ -723,12 +732,232 @@ class Gimnasio:
         pass
 
     def reporte_diario(self):
-        # generar un resumen del día
-        pass
-
+        """
+        Descripción	El sistema debe permitir generar un Reporte Diario. Este reporte incluye, membresías compradas, actualizadas, renovadas en el día, junto con membresías en deuda y cerca finalización.
+        Entrada : Dia del Reporte
+        Salida : 
+            -   Membresías Compradas del Dia
+            -	Balance de Efectivo del Dia
+        """
+        # Solicitar fecha del reporte
+        print("\n=== REPORTE DIARIO ===")
+        ano = datetime.now().year
+        
+        while True:
+            fecha_reporte= input("Ingrese la fecha del reporte (YYYY-MM-DD): ")
+            try:
+                fecha_obj = datetime.strptime(fecha_reporte, "%Y-%m-%d").date()
+                break
+            except Exception as e:
+                print("Fecha inválida. Debe ser en formato 'YYYY-MM-DD'.")
+                print(f"Error : {str(e)}")
+                continue
+        
+        # Convertir fecha a string para comparaciones con archivos
+        fecha_reporte_str = fecha_obj.strftime("%Y-%m-%d")
+        
+        print(f"\n📅 Generando reporte para: {fecha_reporte_str}")
+        print("="*50)
+        
+        # Rutas de archivos
+        registro_caja = "registros/Caja.txt" # Formato: fecha;hora;tipo;efectivo(0,000.0)
+        registro_entradas = "registros/Entradas.txt" # Formato Fecha;Hora;ID;Documento;Nombre;Membresía(False:Vencida/True:Activa/None:SinMembresía);Tipo(Entrada Unica/Membresia)
+        
+        # Variables para el reporte
+        membresias_compradas = 0
+        balance_efectivo = 0.0
+        
+        # 1. Analizar registros de caja del día
+        print("\nBALANCE DE EFECTIVO DEL DÍA:")
+        with open(registro_caja, "r", encoding='utf-8') as archivo_caja:
+            for linea in archivo_caja:
+                datos = linea.strip().split(";")
+                if len(datos) >= 4:
+                    fecha_transaccion = datos[0]
+                    tipo_transaccion = datos[2]
+                    monto = float(datos[3].replace(",", ""))
+                    
+                    if fecha_transaccion == fecha_reporte_str:
+                        balance_efectivo += monto
+                        if tipo_transaccion in ["Membresia", "PagoMembresia"]:
+                            membresias_compradas += 1
+        
+        print(f"   Total ingresos del día: ${balance_efectivo:,.0f}")
+        print(f"   Membresías vendidas: {membresias_compradas}")  # Dividir por 2 porque hay Membresia y PagoMembresia
+        
+        # 2. Analizar entradas del día
+        print("\nENTRADAS DEL DÍA:")
+        entradas_dia = 0
+        entradas_membresia = 0
+        entradas_unicas = 0
+        
+        with open(registro_entradas, "r", encoding='utf-8') as archivo_entradas:
+            for linea in archivo_entradas:
+                datos = linea.strip().split(";")
+                if len(datos) >= 7:
+                    fecha_entrada = datos[0]
+                    tipo_entrada = datos[6]
+                    
+                    if fecha_entrada == fecha_reporte_str:
+                        entradas_dia += 1
+                        if tipo_entrada == "General":
+                            entradas_membresia += 1
+                        elif tipo_entrada == "IngresoUnico":
+                            entradas_unicas += 1
+            
+            print(f"   Total entradas: {entradas_dia}")
+            print(f"   Entradas con membresía: {entradas_membresia}")
+            print(f"   Entradas únicas: {entradas_unicas}")
+        
+        # Resumen final
+        print("\n" + "="*50)
+        print("RESUMEN DEL REPORTE DIARIO:")
+        print(f"    Fecha: {fecha_reporte_str}")
+        print(f"    Balance efectivo: ${balance_efectivo:,.0f}")
+        print(f"    Membresías compradas: {membresias_compradas}")
+        print(f"    Total entradas del día: {entradas_dia}")
+        print("="*50)
+        
+        return {
+            "fecha": fecha_reporte_str,
+            "balance_efectivo": balance_efectivo,
+            "membresias_compradas": membresias_compradas,
+            "entradas_dia": entradas_dia
+        }
+    
+    
     def informe_entrada(self):
-        # reporte de entradas diarias
-        pass
+        """
+        Nombre	Informe de Entradas
+        Descripción	El sistema debe permitir generar un informe de entradas. Este informe muestra el número de entradas de clientes en los diferentes días de la semana y cuáles son las horas más frecuentadas
+        Entrada	: Mes del Informe
+        Salida	: 
+            - Número de Entradas al Gimnasio por Días
+            - Horas más Frecuentadas en el Gimnasio
+        """
+        print("\n=== INFORME DE ENTRADAS ===")
+        
+        registro_entradas = "registros/Entradas.txt" # Formato Fecha;Hora;ID;Documento;Nombre;Membresía(False:Vencida/True:Activa/None:SinMembresía);Tipo(Entrada Unica/Membresia)
+        
+        # Leer archivo y extraer meses únicos
+        meses_disponibles = []
+        
+        with open(registro_entradas, "r", encoding='utf-8') as archivo:
+            for linea in archivo:
+                datos = linea.strip().split(";")
+                if len(datos) >= 7:
+                    fecha = datos[0]  # Formato YYYY-MM-DD
+                    fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+                    mes_año = fecha_obj.strftime("%m")  # Formato YYYY-MM
+                    # Solo agregar si no está ya en la lista (evitar duplicados)
+                    if mes_año not in meses_disponibles:
+                        meses_disponibles+=[mes_año]
+        
+        if not meses_disponibles:
+            print("❌ No se encontraron registros de entradas en el archivo.")
+            return
+        
+        # Mostrar meses disponibles y permitir selección
+        meses_lista = sorted(meses_disponibles, reverse=True)  # Más recientes primero
+        
+        print(f"\nMeses con registros disponibles:")
+        print("="*40)
+        print(meses_lista)
+        
+        # Pedimos el mes
+        while True:
+            mes = input(f"\nSeleccione un mes (1-{len(meses_lista)}) o Enter para cancelar: ")
+            if mes == "":
+                print("Operación cancelada.")
+                return
+            if ut.is_number(mes, "Mes"):
+                mes = int(mes)
+                if mes <= 12 and mes > 0:
+                    break
+        
+        # Pedimes el Año
+        while True:
+            año = input("Ingrese el año (ej: 2025): ")
+            if ut.is_number(año, "Año"):
+                año = int(año)
+                if año >= 2020 and año <= 2030:
+                    break
+        
+        dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        print(f"\n¿Qué día de la semana fue el 1 de {mes}/{año}?")
+        for i, dia in enumerate(dias_semana):
+            print(f"{i+1}. {dia}")
+        
+        # Preguntar qué día de la semana fue el primer día del mes
+        while True:
+            dia_inicio = input("Seleccione el día (1-7): ")
+            if ut.is_number(dia_inicio, "Día"):
+                dia_inicio = int(dia_inicio)
+                if dia_inicio >= 1 and dia_inicio <= 7:
+                    dia_inicio = dia_inicio - 1  # Convertir a índice (0-6)
+                    break
+        
+        # 3. Crear cadena de búsqueda para el mes
+        mes_busqueda = f"{año}-{mes:02d}"  # Formato: 2025-06
+        print(f"\n Generando informe para: {mes}/{año}")
+        print("="*50)
+        
+        # Contadores simples
+        total_entradas = 0
+        entradas_por_dia = {}  # Lunes: 0, Martes: 0, etc.
+        entradas_por_hora = {}  # 08: 0, 09: 0, etc.
+        
+        # Inicializar contadores
+        dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        for dia in dias_semana:
+            entradas_por_dia[dia] = 0
+        
+        # Leer archivo y contar entradas del mes seleccionado
+        with open(registro_entradas, "r", encoding='utf-8') as archivo:
+            for linea in archivo:
+                datos = linea.strip().split(";")
+                if len(datos) >= 7:
+                    fecha = datos[0]  # YYYY-MM-DD
+                    hora = datos[1]   # HH:MM:SS
+                    
+                    # Extraer año y mes de la fecha
+                    partes_fecha = fecha.split("-")
+                    año_entrada = int(partes_fecha[0])
+                    mes_entrada = int(partes_fecha[1])
+                    dia_entrada = int(partes_fecha[2])
+                    
+                    # Solo procesar si es del mes y año seleccionado
+                    if año_entrada == año and mes_entrada == mes:
+                        total_entradas += 1
+                        
+                        # Calcular día de la semana usando el día de inicio
+                        dia_semana_indice = (dia_entrada - 1 + dia_inicio) % 7
+                        dia_semana = dias_semana[dia_semana_indice]
+                        entradas_por_dia[dia_semana] += 1
+                        
+                        # Obtener hora (solo la parte de la hora)
+                        hora_simple = hora.split(":")[0]  # Solo la hora (ej: "14" de "14:30:00")
+                        if hora_simple in entradas_por_hora:
+                            entradas_por_hora[hora_simple] += 1
+                        else:
+                            entradas_por_hora[hora_simple] = 1
+        
+        # Mostrar resultados
+        print(f"\nTOTAL DE ENTRADAS: {total_entradas}")
+        
+        print(f"\nENTRADAS POR DÍA DE LA SEMANA:")
+        for dia, cantidad in entradas_por_dia.items():
+            print(f"   {dia}: {cantidad} entradas")
+        
+        print(f"\nHORAS MÁS FRECUENTADAS:")
+        # Ordenar horas por cantidad de entradas
+        # horas_ordenadas = sorted(entradas_por_hora.items(), key=lambda x: x[1], reverse=True)
+        # for hora, cantidad in horas_ordenadas[:5]:  # Solo mostrar top 5
+        for hora, cantidad in entradas_por_hora.items(): 
+            print(f"   {hora}:00 - {cantidad} entradas")
+        
+        print("="*50)
+
     
     #* ============================== Exportar e Importar Datos ==============================
     
@@ -980,6 +1209,138 @@ class Gimnasio:
                         archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro_c()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
                     else:
                         archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro_c()};None;None;None\n")
+        
+        return nombre_archivo
+        print(f"✓ Datos exportados exitosamente a: {nombre_archivo}")
 
+    def cargar_entrenadores(self, nombre_archivo=None):
+        if nombre_archivo is None:
+            print("Archivos disponibles en la carpeta 'registros':")
+            archivos = [f for f in os.listdir("registros") if f.endswith(".txt")]
+            for idx, archivo in enumerate(archivos, 1):
+                print(f"{idx}. {archivo}")
+            nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
+        if nombre_archivo is None:
+            nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
+        if nombre_archivo == 0 or nombre_archivo == "0" or nombre_archivo == "":
+            print("Operacion cancelada.")
+            return False
+        if nombre_archivo == "1" or nombre_archivo == 1:
+            nombre_archivo = "entrenadores.txt"
+        
+        nombre_archivo = f"registros/{nombre_archivo}"
+        
+        print("\n")
+        print("="*40)
+        print(f"📂 Cargando datos desde el archivo: {nombre_archivo}\n")
+        
+        try:
+            with open(nombre_archivo, "r") as archivo:
+                lineas = archivo.readlines()
+                rows = len(lineas)
+                
+                if rows == 0:
+                    print("✗ El archivo está vacío.")
+                    return False
+                
+                # Validar formato del archivo (debe tener encabezados)
+                primera_linea = lineas[0].strip().split(";")
+                columns = len(primera_linea)
+                print(f"Número de líneas : {rows}")
+                print(f"Número de columnas : {columns}")
+                print(f"Encabezados detectados: {primera_linea}")
+                
+                # Validar que tenga el formato esperado para entrenadores (4 columnas)
+                if columns != 4:
+                    print(f"⚠️  ADVERTENCIA: Este archivo tiene {columns} columnas.")
+                    print("""📋 Formato esperado para entrenadores : """)
+                    
+                self.crear_entrenador()
+        except FileNotFoundError:
+            print(f"✗ Archivo {nombre_archivo} no encontrado.")
+            return False
+        except Exception as e:
+            print(f"✗ Error al leer el archivo: {str(e)}")
+            return False
 
-
+    def exportar_entrenadores(self):
+        """
+        Exporta los entrenadores y sus sesiones asociadas a un archivo JSON.
+        Cada entrenador incluye una lista de sesiones con sus detalles e inscritos.
+        
+        Returns:
+            str: Ruta del archivo creado o None si hubo error
+        """
+        nombre_archivo = f"registros/entrenadores_{date.today().strftime('%Y%m%d')}.json"
+        
+        # Crear estructura de datos para exportar
+        datos_exportar = {
+            "gimnasio": {
+                "nombre": self.__nombre,
+                "fecha_exportacion": date.today().strftime("%Y-%m-%d")
+            },
+            "estadisticas": {
+                "total_entrenadores": len(self.__entrenadores),
+                "total_sesiones": len(self.__sesiones)
+            },
+            "entrenadores": []
+        }
+        
+        print(f"\n📥 Exportando {len(self.__entrenadores)} entrenadores...")
+        
+        # Procesar cada entrenador
+        for entrenador in self.__entrenadores:
+            datos_entrenador = {
+                "id_entrenador": entrenador.get_id_entrenador(),
+                "nombre": entrenador.get_nombre(),
+                "especialidad": entrenador.get_especialidad(),
+                "telefono": entrenador.get_telefono(),
+                "sesiones": []
+            }
+            
+            # Buscar sesiones asociadas a este entrenador
+            sesiones_entrenador = 0
+            for sesion in self.__sesiones:
+                # Verificar si la sesión pertenece a este entrenador
+                if (sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == entrenador.get_id_entrenador()):
+                    
+                    # Obtener documentos de clientes inscritos
+                    documentos_inscritos = []
+                    for i in range(sesion.get_cupos()):
+                        cliente_inscrito = sesion._SesionEspecial__inscritos[i]
+                        if cliente_inscrito is not None:
+                            documentos_inscritos.append(cliente_inscrito.get_documento())
+                    
+                    # Crear datos de la sesión
+                    datos_sesion = {
+                        "id_sesion": sesion.get_id_sesion(),
+                        "fecha": sesion.get_fecha(),
+                        "maximo_cupos": sesion.get_maximo_cupos(),
+                        "cupos_ocupados": sesion.get_cupos(),
+                        "cupos_disponibles": sesion.get_cupos_disponibles(),
+                        "dias_restantes": sesion.calcular_dias_restantes(),
+                        "documentos_inscritos": documentos_inscritos
+                    }
+                    
+                    datos_entrenador["sesiones"].append(datos_sesion)
+                    sesiones_entrenador += 1
+            
+            datos_entrenador["total_sesiones"] = sesiones_entrenador
+            datos_exportar["entrenadores"].append(datos_entrenador)
+            print(f"✓ Entrenador {entrenador.get_nombre()}: {sesiones_entrenador} sesiones")
+        
+        # Guardar archivo JSON
+        try:
+            with open(nombre_archivo, 'w') as archivo:
+                json.dump(datos_exportar, archivo, indent=4, ensure_ascii=False)
+            
+            print(f"\n✓ Datos exportados exitosamente a: {nombre_archivo}")
+            print(f"✓ Total de entrenadores exportados: {len(datos_exportar['entrenadores'])}")
+            print(f"✓ Total de sesiones exportadas: {sum(ent['total_sesiones'] for ent in datos_exportar['entrenadores'])}")
+            
+            return nombre_archivo
+            
+        except Exception as e:
+            print(f"✗ Error al guardar el archivo JSON: {str(e)}")
+            return None
+            
