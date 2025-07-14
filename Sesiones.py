@@ -119,7 +119,7 @@ class SesionEspecial:
         return diferencia
     
     # Métodos para gestionar inscripciones
-    def inscribir_cliente(self, cliente: Cliente):
+    def inscribir_cliente(self, cliente):
         """_summary_
             Inscribe un cliente a la sesión especial.
         Args:

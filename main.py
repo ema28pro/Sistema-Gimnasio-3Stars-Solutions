@@ -163,7 +163,7 @@ def menu_membresia(membresia, cliente=None):
                 Gym.pagar_membresia(membresia)
                 input("\nPresione Enter para continuar...")
             case "3":
-                Gym.renovar_membresia(membresia_encontrada=membresia, cliente_encontrado=cliente)
+                Gym.renovar_membresia(membresia=membresia, cliente=cliente)
                 input("\nPresione Enter para continuar...")
             case "4":
                 if cliente is None:

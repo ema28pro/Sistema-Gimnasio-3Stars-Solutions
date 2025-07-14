@@ -122,11 +122,11 @@ class Gimnasio:
         
         self.__numero_clientes += 1 # Incrementamos el contador de clientes
         self.__historico_clientes += 1 # Incrementamos el contador de clientes históricos
-        print(f"ID {id_cliente} : Cliente {nombre} registrado exitosamente. {fecha_registro}")
+        print(f"ID {id_cliente}  {nombre} registrado exitosamente. {fecha_registro}")
         return nuevo_cliente # Objeto Cliente creado
 
     # R3
-    def crear_membresia(self, cliente: Cliente, fecha_inicio: str=None, fecha_fin: str=None, pago: bool=None):
+    def crear_membresia(self, cliente, fecha_inicio: str=None, fecha_fin: str=None, pago: bool=None):
         """_summary_
             Funcion encargada de crear la Mebresia del Cliente y asignarala a su respectivo Cliente.
         Args:
@@ -140,9 +140,9 @@ class Gimnasio:
         
         # Validaciones
         
-        if cliente_encontrado.get_membresia():
+        if cliente.get_membresia():
             print("El cliente ya tiene membresia.")
-            cliente_encontrado.info_membresia()
+            cliente.info_membresia()
             return False
         
         if not fecha_inicio:
@@ -187,7 +187,7 @@ class Gimnasio:
                 self.ingreso_caja(PRECIO_MEMBRESIA, "Membresia")
 
         # Crear la membresía y nos aseguramos de guardar las fechas str y no como Objetos date
-        nueva_membresia = Membresia(fecha_inicio.strftime("%Y-%m-%d"), fecha_fin, pago.strftime("%Y-%m-%d"))
+        nueva_membresia = Membresia(fecha_inicio.strftime("%Y-%m-%d"), fecha_fin.strftime("%Y-%m-%d"), pago)
         cliente.set_membresia(nueva_membresia)
         print(f"Membresía creada para {cliente.get_nombre()} con ID {cliente.get_id_cliente()}")
         print(f"Vigencia: {fecha_inicio} hasta {fecha_fin}")
@@ -381,7 +381,7 @@ class Gimnasio:
             return cliente_encontrado # Objeto Cliente encontrado
 
 
-    def consultar_membresia(self, cliente: Cliente):
+    def consultar_membresia(self, cliente):
         """ Muestra la informacion de la membresía de un cliente y Retorna el Objeto Memebreisa"""
         
         if cliente.get_membresia() is None:
@@ -562,16 +562,16 @@ class Gimnasio:
             print(f"No se encontró una sesión con ID {id_sesion}.")
             return None
     
-    def sesiones_agendadas(self, cliente: Cliente):
+    def sesiones_agendadas(self, cliente):
         """_sumary_
             Muestra las sesiones especiales a las que un cliente está inscrito.
         Args:
             cliente: Objeto Cliente para el cual se desean ver las sesiones agendadas.
         """
-        print(f"\n=== Sesiones Agendadas para {cliente_encontrado.get_nombre()} ===")
+        print(f"\n=== Sesiones Agendadas para {cliente.get_nombre()} ===")
         for sesion in self.__sesiones:
             for cliente in sesion.get_clientes_inscritos():
-                if cliente.get_id_cliente() == cliente_encontrado.get_id_cliente():
+                if cliente.get_id_cliente() == cliente.get_id_cliente():
                     sesion.mostrar_info()
     
     #? ============================== Metodos de Modificacion ==============================
@@ -615,7 +615,7 @@ class Gimnasio:
             membresia.set_pago(True) # Actualizamos el estado de pago de la membresía
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
-    def renovar_membresia(self, cliente: Cliente=None ,membresia: Membresia = None):
+    def renovar_membresia(self, cliente=None ,membresia: Membresia = None):
         """_summary_
             Metodo encargado de renovar la Membresia del Cliente.
         Args:
@@ -645,12 +645,12 @@ class Gimnasio:
         self.ingreso_caja(PRECIO_MEMBRESIA, "RenovacionMembresia") # Se registra el ingreso en caja con su motivo
         membresia_.renovar_membresia() # Actualiza la fecha de fin de la membresía
     
-    def pago_ingreso_unico(self, cliente: Cliente):
+    def pago_ingreso_unico(self, cliente):
         """"Metodo encargado de registrar el ingreso unico de un cliente sin tener que adquirir memebreisa, pagando el ingreso unico del Cliente."""
         self.ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico") # Se registra el ingreso en caja con su motivo
         cliente.registrar_entrada("IngresoUnico") # Registra la entrada del cliente en el historial de entradas
     
-    def agendar_sesion(self, cliente: Cliente, id_sesion: int=None):
+    def agendar_sesion(self, cliente, id_sesion: int=None):
         """_summary_
             Permite a un cliente inscribirse en una sesión especial.
         Args:
@@ -737,7 +737,7 @@ class Gimnasio:
 
     #! ============================== Metodos de Eliminacion ==============================
     
-    def eliminar_cliente(self, id_cliente: int=None,cliente: Cliente=None):
+    def eliminar_cliente(self, id_cliente: int=None,cliente=None):
         """_summary_
             Funcion encargada de eliminar un Cliente del array de clientes y todas sus referencias.
             Si no se proporciona un ID o un objeto Cliente, se solicita al usuario que ingrese el ID del cliente a eliminar.
@@ -811,7 +811,7 @@ class Gimnasio:
             print(f"No se encontró un cliente con ID {id_cliente}.")
             return False
 
-    def eliminar_membresia(self, cliente: Cliente=None):
+    def eliminar_membresia(self, cliente=None):
         """_summary_
             Metodo encargado de eliminar la Membresia de un Cliente.
         Args:
@@ -936,7 +936,6 @@ class Gimnasio:
                 dias_restantes = sesion.calcular_dias_restantes()
                 estado = f"{dias_restantes} días restantes" if dias_restantes is not None else "Ya pasó"
                 print(f"Sesión especial con ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, {estado}")
-                # Pedimos una confirmación de eliminación
                 while True:
                     confirmacion = input("¿Estas seguro de eliminar la sesion? (si/no): ")
                     if ut.valid_yes_no(confirmacion):
@@ -1292,7 +1291,7 @@ class Gimnasio:
         
         # Pedimos el mes
         while True:
-            mes = input(f"\nSeleccione un mes (1-{len(meses_lista)}) o Enter para cancelar: ")
+            mes = input(f"\nSeleccione un mes {meses_lista} o Enter para cancelar: ")
             if mes == "":
                 print("Operación cancelada.")
                 return
@@ -1375,7 +1374,7 @@ class Gimnasio:
         for dia, cantidad in entradas_por_dia.items():
             print(f"   {dia}: {cantidad} entradas")
         
-        print(f"\nHORAS MÁS FRECUENTADAS:")
+        print(f"\nFRECUENCIA HORAS:")
         # Ordenar horas por cantidad de entradas
         # horas_ordenadas = sorted(entradas_por_hora.items(), key=lambda x: x[1], reverse=True)
         # for hora, cantidad in horas_ordenadas[:5]:  # Solo mostrar top 5
@@ -1572,45 +1571,75 @@ class Gimnasio:
 
             try:
                 print("="*30)
-                print(f"Procesando línea {i+1}/{rows-1}: {linea}")
+                print(f"Procesando línea {i+1}/{rows}: {linea}")
                 
                 # Validación para teléfono: si es "0", "None", "none" o vacío, se convierte a None
                 telefono = linea[2]
                 if telefono and telefono.lower() in inval:
                     telefono = None
                 
+                # Validar fecha de registro (obligatoria para crear cliente)
+                try:
+                    fecha_registro = datetime.strptime(linea[3], "%Y-%m-%d").date()
+                except Exception as e:
+                    print(f"✗ Error en la fecha de registro en línea {i+1}: {str(e)}")
+                    lineas_error.append(i+1)
+                    continue
+                
                 # Crear el cliente primero
                 cliente_creado = self.crear_cliente(
                     nombre=linea[0],
                     documento=linea[1],
                     telefono=telefono,
-                    fecha_registro=datetime.strptime(linea[3], "%Y-%m-%d").date()
+                    fecha_registro=linea[3]
                 )
                 
                 if cliente_creado:
+                    clientes_cargados += 1
                     
+                    # Verificar si el cliente tiene datos de membresía válidos
                     if (linea[4] in inval) or (linea[5] in inval):
-                        print(f"⚠️  Línea {i+1} tiene datos de membresía inválidos o cliente sin membresia, se omitirá la membresía.")
-                        clientes_cargados += 1
+                        print(f"⚠️  Línea {i+1}: Cliente sin membresía o datos de membresía inválidos.")
                         continue
                     
-                    if linea[6] in inval:
-                        linea[6] = None  # Si la fecha fin es inválida, la dejamos como None y se calculara en la membresía
+                    # Validar fecha de inicio de membresía (obligatoria)
+                    try:
+                        fecha_inicio = datetime.strptime(linea[5], "%Y-%m-%d").date()
+                    except Exception as e:
+                        print(f"✗ Error en la fecha de inicio de membresía en línea {i+1}: {str(e)}")
+                        print("⚠️  Se omitirá la membresía para este cliente.")
+                        continue
                     
-                    clientes_cargados += 1
+                    # Validar fecha de fin de membresía (opcional - se puede calcular automáticamente)
+                    fecha_fin_valida = linea[6]
+                    if linea[6] in inval:
+                        print(f"⚠️  Línea {i+1}: Fecha fin inválida, se calculará automáticamente (+30 días).")
+                        fecha_fin_valida = None
+                    else:
+                        try:
+                            datetime.strptime(linea[6], "%Y-%m-%d").date()
+                        except Exception as e:
+                            print(f"⚠️  Error en la fecha fin en línea {i+1}: {str(e)}")
+                            print("⚠️  Se calculará automáticamente (+30 días).")
+                            fecha_fin_valida = None
+                    
+                    # Procesar el pago
                     pago_bool = linea[4].strip().lower() == 'true'
                     
+                    # Intentar crear la membresía
                     membresia_creada = self.crear_membresia(
-                        cliente_encontrado=cliente_creado,
-                        fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(),
-                        fecha_fin=datetime.strptime(linea[6], "%Y-%m-%d").date(),
+                        cliente=cliente_creado,
+                        fecha_inicio=linea[5],
+                        fecha_fin=fecha_fin_valida,
                         pago=pago_bool
                     )
+                    
                     if membresia_creada:
                         membresias_cargadas += 1
                         print(f"✓ Cliente y membresía cargados exitosamente.")
                     else:
-                        print(f"⚠️  Cliente creado pero falló la membresía.")
+                        print(f"⚠️  Cliente creado pero falló la creación de la membresía.")
+                        
                 else:
                     lineas_error.append(i+1)
                     print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
