@@ -93,7 +93,7 @@ def menu_cliente(cliente):
         opcion_cliente = input("Seleccione una opción : ")
         print(30*"=")
         ut.sp(2)
-        if opcion_cliente not in ["1", "2", "3", "4", "5", "6", "7", "8", ""]:
+        if opcion_cliente not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", ""]:
             print("Opción fuera de rango. Por favor, ingrese una opción válida.")
             continue
         
