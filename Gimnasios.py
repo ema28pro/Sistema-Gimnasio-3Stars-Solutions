@@ -552,7 +552,18 @@ class Gimnasio:
             print(f"No se encontró una sesión con ID {id_sesion}.")
             return
     
-    
+    def sesiones_agendadas(self, cliente_encontrado: Cliente):
+        """
+        Muestra las sesiones especiales a las que un cliente está inscrito.
+        
+        Args:
+            cliente_encontrado: Objeto Cliente para el cual se desean ver las sesiones agendadas.
+        """
+        print(f"\n=== Sesiones Agendadas para {cliente_encontrado.get_nombre()} ===")
+        for sesion in self.__sesiones:
+            for cliente in sesion.get_clientes_inscritos():
+                if cliente.get_id_cliente() == cliente_encontrado.get_id_cliente():
+                    sesion.mostrar_info()
     
     #? ============================== Metodos de Modificacion ==============================
 
@@ -585,6 +596,30 @@ class Gimnasio:
             self.ingreso_caja(PRECIO_MEMBRESIA,"PagoMembresia")
             membresia_encontrada.set_pago(True)
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
+    
+    def renovar_membresia(self, cliente_encontrado: Cliente=None,membresia_encontrada: Membresia = None):
+        
+        if membresia_encontrada is None:
+            if cliente_encontrado is None:
+                print("Debe proporcionar un cliente para renovar la membresía.")
+                return
+            else:
+                membresia_encontrada = cliente_encontrado.get_membresia()
+                if membresia_encontrada is None:
+                    print("El cliente no tiene una membresía activa para renovar.")
+                    return
+        
+        if not membresia_encontrada.get_pago():
+            print("La membresía no ha sido pagada.")
+            return
+        if membresia_encontrada.calcular_dias_restantes() > 0:
+            print("La membresía aún está activa y no necesita renovación.")
+            return
+        
+        # Actualizar la membresía
+        print(f"Membresía renovada.")
+        self.ingreso_caja(PRECIO_MEMBRESIA, "RenovacionMembresia")
+        membresia_encontrada.renovar_membresia()
     
     def pago_ingreso_unico(self, cliente_encontrado: Cliente):
         self.ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico")

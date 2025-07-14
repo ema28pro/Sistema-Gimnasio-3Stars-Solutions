@@ -44,6 +44,53 @@ class Membresia:
         else:
             fecha_fin_obj = self.__fecha_fin
         return (fecha_fin_obj - date.today()).days
+
+    def renovar_membresia(self,fecha_inicio=None, fecha_fin=None):
+        """Renueva la membresía por 30 días a partir de la fecha de inicio proporcionada o la fecha actual si no se proporciona."""
+        if not self.__pago:
+            print("La membresía no ha sido pagada. No se puede renovar.")
+            return
+        
+        if self.calcular_dias_restantes() > 0:
+            print("La membresía aún está activa y no necesita renovación.")
+            return
+        
+        if fecha_inicio is None:
+            fecha_inicio = date.today()
+        
+        # Validar que la fecha de inicio sea un objeto date
+        if isinstance(fecha_inicio, str):
+            fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+        
+        if fecha_fin is None:
+            nueva_fecha_fin = fecha_inicio + timedelta(days=30)
+        else:
+            if not isinstance(fecha_fin, date):
+                if isinstance(fecha_fin, str):
+                    nueva_fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+                else:
+                    print("Fecha de fin inválida para calcular diferencia.")
+                    return False
+            
+            # Calcular la diferencia en días
+            diferencia_dias = (nueva_fecha_fin - fecha_inicio).days
+            # Comprobar si la diferencia es exactamente 30 días
+            if diferencia_dias != 30:
+                print(f"La diferencia entre la fecha de inicio y fin es de {diferencia_dias} días, no los 30 días estándar.")
+                if diferencia_dias > 30:
+                    print(f"Hay {diferencia_dias - 30} días adicionales.")
+                else:
+                    print(f"Faltan {30 - diferencia_dias} días para completar los 30 días estándar.")
+                
+                # Calcular la fecha de fin correcta (30 días después de la fecha de inicio)
+                fecha_fin_correcta = fecha_inicio + timedelta(days=30)
+                
+                nueva_fecha_fin = fecha_fin_correcta
+                print(f"Se ha actualizado la fecha de fin a: {nueva_fecha_fin}")
+        
+        self.__fecha_inicio = fecha_inicio
+        self.__fecha_fin = nueva_fecha_finGimnasio.renovar_membresia() got an unexpected keyword argument 'cliente'
+        print(f"Memebresia actualizada: Inicio: {self.__fecha_inicio}, Fin: {self.__fecha_fin}")
     
     def ver_info(self):
         """Muestra información de la membresía"""

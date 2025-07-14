@@ -91,6 +91,10 @@ class SesionEspecial:
     def get_cupos_disponibles(self):
         return self.__maximo_cupos - self.__cupos
     
+    def get_clientes_inscritos(self):
+        """Devuelve una lista de clientes inscritos en la sesión"""
+        return [cliente for cliente in self.__inscritos if cliente is not None]
+    
     def set_entrenador(self, entrenador):
         if self.__entrenador is None:
             print("Sesion sin entrenador")
