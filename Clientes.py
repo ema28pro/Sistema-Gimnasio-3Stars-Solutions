@@ -229,7 +229,7 @@ class Cliente:
             guardando la fecha, hora, ID, documento, nombre y estado de la membresía
             En el archivo correspondiente 'registros/Entradas.txt'.
         Args:
-            motivo (str, optional): _description_. Defaults to None.
+            motivo (str, optional): Motivo de la entrada. Defaults to None.
         """           
         # Fecha;Hora;ID;Documento;Nombre;Membresía(False/True/None)
         

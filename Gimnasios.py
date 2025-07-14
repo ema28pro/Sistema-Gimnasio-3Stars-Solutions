@@ -331,6 +331,7 @@ class Gimnasio:
         # Swich case para manejar las opciones de búsqueda
         match opcion_busqueda:
             case "1":
+                # Busqueda por ID
                 while True: #Ciclo para el correcto ingreso del ID
                     id_cliente = input("Ingrese el ID del cliente: ")
                     if ut.is_number(id_cliente, "ID"):
@@ -342,8 +343,9 @@ class Gimnasio:
                         print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                 if not cliente_encontrado: # Si no se encontró el cliente, informar al usuario
                     print(f"No se encontró un cliente con ID {id_cliente}.")
-                    return
+                    return None
             case "2":
+                # Busqueda por Nombre - Este metodo toma la primer coincidencia del nombre
                 while True:
                     nombre_cliente = input("Ingrese el nombre del cliente: ")
                     if ut.is_string(nombre_cliente, "Nombre"):
@@ -354,8 +356,9 @@ class Gimnasio:
                         print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con nombre {nombre_cliente}.")
-                    return
+                    return None
             case "3":
+                # Busqueda por Documento
                 while True:
                     documento = input("Ingrese el documento del cliente: ")
                     if ut.is_number(documento, "Documento"):
@@ -366,62 +369,66 @@ class Gimnasio:
                         print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con documento {documento}.")
-                    return
+                    return None
             case "":
                 print("Saliendo del menú de búsqueda...")
                 
         if cliente_encontrado is None:
+            # Si  no se Encontro Cliente Finaliza ejecusion
             print("No se encontró ningún cliente.")
-            return
+            return None
         else:
-            return cliente_encontrado
+            return cliente_encontrado # Objeto Cliente encontrado
 
 
-    def consultar_membresia(self, cliente_encontrado: Cliente):
-        if cliente_encontrado.get_membresia() is None:
-            print(f"El cliente {cliente_encontrado.get_nombre()} no tiene una membresía activa.")
+    def consultar_membresia(self, cliente: Cliente):
+        """ Muestra la informacion de la membresía de un cliente y Retorna el Objeto Memebreisa"""
+        
+        if cliente.get_membresia() is None:
+            print(f"El cliente {cliente.get_nombre()} no tiene una membresía activa.")
             return
         else:
-            membresia_encontrada = cliente_encontrado.get_membresia()
+            membresia = cliente.get_membresia()
         
         # Mostrar información de la membresía
         print(f"\n=== Información de Membresía ===")
-        print(f"Cliente: {cliente_encontrado.get_nombre()}")
-        print(f"Estado de pago: {'Pagada' if membresia_encontrada.get_pago() else 'Pendiente'}") 
-        print(f"Fecha de inicio: {membresia_encontrada.get_fecha_inicio()}")
-        print(f"Fecha de fin: {membresia_encontrada.get_fecha_fin()}")
+        print(f"Cliente: {cliente.get_nombre()}")
+        print(f"Estado de pago: {'Pagada' if membresia.get_pago() else 'Pendiente'}") 
+        print(f"Fecha de inicio: {membresia.get_fecha_inicio()}")
+        print(f"Fecha de fin: {membresia.get_fecha_fin()}")
         # print(f"Días restantes: {}")
         print("="*30)
         
-        return membresia_encontrada
-        
+        return membresia # Objeto Membresia encontrado
     
-    def buscar_entrenador(self, id_entrenador: int = None):
-        """
-        Busca un entrenador por su ID.
-        
+    def buscar_entrenador(self, id_entrenador: int=None):
+        """_sumary_
+            Busca un entrenador por su ID.
         Args:
-            id_entrenador (int): ID del entrenador a buscar
-        
+            id_entrenador (int): ID del Entrenador a buscar
         Returns:
             Entrenador: Objeto Entrenador si se encuentra, None si no se encuentra
         """
         
-        if id_entrenador is None:
+        if id_entrenador is None: # Si no se proporciona un ID, se solicita al usuario que lo ingrese
             while True:
                 id_entrenador = input("Ingrese el ID del entrenador: ")
                 if ut.is_number(id_entrenador, "ID"):
                     id_entrenador = int(id_entrenador)
                     break
         
+        # Se recorre la lista de entrenadores para buscar el ID
         for entrenador in self.__entrenadores:
             if entrenador.get_id_entrenador() == id_entrenador:
                 print(f"Entrenador : ID: {entrenador.get_id_entrenador()}, Nombre: {entrenador.get_nombre()}, Especialidad: {entrenador.get_especialidad()}")
-                return entrenador
+                # Si se encuentra el Entrenador, se retorna para finalizar la ejecucion
+                return entrenador # Objeto Entrenador encontrado
+        # Si no se encuentra el entrenador, se informa al usuario
         print(f"No se encontró un entrenador con ID {id_entrenador}.")
         return None
     
-    def visualizar_clientes(self):      
+    def visualizar_clientes(self):
+        """Muestra todos los clientes registrados en el gimnasio."""
         print("\n=== Clientes Registrados ===")
         total_clientes = 0
         for cliente in self.__clientes:
@@ -431,6 +438,7 @@ class Gimnasio:
         
         print(f"\nNumero de Clientes Registradas : {total_clientes}")
         
+        # Permite seleccionar un cliente por ID para retornarlo
         id_cliente = input("\nSelecione un Cliente o Enter para continuar... ")
         if id_cliente == "":
             print("Saliendo del menú de clientes...")
@@ -440,23 +448,25 @@ class Gimnasio:
             if not ut.is_number(id_cliente, "ID de Cliente"):
                 print("ID de cliente inválido. Debe ser un número.")
                 return None
-            if int(id_cliente) < 1:
+            id_cliente = int(id_cliente)
+            if id_cliente < 1:
                 print(f"ID de cliente inválido.")
                 return None
             
-            id_cliente = int(id_cliente)
             # Buscar el cliente por ID
             for cliente in self.__clientes:
                 if cliente is not None and cliente.get_id_cliente() == id_cliente:
+                    # Si se encuentra el cliente, se imprime su información
                     print(f"\n===== Cliente Seleccionado ====")
                     print(f"Cliente ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                     print(f"Telefono: {cliente.get_telefono() if cliente.get_telefono() else 'No registrado'}")
                     print(f"Membresía: {cliente.tiene_membresia()}")
-                    return cliente
+                    return cliente # Y se retorna el Objeto Cliente encontrado para finalizar la ejecucion
             print(f"No se encontró un cliente con ID {id_cliente}.")
             return None
     
     def visualizar_membresias(self):
+        """Muestra todas las membresias registradas en el gimnasio."""
         print("\n=== Membresías Registradas ===")
         total_membresias = 0
         for cliente in self.__clientes:
@@ -471,9 +481,10 @@ class Gimnasio:
     
     
     def mostrar_entrenadores(self):
+        """Muestra todos los entrenadores registrados en el gimnasio."""
         if not self.__entrenadores or len(self.__entrenadores) == 0:
             print("No hay entrenadores registrados.")
-            return
+            return None
         
         print("\n=== Entrenadores Registrados ===")
         total_entrenadores = 0
@@ -483,6 +494,7 @@ class Gimnasio:
             
         print(f"\nNumero de Entrenadores Registrados : {total_entrenadores}")
         
+        # Permite seleccionar un entrenador por ID para retornarlo
         id_entrenador = input("\nSeleccione un Entrenador o Enter para continuar... ")
         
         if id_entrenador == "":
@@ -492,18 +504,18 @@ class Gimnasio:
             # Validar que el ID ingresado sea un número
             if not ut.is_number(id_entrenador, "ID de Entrenador"):
                 print("ID de entrenador inválido. Debe ser un número.")
-                return
-            if int(id_entrenador) < 1:
-                print(f"ID de entrenador inválido.")
-                return
-            
+                return None
             id_entrenador = int(id_entrenador)
+            if id_entrenador < 1:
+                print(f"ID de entrenador inválido.")
+                return None
+            
             # Buscar el entrenador por ID
             entrenador = self.buscar_entrenador(id_entrenador)
             if not entrenador:
                 print(f"No se encontró un entrenador con ID {id_entrenador}.")
             else:
-                return entrenador
+                return entrenador # Retorna el Objeto Entrenador encontrado
     
     
     def mostrar_sesiones(self):
@@ -511,7 +523,7 @@ class Gimnasio:
         total_sesiones = 0
         if not self.__sesiones or len(self.__sesiones) == 0:
             print("No hay sesiones especiales programadas.")
-            return
+            return None
         else:
             print("\n=== Todas las Sesiones Especiales ===")
             for sesion in self.__sesiones:
@@ -523,21 +535,22 @@ class Gimnasio:
                     print("No se encontró un entrenador para esta sesión.")
             print(f"\nNumero de Sesiones Especiales Registradas : {total_sesiones}")
         
+        # Permite seleccionar una sesión por ID para retornarla
         id_sesion = input("\nSeleccione una Sesion o Enter para continuar... ")
         
         if id_sesion == "":
             print("Saliendo del menú de sesiones...")
-            return
+            return None
         else:
             # Validar que la sesión ingresada sea un número
             if not ut.is_number(id_sesion, "ID de Sesión"):
                 print("ID de sesión inválido. Debe ser un número.")
                 return
-            if int(id_sesion) < 1:
+            id_sesion = int(id_sesion)
+            if id_sesion < 1:
                 print(f"ID de sesión inválido. Debe estar entre 1 y {total_sesiones}.")
                 return
             
-            id_sesion = int(id_sesion)
             # Buscar la sesión por ID
             for sesion in self.__sesiones:
                 if sesion.get_id_sesion() == id_sesion:
@@ -547,14 +560,13 @@ class Gimnasio:
                     entrenador.mostrar_info()
                     return sesion
             print(f"No se encontró una sesión con ID {id_sesion}.")
-            return
+            return None
     
-    def sesiones_agendadas(self, cliente_encontrado: Cliente):
-        """
-        Muestra las sesiones especiales a las que un cliente está inscrito.
-        
+    def sesiones_agendadas(self, cliente: Cliente):
+        """_sumary_
+            Muestra las sesiones especiales a las que un cliente está inscrito.
         Args:
-            cliente_encontrado: Objeto Cliente para el cual se desean ver las sesiones agendadas.
+            cliente: Objeto Cliente para el cual se desean ver las sesiones agendadas.
         """
         print(f"\n=== Sesiones Agendadas para {cliente_encontrado.get_nombre()} ===")
         for sesion in self.__sesiones:
@@ -564,70 +576,86 @@ class Gimnasio:
     
     #? ============================== Metodos de Modificacion ==============================
 
-    def ingreso_caja(self, efectivo: float, motivo:str=None): #pendieten pedir el tipo para el registro en persitencia
+    def ingreso_caja(self, efectivo: float, motivo: str=None): #pendieten pedir el tipo para el registro en persitencia
         """_summary_
-            Modifica el efectivo del gimnasio.
-        """
-        # Pensar si es necesario el Cliente quien paga, o si es necesario el ID del cliente
+            Modifica el efectivo del gimnasio y registra el ingreso en un archivo de texto.
+        Args:
+            efectivo (float): Efectivo a ingresar en la caja del gimnasio.
+            motivo (str, optional): Motivo del ingreso. Defaults to None.
+        Notes:
+            - Se penso en guardar informacion del cliente que paga pero no c implemento
+        """        
+
         # Registrar el ingreso en formato: fecha;hora;tipo;efectivo
-        fecha = datetime.now().strftime('%Y-%m-%d')
-        hora = datetime.now().strftime('%H:%M:%S')
-        tipo = motivo if motivo else "Ingreso"
+        fecha = datetime.now().strftime('%Y-%m-%d') # Objeto fecha y hora actual a str
+        hora = datetime.now().strftime('%H:%M:%S')  # Objeto fecha y hora actual a str
+        tipo = motivo if motivo else "Ingreso" # Si no se proporciona motivo, se usa "Ingreso" como predeterminado
         registro = f"{fecha};{hora};{tipo};{float(efectivo):,}\n"
         
         print(f"Efectivo actual: ${self.__efectivo:,} + ${float(efectivo):,}")
         self.__efectivo += float(efectivo)
         print(f"Efectivo actualizado a: ${self.__efectivo:,}")
         
+        # Guardar el registro en un archivo de texto
         with open("registros/Caja.txt", "a") as caja_file:
             caja_file.write(registro)
-        
-
     
-    def pagar_membresia(self, membresia_encontrada: Membresia):
-        if membresia_encontrada.get_pago():
+    def pagar_membresia(self, membresia: Membresia):
+        """_summary_
+            Metodo encargado de pagar la Membresia del Cliente si esta en deuda.
+        Args:
+            membresia (Membresia): Objeto Membresia del Cliente a pagar.
+        """        
+        if membresia.get_pago():
             print("La membresía ya ha sido pagada.")
             return
         else:
             print(f"El cliente tiene una membresía que aún no ha sido pagada.")
-            self.ingreso_caja(PRECIO_MEMBRESIA,"PagoMembresia")
-            membresia_encontrada.set_pago(True)
+            self.ingreso_caja(PRECIO_MEMBRESIA,"PagoMembresia") # Se registra el ingreso en caja con su motivo
+            membresia.set_pago(True) # Actualizamos el estado de pago de la membresía
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
-    def renovar_membresia(self, cliente_encontrado: Cliente=None,membresia_encontrada: Membresia = None):
+    def renovar_membresia(self, cliente: Cliente=None ,membresia: Membresia = None):
+        """_summary_
+            Metodo encargado de renovar la Membresia del Cliente.
+        Args:
+            cliente (Cliente, optional): Objeto Cliente que desea renovar su Membresia. Defaults to None.
+            membresia (Membresia, optional): Membresia a renovar asiciada al Cliente. Defaults to None.
+        """        
         
-        if membresia_encontrada is None:
-            if cliente_encontrado is None:
+        if membresia is None:
+            if cliente is None:
                 print("Debe proporcionar un cliente para renovar la membresía.")
                 return
             else:
-                membresia_encontrada = cliente_encontrado.get_membresia()
-                if membresia_encontrada is None:
+                membresia = cliente.get_membresia()
+                if membresia is None:
                     print("El cliente no tiene una membresía activa para renovar.")
                     return
         
-        if not membresia_encontrada.get_pago():
+        if not membresia.get_pago():
             print("La membresía no ha sido pagada.")
             return
-        if membresia_encontrada.calcular_dias_restantes() > 0:
+        if membresia.calcular_dias_restantes() > 0:
             print("La membresía aún está activa y no necesita renovación.")
             return
         
         # Actualizar la membresía
         print(f"Membresía renovada.")
-        self.ingreso_caja(PRECIO_MEMBRESIA, "RenovacionMembresia")
-        membresia_encontrada.renovar_membresia()
+        self.ingreso_caja(PRECIO_MEMBRESIA, "RenovacionMembresia") # Se registra el ingreso en caja con su motivo
+        membresia_.renovar_membresia() # Actualiza la fecha de fin de la membresía
     
-    def pago_ingreso_unico(self, cliente_encontrado: Cliente):
-        self.ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico")
-        cliente_encontrado.registrar_entrada("IngresoUnico")
+    def pago_ingreso_unico(self, cliente: Cliente):
+        """"Metodo encargado de registrar el ingreso unico de un cliente sin tener que adquirir memebreisa, pagando el ingreso unico del Cliente."""
+        self.ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico") # Se registra el ingreso en caja con su motivo
+        cliente.registrar_entrada("IngresoUnico") # Registra la entrada del cliente en el historial de entradas
     
-    def agendar_sesion(self, cliente, id_sesion: int= None):
-        """
-        Permite a un cliente inscribirse en una sesión especial.
-        
+    def agendar_sesion(self, cliente: Cliente, id_sesion: int=None):
+        """_summary_
+            Permite a un cliente inscribirse en una sesión especial.
         Args:
             cliente: Objeto Cliente que se quiere inscribir
+            id_sesion (int, optional): ID de la sesión especial a la que se quiere inscribir. Si es None, se muestran todas las sesiones disponibles.
         """
         if not self.__sesiones or len(self.__sesiones) == 0:
             print("No hay sesiones especiales disponibles.")
@@ -650,6 +678,7 @@ class Gimnasio:
             print(f"No se encontró una sesión con ID {id_sesion}.")
             return
         else:
+            # Si no se proporciona un ID de sesión, mostrar todas las sesiones disponibles
             print("\n=== Sesiones Especiales Disponibles ===")
             sesiones_disponibles = []
             
@@ -671,6 +700,7 @@ class Gimnasio:
                 return
             
             sesion_ids = [sesion.get_id_sesion() for sesion in sesiones_disponibles]
+            # Lista de los IDs de las sesiones disponibles
             
             while True:
                 print("Enter o '0' para cancelar la operación.")
@@ -694,7 +724,7 @@ class Gimnasio:
                             break
                 else:
                     print("Por favor ingrese un número válido.")
-                    
+                
             # Buscar la sesión seleccionada
             for sesion in sesiones_disponibles:
                 if sesion.get_id_sesion() == id_sesion:
@@ -707,29 +737,36 @@ class Gimnasio:
 
     #! ============================== Metodos de Eliminacion ==============================
     
-    def eliminar_cliente(self, id_cliente: int= None,cliente:Cliente = None):
+    def eliminar_cliente(self, id_cliente: int=None,cliente: Cliente=None):
+        """_summary_
+            Funcion encargada de eliminar un Cliente del array de clientes y todas sus referencias.
+            Si no se proporciona un ID o un objeto Cliente, se solicita al usuario que ingrese el ID del cliente a eliminar.
+        Args:
+            id_cliente (int, optional): ID del Cliente a eliminar. Defaults to None.
+            cliente (Cliente, optional): Objeto Cliente a eliminar. Defaults to None.
+
+        Returns:
+            bool: Booleano que indica si la eliminación fue exitosa o no.
+        """        
         
         if self.__numero_clientes == 0:
             print("No hay clientes registrados para eliminar.")
             return False
         
-        if id_cliente is None and cliente is None:
-            print("Debe proporcionar un ID de cliente o un objeto Cliente para eliminar.")
-            while True:
-                id_cliente = input("Ingrese el ID del Cliente: ")
-                if ut.is_number(id_cliente, "ID"):
-                    id_cliente = int(id_cliente)
-                    break
+        # Validaciones
         
         if id_cliente is None:
-            if cliente is not None:
-                id_cliente = cliente.get_id_cliente()
-            else:
+            if cliente is None:
+                # Si no se proporciona un ID ni un objeto Cliente, se solicita al usuario que ingrese el ID
+                print("Debe proporcionar un ID de cliente o un objeto Cliente para eliminar.")
                 while True:
                     id_cliente = input("Ingrese el ID del Cliente: ")
                     if ut.is_number(id_cliente, "ID"):
                         id_cliente = int(id_cliente)
                         break
+            else:
+                # Si se proporciona un objeto Cliente, obtenemos su ID
+                id_cliente = cliente.get_id_cliente()
         
         # Buscar el cliente por ID
         cliente_encontrado = None
@@ -737,7 +774,6 @@ class Gimnasio:
         
         for i in range(len(self.__clientes)):
             cliente = self.__clientes[i]
-            
             if cliente is not None and cliente.get_id_cliente() == id_cliente:
                 cliente_encontrado = cliente
                 indice_cliente = i
@@ -746,16 +782,14 @@ class Gimnasio:
         if cliente_encontrado:
             # Mostrar Cliente
             print(f"Cliente con ID {id_cliente} y nombre {cliente_encontrado.get_nombre()}.")
-                
-            # Confirmación de eliminación
             
+            # Confirmación de eliminación
             while True:
                 confirmar = input("¿Está seguro de eliminar este Cliente? (si/no): ").strip().lower()
                 if ut.valid_yes_no(confirmar):
                     break
             
             if ut.yes_no(confirmar):
-                
                 self.__clientes[i].set_membresia(None)  # Eliminar membresía si existe, luego implementar eliminar_membresia
                 
                 # Buscar si el cliente tiene sesiones especiales
@@ -769,14 +803,22 @@ class Gimnasio:
                 print(f"Cliente con ID {id_cliente} eliminado exitosamente.")
                 return True
             else:
+                # Si el usuario cancela la eliminación, informamos y finalizamos la ejecución
                 print("Eliminación cancelada.")
                 return False
         else:
+            # Si no se encuentra el cliente, informamos y finalizamos la ejecución
             print(f"No se encontró un cliente con ID {id_cliente}.")
             return False
-            
-    def eliminar_membresia(self, cliente: Cliente= None):
-        
+
+    def eliminar_membresia(self, cliente: Cliente=None):
+        """_summary_
+            Metodo encargado de eliminar la Membresia de un Cliente.
+        Args:
+            cliente (Cliente, optional): Objeto Cliente del cual se desea eliminar su Membresia. Defaults to None.
+        Returns:
+            bool: Booleano que indica si la eliminación fue exitosa o no.
+        """        
         if cliente is None:
             return False
         
@@ -785,32 +827,37 @@ class Gimnasio:
             return False
         
         print("\n=== Eliminar Membresía ===")
-        
         print(f"Cliente: {cliente.get_nombre()}")
         print(f"ID Cliente: {cliente.get_id_cliente()}")
         print(f"Membresía: {cliente.tiene_membresia()}")
         while True:
+            # Confirmación de eliminación
             confirmar = input("¿Está seguro de eliminar la membresía? (si/no): ").strip().lower()
             if ut.valid_yes_no(confirmar):
                 break
         if ut.yes_no(confirmar):
-            cliente.set_membresia(None)
+            cliente.set_membresia(None) # Eliminar la membresía del cliente
             print(f"Membresía del cliente {cliente.get_nombre()} eliminada exitosamente.")
             return True
         else:
             print("Eliminación de membresía cancelada.")
             return False
-        
-    
-    
-    
     
     def eliminar_entrenador(self, id_entrenador: int=None):
+        """_summary_
+            Metodo encargado de eliminar un Entrenador del array de entrenadores y todas sus referencias.
+        Args:
+            id_entrenador (int, optional): ID del Entrenador que se desea Eliminar. Defaults to None.
+        Returns:
+            bool: Booleano que indica si la eliminación fue exitosa o no.
+        """
+        
         if not self.__entrenadores:
             print("No hay entrenadores registrados para eliminar.")
-            return
+            return False
         
         if id_entrenador is None:
+            # Si no se proporciona un ID, se solicita al usuario que lo ingrese
             while True:
                 id_entrenador = input("Ingrese el ID del entrenador: ")
                 if ut.is_number(id_entrenador, "ID"):
@@ -818,11 +865,13 @@ class Gimnasio:
                     break
         
         for i in range(len(self.__entrenadores)):
+            # Buscamos el Entrenador por su ID y mostramos su información
             if self.__entrenadores[i].get_id_entrenador() == id_entrenador:
                 print(f"Entrenador con ID {id_entrenador} y nombre {self.__entrenadores[i].get_nombre()}.")
                 print(f"Tambien se eliminarán las sesiones especiales asociadas a este entrenador.")
                 print(f"===== Sesiones asociadas =====")
                 total_sesiones = 0
+                # Mostramos las sesiones asociadas al entrenador
                 for sesion in self.__sesiones:
                     if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador:
                         total_sesiones += 1
@@ -830,13 +879,15 @@ class Gimnasio:
                         estado = f"{dias_restantes} días restantes" if dias_restantes is not None else "Ya pasó"
                         print(f" - Sesión ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, {estado}")
                 print(f"Total de sesiones asociadas: {total_sesiones}")
+                
+                # Y pedimos una confirmación de eliminación
                 while True:
                     confirmacion = input("¿Estas seguro de eliminar el entrenador? (si/no): ")
                     if ut.valid_yes_no(confirmacion):
                         break
                 if ut.yes_no(confirmacion):
                     print(f"Eliminando entrenador {self.__entrenadores[i].get_nombre()}...")
-                    self.__entrenadores.pop(i)
+                    self.__entrenadores.pop(i) # Eliminamos el entrenador de la lsi
                     
                     # Buscar sesiones en las que esta
                     for sesion in self.__sesiones:
@@ -844,25 +895,39 @@ class Gimnasio:
                             print(f"Eliminando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
                             if not self.eliminar_sesion(sesion): # Si la sesion no se elimino, hay que eliminar la referencia del entrenador
                                 sesion.set_entrenador(None)
+                    
+                    return True # Si se elimino el entrenador y las sesiones asociadas
                 else:
                     print("Eliminación cancelada.")
+                    return False
                 break
         
-    def eliminar_sesion(self, sesion=None):
+    def eliminar_sesion(self, sesion: SesionEspecial=None, id_sesion: int=None):
+        """_summary_
+            Metodo encargado de eliminar una Sesion Especial del array de sesiones y todas sus referencias.
+        Args:
+            sesion (SesionEspecial, optional): Objeto SesionEspecial que se desea eliminar. Defaults to None.
+        Returns:
+            bool: Booleano que indica si la eliminación fue exitosa o no.
+        """        
         if not self.__sesiones or len(self.__sesiones) == 0:
             print("No hay sesiones especiales programadas para eliminar.")
-            return
+            return False
+        
         if sesion is None:
-            while True:
-                id_sesion = input("Ingrese el ID de la sesión a eliminar: ")
-                if ut.is_number(id_sesion, "ID"):
-                    id_sesion = int(id_sesion)
-                    break
+            if id_sesion is None:
+                while True:
+                    id_sesion = input("Ingrese el ID de la sesión a eliminar: ")
+                    if ut.is_number(id_sesion, "ID"):
+                        id_sesion = int(id_sesion)
+                        break
+            else:
+                id_sesion = int(id_sesion)
         else:
-            if isinstance(sesion, SesionEspecial):
+            if id_sesion is None:
                 id_sesion = sesion.get_id_sesion()
             else:
-                id_sesion = sesion
+                id_sesion = int(id_sesion)
         
         # Buscar la sesión por ID
         for i in range(len(self.__sesiones)):
@@ -871,6 +936,7 @@ class Gimnasio:
                 dias_restantes = sesion.calcular_dias_restantes()
                 estado = f"{dias_restantes} días restantes" if dias_restantes is not None else "Ya pasó"
                 print(f"Sesión especial con ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, {estado}")
+                # Pedimos una confirmación de eliminación
                 while True:
                     confirmacion = input("¿Estas seguro de eliminar la sesion? (si/no): ")
                     if ut.valid_yes_no(confirmacion):
