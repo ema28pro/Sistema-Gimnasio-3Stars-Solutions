@@ -1043,7 +1043,7 @@ class Gimnasio:
                         total_ingresos += monto
                         
                         # Clasificar por tipo de ingreso
-                        if tipo in ["Membresia", "PagoMembresia"]:
+                        if tipo in ["Membresia", "PagoMembresia", "RenovacionMembresia"]:
                             ingresos_membresia += monto
                             cantidad_membresias += 1
                         elif tipo in ["PagoIngresoUnico", "IngresoUnico"]:

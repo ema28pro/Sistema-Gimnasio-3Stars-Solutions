@@ -40,10 +40,12 @@ class Gimnasio {
   + visualizar_membresias()
   + mostrar_entrenadores()
   + mostrar_sesiones()
+  + sesiones_agendadas()
 
   %% Metdosos de Actualizacion (Modificacion)
   + ingreso_caja()
   + pagar_membresia()
+  + renovar_membresia()
   + pago_ingreso_unico()
   + agendar_sesion()
 
@@ -88,6 +90,9 @@ class Cliente {
   %% +solicitar_sesion()
 
   + info_cliente()
+  + tiene_membresia()
+  + estado_pago_membresia()
+  + estado_vigencia_membresia()
   + info_membresia()
   + registrar_entrada()
 }
@@ -99,6 +104,7 @@ class Membresia {
   - String fecha_fin
   
   + calcular_dias_restantes()
+  + renovar_membresia()
   + ver_info()
 }
 
