@@ -1043,7 +1043,7 @@ class Gimnasio:
                     mes_año = fecha_obj.strftime("%m")  # Formato YYYY-MM
                     # Solo agregar si no está ya en la lista (evitar duplicados)
                     if mes_año not in meses_disponibles:
-                        meses_disponibles+=[mes_año]
+                        meses_disponibles.append(mes_año)
         
         if not meses_disponibles:
             print("❌ No se encontraron registros de entradas en el archivo.")
@@ -1608,6 +1608,7 @@ class Gimnasio:
                     except Exception as e:
                         print(f"✗ Error en la fecha de inicio de membresía en línea {i+1}: {str(e)}")
                         print("⚠️  Se omitirá la membresía para este cliente.")
+                        lineas_error.append(i+1)
                         continue
                     
                     # Validar fecha de fin de membresía (opcional - se puede calcular automáticamente)
