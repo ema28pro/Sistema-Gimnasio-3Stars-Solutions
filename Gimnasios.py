@@ -150,6 +150,38 @@ class Gimnasio:
                 print("Fecha de fin inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
                 return False
         
+        # Validar la diferencia entre fecha_inicio y fecha_fin cuando ambas son proporcionadas
+        if fecha_inicio is not None and fecha_fin is not None:
+            # Asegurarse que ambas fechas sean objetos date
+            if not isinstance(fecha_inicio, date):
+                if isinstance(fecha_inicio, str):
+                    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+                else:
+                    print("Fecha de inicio inválida para calcular diferencia.")
+                    return False
+            if not isinstance(fecha_fin, date):
+                if isinstance(fecha_fin, str):
+                    fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+                else:
+                    print("Fecha de fin inválida para calcular diferencia.")
+                    return False
+            
+            # Calcular la diferencia en días
+            diferencia_dias = (fecha_fin - fecha_inicio).days
+            # Comprobar si la diferencia es exactamente 30 días
+            if diferencia_dias != 30:
+                print(f"La diferencia entre la fecha de inicio y fin es de {diferencia_dias} días, no los 30 días estándar.")
+                if diferencia_dias > 30:
+                    print(f"Hay {diferencia_dias - 30} días adicionales.")
+                else:
+                    print(f"Faltan {30 - diferencia_dias} días para completar los 30 días estándar.")
+                
+                # Calcular la fecha de fin correcta (30 días después de la fecha de inicio)
+                fecha_fin_correcta = fecha_inicio + timedelta(days=30)
+                
+                fecha_fin = fecha_fin_correcta
+                print(f"Se ha actualizado la fecha de fin a: {fecha_fin}")
+        
         if pago is None:
             while True: # Ciclo para Ingreso correcto del pago
                 pagar = input("¿Desea pagar inmediatamente? (si/no)\nR// ")
@@ -187,12 +219,13 @@ class Gimnasio:
                     break
             
             while True:
-                especialidad = input(f"Ingrese la especialidad del Entrenador {self.__sesiones_especiales} : ").lower()
-                if ut.is_string(nombre, "Especialidad"):
-                    if especialidad in self.__sesiones_especiales:
+                especialidad = input(f"Ingrese la indice de la especialidad del Entrenador {self.__sesiones_especiales} : ")
+                if ut.is_number(especialidad, "Indice Especialidad"):
+                    especialidad = int(especialidad)
+                    if especialidad <= len(self.__sesiones_especiales) and especialidad >= 0:
                         break
                     else:
-                        print(f"Especialidad no válida. Debe ser una de las siguientes: {self.__sesiones_especiales}")
+                        print(f"Especialidad no válida. Debe ser un indice de las siguientes: {self.__sesiones_especiales}")
             
             while True:
                 telefono = input("Ingrese el numero de telefono del Entrenador (Enter para Omitir) : ")
@@ -213,13 +246,13 @@ class Gimnasio:
         
         
         id_entrenador = self.__historico_entrenadores + 1
-        nuevo_entrenador = Entrenador(id_entrenador, nombre.lower(), especialidad, telefono)
+        nuevo_entrenador = Entrenador(id_entrenador, nombre.lower(), self.__sesiones_especiales[especialidad], telefono)
         self.__entrenadores+=[nuevo_entrenador]
         self.__historico_entrenadores += 1
-        print(f"Entrenador {nombre} especializado en {especialidad} registrado con ID: {id_entrenador}")
+        print(f"Entrenador {nombre} especializado en {self.__sesiones_especiales[especialidad]} registrado con ID: {id_entrenador}")
         return nuevo_entrenador
     
-    def crear_sesion_especial(self, entrenador=None, fecha: str=None, maximo_cupos: int = 25,id_entrenador: int = None):
+    def crear_sesion_especial(self, entrenador=None, fecha: str=None, maximo_cupos: int = None,id_entrenador: int = None):
         """
         Crea una nueva sesión especial.
         
@@ -252,6 +285,16 @@ class Gimnasio:
                 if entrenador is None:
                     print(f"No se encontró un entrenador con ID {id_entrenador}.")
                     return None
+        
+        if not maximo_cupos:
+            while True:
+                maximo_cupos = input("Ingrese el número máximo de cupos (Enter para usar el valor por defecto 25): ")
+                if maximo_cupos == "":
+                    maximo_cupos = 25
+                    break
+                elif ut.is_number(maximo_cupos, "Maximo Cupos"):
+                    maximo_cupos = int(maximo_cupos)
+                    break
         
         id_sesion = self.__historico_sesiones + 1
         nueva_sesion = SesionEspecial(id_sesion, entrenador, fecha, maximo_cupos)
@@ -299,7 +342,7 @@ class Gimnasio:
                     if cliente is not None and cliente.get_id_cliente() == int(id_cliente): # Buscar coincidencia
                         cliente_encontrado = cliente # Guardar el cliente encontrado
                         # Imprimir los detalles del cliente encontrado
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                 if not cliente_encontrado: # Si no se encontró el cliente, informar al usuario
                     print(f"No se encontró un cliente con ID {id_cliente}.")
                     return
@@ -311,7 +354,7 @@ class Gimnasio:
                 for cliente in self.__clientes:
                     if cliente is not None and cliente.get_nombre() == nombre_cliente.lower():
                         cliente_encontrado = cliente
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con nombre {nombre_cliente}.")
                     return
@@ -323,7 +366,7 @@ class Gimnasio:
                 for cliente in self.__clientes:
                     if cliente is not None and cliente.get_documento() == documento:
                         cliente_encontrado = cliente
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con documento {documento}.")
                     return
@@ -387,7 +430,7 @@ class Gimnasio:
         for cliente in self.__clientes:
             if cliente is not None:
                 total_clientes += 1
-                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
+                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registro: {cliente.get_fecha_registro()} {cliente.tiene_membresia()}")
         
         print(f"\nNumero de Clientes Registradas : {total_clientes}")
         
@@ -409,7 +452,9 @@ class Gimnasio:
             for cliente in self.__clientes:
                 if cliente is not None and cliente.get_id_cliente() == id_cliente:
                     print(f"\n===== Cliente Seleccionado ====")
-                    print(f"Cliente ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
+                    print(f"Cliente ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro()}")
+                    print(f"Telefono: {cliente.get_telefono() if cliente.get_telefono() else 'No registrado'}")
+                    print(f"Membresía: {cliente.tiene_membresia()}")
                     return cliente
             print(f"No se encontró un cliente con ID {id_cliente}.")
             return None
@@ -422,7 +467,7 @@ class Gimnasio:
                 membresia = cliente.get_membresia()
                 total_membresias += 1
                 dias_restantes = membresia.calcular_dias_restantes()
-                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_regitro()}
+                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_registro()}
                         Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {dias_restantes if dias_restantes < 0 else "Vencida"} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
@@ -630,49 +675,100 @@ class Gimnasio:
 
     #! ============================== Metodos de Eliminacion ==============================
     
-    def eliminar_cliente(self, id_cliente: int= None):
+    def eliminar_cliente(self, id_cliente: int= None,cliente:Cliente = None):
         
-        if id_cliente is None:
+        if self.__numero_clientes == 0:
+            print("No hay clientes registrados para eliminar.")
+            return False
+        
+        if id_cliente is None and cliente is None:
+            print("Debe proporcionar un ID de cliente o un objeto Cliente para eliminar.")
             while True:
                 id_cliente = input("Ingrese el ID del Cliente: ")
                 if ut.is_number(id_cliente, "ID"):
                     id_cliente = int(id_cliente)
                     break
         
+        if id_cliente is None:
+            if cliente is not None:
+                id_cliente = cliente.get_id_cliente()
+            else:
+                while True:
+                    id_cliente = input("Ingrese el ID del Cliente: ")
+                    if ut.is_number(id_cliente, "ID"):
+                        id_cliente = int(id_cliente)
+                        break
+        
+        # Buscar el cliente por ID
+        cliente_encontrado = None
+        indice_cliente = -1
+        
         for i in range(len(self.__clientes)):
-            if self.__clientes[i].get_id_cliente() == id_cliente:
-                print(f"Cliente con ID {id_cliente} y nombre {self.__clientes[i].get_nombre_c()}.")
-                confirmar = input("¿Está seguro de eliminar este Cliente? (si/no): ").strip().lower()
-                if confirmar == 'si':
-                    self.__clientes.pop(i)
-                else:
-                    print("Eliminación cancelada.")
-                break
+            cliente = self.__clientes[i]
             
-    def eliminar_membresia(self, id_cliente: int= None):
+            if cliente is not None and cliente.get_id_cliente() == id_cliente:
+                cliente_encontrado = cliente
+                indice_cliente = i
+                break
         
-        if id_cliente is None:
+        if cliente_encontrado:
+            # Mostrar Cliente
+            print(f"Cliente con ID {id_cliente} y nombre {cliente_encontrado.get_nombre()}.")
+                
+            # Confirmación de eliminación
+            
             while True:
-                id_cliente = input("Ingrese el ID del Cliente: ")
-                if ut.is_number(id_cliente, "ID"):
-                    id_cliente = int(id_cliente)
+                confirmar = input("¿Está seguro de eliminar este Cliente? (si/no): ").strip().lower()
+                if ut.valid_yes_no(confirmar):
                     break
+            
+            if ut.yes_no(confirmar):
+                
+                self.__clientes[i].set_membresia(None)  # Eliminar membresía si existe, luego implementar eliminar_membresia
+                
+                # Buscar si el cliente tiene sesiones especiales
+                for sesion in self.__sesiones:
+                    print(f"Verificando sesion {sesion.get_id_sesion()} ...")
+                    sesion.editar_inscritos(cliente.get_id_cliente())
+                
+                # Eliminar cliente del array
+                self.__clientes[i] = None 
+                self.__numero_clientes -= 1 
+                print(f"Cliente con ID {id_cliente} eliminado exitosamente.")
+                return True
+            else:
+                print("Eliminación cancelada.")
+                return False
+        else:
+            print(f"No se encontró un cliente con ID {id_cliente}.")
+            return False
+            
+    def eliminar_membresia(self, cliente: Cliente= None):
         
-        for i in range(len(self.__clientes)):
-            if self.__clientes[i].get_id_cliente() == id_cliente:
-                cliente = self.__clientes[i]
-                if cliente.get_membresia() is None:
-                    print(f"El cliente {cliente.get_nombre_c()} no tiene una membresía activa.")
-                    return
-                else:
-                    print(f"Cliente con ID {id_cliente} y nombre {cliente.get_nombre_c()}.")
-                    confirmar = input("¿Está seguro de eliminar la membresía de este Cliente? (si/no): ").strip().lower()
-                    if confirmar == 'si':
-                        cliente.set_membresia(None)
-                        print(f"Membresía del cliente {cliente.get_nombre_c()} eliminada.")
-                    else:
-                        print("Eliminación cancelada.")
-                break     
+        if cliente is None:
+            return False
+        
+        if cliente.get_membresia() is None:
+            print(f"El cliente {cliente.get_nombre()} no tiene una membresía activa.")
+            return False
+        
+        print("\n=== Eliminar Membresía ===")
+        
+        print(f"Cliente: {cliente.get_nombre()}")
+        print(f"ID Cliente: {cliente.get_id_cliente()}")
+        print(f"Membresía: {cliente.tiene_membresia()}")
+        while True:
+            confirmar = input("¿Está seguro de eliminar la membresía? (si/no): ").strip().lower()
+            if ut.valid_yes_no(confirmar):
+                break
+        if ut.yes_no(confirmar):
+            cliente.set_membresia(None)
+            print(f"Membresía del cliente {cliente.get_nombre()} eliminada exitosamente.")
+            return True
+        else:
+            print("Eliminación de membresía cancelada.")
+            return False
+        
     
     
     
@@ -1236,7 +1332,7 @@ class Gimnasio:
                     "nombre": cliente.get_nombre(),
                     "documento": cliente.get_documento(),
                     "telefono": cliente.get_telefono(),
-                    "fecha_registro": cliente.get_fecha_regitro(),
+                    "fecha_registro": cliente.get_fecha_registro(),
                     "membresia": None
                 }
                 
@@ -1397,6 +1493,7 @@ class Gimnasio:
                     
                     if (linea[4] in inval) or (linea[5] in inval):
                         print(f"⚠️  Línea {i+1} tiene datos de membresía inválidos o cliente sin membresia, se omitirá la membresía.")
+                        clientes_cargados += 1
                         continue
                     
                     if linea[6] in inval:
@@ -1459,9 +1556,9 @@ class Gimnasio:
                 if i is not None:
                     membresia = i.get_membresia()
                     if membresia:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_regitro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
+                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
                     else:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_regitro()};None;None;None\n")
+                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro()};None;None;None\n")
         
         return nombre_archivo
         print(f"✓ Datos exportados exitosamente a: {nombre_archivo}")

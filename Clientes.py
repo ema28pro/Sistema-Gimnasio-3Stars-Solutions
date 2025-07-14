@@ -43,7 +43,7 @@ class Membresia:
             self.__fecha_fin = fecha_fin_obj  # Actualizar el atributo para que sea un objeto date
         else:
             fecha_fin_obj = self.__fecha_fin
-        return (self.__fecha_fin_obj - date.today()).days
+        return (fecha_fin_obj - date.today()).days
     
     def ver_info(self):
         """Muestra información de la membresía"""
@@ -127,6 +127,36 @@ class Cliente:
         else:
             print("No tiene membresía activa.")
         print("="*40)
+    
+    def tiene_membresia(self):
+        """Verifica si el cliente tiene una membresía activa"""
+        if self.__membresia:
+            return "Con Membresía" , self.estado_pago_membresia(), self.estado_vigencia_membresia()
+        else:
+            return "Sin Membresía"
+    
+    def estado_pago_membresia(self):
+        """Verifica el estado de la membresía del cliente"""
+        if self.__membresia:
+            if self.__membresia.get_pago():
+                return "Paga"
+            else:
+                return "Pendiente"
+        else:
+            return "Sin Membresía"
+    
+    def estado_vigencia_membresia(self):
+        """Verifica si la membresía está vigente"""
+        if self.__membresia:
+            dias_restantes = self.__membresia.calcular_dias_restantes()
+            if dias_restantes > 0:
+                return "Activa"
+            elif dias_restantes == 0:
+                return "Vigente, expira hoy"
+            else:
+                return "Expirada"
+        else:
+            return "Sin Membresía"
     
     def info_membresia(self):
         """Muestra información de la membresía del cliente"""

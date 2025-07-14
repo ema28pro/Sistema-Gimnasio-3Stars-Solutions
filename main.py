@@ -87,11 +87,12 @@ def menu_cliente(cliente):
         print("5. Pago Ingreso Único")
         print("6. Registrar Entrada")
         print("7. Eliminar Cliente")
+        print("8. Eliminar Membresía" , "(Sin Membresia)" if cliente.get_membresia() is None else "")
         print("Enter para salir")
         opcion_cliente = input("Seleccione una opción : ")
         print(30*"=")
         ut.sp(2)
-        if opcion_cliente not in ["1", "2", "3", "4", "5", "6", "7", ""]:
+        if opcion_cliente not in ["1", "2", "3", "4", "5", "6", "7", "8", ""]:
             print("Opción fuera de rango. Por favor, ingrese una opción válida.")
             continue
         
@@ -106,7 +107,7 @@ def menu_cliente(cliente):
                 membresia = Gym.consultar_membresia(cliente)
                 # Menu Acciones con Membresia
                 if membresia:
-                    menu_membresia(membresia)
+                    menu_membresia(membresia,cliente)
                 else:
                     print("El cliente no tiene una membresía activa.")
                     input("\nPresione Enter para continuar...")
@@ -120,26 +121,20 @@ def menu_cliente(cliente):
                 cliente.registrar_entrada("General") # Pensar de que clase hacerlo
                 input("\nPresione Enter para continuar...")
             case "7":
-                eliminar = None
-                while eliminar is None:
-                    eliminar = input("¿Esta seguro de eliminar el Cliente? (si/no)\nR// ")
-                    if ut.valid_yes_no(eliminar):
-                        if ut.yes_no(eliminar):
-                            print(f"Cliente {cliente.get_nombre()} eliminando.")
-                            Gym.eliminar_cliente(cliente)
-                        else:
-                            print(f"Cliente {cliente.get_nombre()} no eliminado.")
-                        break
-                    else:
-                        eliminar = None
-                input("\nPresione Enter para continuar...")
-                print("Saliendo del menú de cliente...")
-                break
+                if Gym.eliminar_cliente(cliente=cliente):
+                    input("\nPresione Enter para continuar...")
+                    print("Saliendo del menú de cliente...")
+                    break
+                else:
+                    print("Operación cancelada. Regresando al menú de cliente...")
+                    input("\nPresione Enter para continuar...")
+            case "8":
+                Gym.eliminar_membresia(cliente)
             case "":
                 print("Saliendo del menú de cliente...")
                 break
 
-def menu_membresia(membresia):
+def menu_membresia(membresia, cliente=None):
     # Menu Acciones con Membresia
     while True:
         print("====== ¿Que desea hacer? =====")
@@ -162,7 +157,10 @@ def menu_membresia(membresia):
                 Gym.pagar_membresia(membresia)
                 input("\nPresione Enter para continuar...")
             case "3":
-                Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
+                if cliente is None:
+                    print("No se proporcionó un cliente para eliminar la membresía.")
+                else:
+                    Gym.eliminar_membresia(membresia) #
                 input("\nPresione Enter para continuar...")
             case "":
                 print("Saliendo del menú de membresía...")
