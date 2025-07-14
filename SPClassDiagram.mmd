@@ -1,0 +1,137 @@
+classDiagram
+
+%% =========================
+%% SUBGRUPO: GIMNASIO Y SU ECOSISTEMA
+%% =========================
+
+class Gimnasio {
+  <<Entidad Principal>>
+  - String nombre
+  - String direccion
+  - String telefono
+  - String correo_electronico
+
+  - float efectivo
+
+  - int maximo_clientes
+  - int numero_clientes
+  - int historica_clientes
+  - List~Cliente~ clientes
+  - int historico_entrenadores
+  - List~Entrenador~ entrenadores
+  - int historico_sesiones
+  - List~SesionEspecial~ sesiones
+  - List~String~ sesiones_especiales
+  
+  + get()
+  + ver_inf()
+
+  %% Metodos de Creacion
+  + crear_cliente()
+  + crear_membresia()
+  + crear_entrenador()
+  + crear_sesion_especial()
+
+  %% Metodos de Consulta (Busqueda y Visualizacion)
+  + buscar_cliente()
+  + consultar_membresia()
+  + buscar_entrenador()
+  + visualizar_clientes()
+  + visualizar_membresias()
+  + mostrar_entrenadores()
+  + mostrar_sesiones()
+
+  %% Metdosos de Actualizacion (Modificacion)
+  + ingreso_caja()
+  + pagar_membresia()
+  + pago_ingreso_unico()
+  + agendar_sesion()
+
+  %% Metodos de Eliminacion
+  %% + eliminar_cliente()
+  %% + eliminar_membresia()
+  + eliminar_entrenador()
+  %% + eliminar_sesion_especial()
+
+  + analisis_financiero()
+  + reporte_diario()
+  + informe_entrada()
+  + exportar_datos()
+  + cargar_datos()
+  + cargar_clientes()
+  + exportar_clientes()
+}
+
+%% =========================
+%% SUBGRUPO: CLIENTES Y MEMBRESÍAS
+%% =========================
+
+class Cliente {
+  <<Usuario>>
+  - int id_cliente
+  - String nombre
+  - String documento
+  - String telefono
+  - String fecha_registro
+
+  - Membresia membresia 
+  
+  %% +pago_ingreso_unico()
+  %% +pagar_membresia()
+  %% +solicitar_sesion()
+
+  + info_cliente()
+  + info_membresia()
+  + pago_ingreso_unico()
+  + registrar_entrada()
+}
+
+class Membresia {
+  <<Plan>>
+  - Boolean pago
+  - String fecha_inicio
+  - String fecha_fin
+  
+  + calcular_dias_restantes()
+}
+
+%% =========================
+%% SUBGRUPO: ENTRENADORES Y SESIONES
+%% =========================
+
+class Entrenador {
+  <<Personal>>
+  - int id_entrenador
+  - String nombre
+  - String telefono
+  - String especialidad
+
+  + mostrar_info()
+}
+
+class SesionEspecial {
+  <<Evento>>
+  - id_sesion
+  - Entrenador entrenador 
+  - int cupos
+  - String fecha
+  - int maximo_cupos
+  - List Cliente inscritos
+  + calcular_dias_restantes()
+  + inscribir_cliente()
+  + editar_inscritos()
+  + mostrar_info()
+  + ver_entrenador()
+}
+
+%% =========================
+%% RELACIONES PRINCIPALES
+%% =========================
+
+Gimnasio "1" o--> "0..*" Cliente : contiene
+Gimnasio "1" o--> "0..*" Membresia : ofrece
+Gimnasio "1" o--> "0..*" Entrenador : contrata
+Gimnasio "1" o--> "0..*" SesionEspecial : programa
+Cliente "1" *--> "1" Membresia : posee
+SesionEspecial "1" o--> "0..*" Cliente : inscritos
+SesionEspecial "1" *--> "1" Entrenador : guiada por
