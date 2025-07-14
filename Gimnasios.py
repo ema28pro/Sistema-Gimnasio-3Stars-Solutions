@@ -633,6 +633,53 @@ class Gimnasio:
 
     #! ============================== Metodos de Eliminacion ==============================
     
+    def eliminar_cliente(self, id_cliente: int= None):
+        
+        if id_cliente is None:
+            while True:
+                id_cliente = input("Ingrese el ID del Cliente: ")
+                if ut.is_number(id_cliente, "ID"):
+                    id_cliente = int(id_cliente)
+                    break
+        
+        for i in range(len(self.__clientes)):
+            if self.__clientes[i].get_id_cliente() == id_cliente:
+                print(f"Cliente con ID {id_cliente} y nombre {self.__clientes[i].get_nombre_c()}.")
+                confirmar = input("¿Está seguro de eliminar este Cliente? (si/no): ").strip().lower()
+                if confirmar == 'si':
+                    self.__clientes.pop(i)
+                else:
+                    print("Eliminación cancelada.")
+                break
+            
+    def eliminar_membresia(self, id_cliente: int= None):
+        
+        if id_cliente is None:
+            while True:
+                id_cliente = input("Ingrese el ID del Cliente: ")
+                if ut.is_number(id_cliente, "ID"):
+                    id_cliente = int(id_cliente)
+                    break
+        
+        for i in range(len(self.__clientes)):
+            if self.__clientes[i].get_id_cliente() == id_cliente:
+                cliente = self.__clientes[i]
+                if cliente.get_membresia() is None:
+                    print(f"El cliente {cliente.get_nombre_c()} no tiene una membresía activa.")
+                    return
+                else:
+                    print(f"Cliente con ID {id_cliente} y nombre {cliente.get_nombre_c()}.")
+                    confirmar = input("¿Está seguro de eliminar la membresía de este Cliente? (si/no): ").strip().lower()
+                    if confirmar == 'si':
+                        cliente.set_membresia(None)
+                        print(f"Membresía del cliente {cliente.get_nombre_c()} eliminada.")
+                    else:
+                        print("Eliminación cancelada.")
+                break     
+    
+    
+    
+    
     def eliminar_entrenador(self, id_entrenador: int=None):
         if not self.__entrenadores:
             print("No hay entrenadores registrados para eliminar.")
