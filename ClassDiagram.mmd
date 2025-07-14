@@ -16,7 +16,7 @@ class Gimnasio {
   - int maximo_clientes
   - int numero_clientes
   - int historica_clientes
-  - List~Cliente~ clientes
+  - Np.ndarry~Cliente~ clientes
   - int historico_entrenadores
   - List~Entrenador~ entrenadores
   - int historico_sesiones
@@ -24,7 +24,7 @@ class Gimnasio {
   - List~String~ sesiones_especiales
   
   + get()
-  + ver_inf()
+  + ver_info()
 
   %% Metodos de Creacion
   + crear_cliente()
@@ -40,23 +40,35 @@ class Gimnasio {
   + visualizar_membresias()
   + mostrar_entrenadores()
   + mostrar_sesiones()
+  + sesiones_agendadas()
 
   %% Metdosos de Actualizacion (Modificacion)
   + ingreso_caja()
   + pagar_membresia()
+  + renovar_membresia()
   + pago_ingreso_unico()
-  + registrar_entrada()
   + agendar_sesion()
 
   %% Metodos de Eliminacion
-  %% + eliminar_cliente()
-  %% + eliminar_membresia()
+  + eliminar_cliente()
+  + eliminar_membresia()
   + eliminar_entrenador()
-  %% + eliminar_sesion_especial()
+  + eliminar_sesion()
 
+  %% Metodos de Analisis y Reportes
+  + seguimiento_membresias()
   + analisis_financiero()
   + reporte_diario()
   + informe_entrada()
+
+  %% Metodos de Datos (Exportacion e Importacion)
+
+  + exportar_datos_json()
+  + cargar_datos_json()
+  + cargar_clientes()
+  + exportar_clientes()
+  + cargar_entrenadores() %% Incompleto
+  + exportar_entrenadores()
 }
 
 %% =========================
@@ -68,29 +80,32 @@ class Cliente {
   - int id_cliente
   - String nombre
   - String documento
-  - String numero_telefono
+  - String telefono
   - String fecha_registro
 
-  - String id_membresía %% Pensar en guardar el objeto membresia
-  - List~id_sesion_especial~ Sesiones_especiales
+  - Membresia membresia 
   
   %% +pago_ingreso_unico()
   %% +pagar_membresia()
   %% +solicitar_sesion()
 
-  + agregar_sesion()
-  + remover_sesion()
-  + mostrar_sesiones_inscritas()
+  + info_cliente()
+  + tiene_membresia()
+  + estado_pago_membresia()
+  + estado_vigencia_membresia()
+  + info_membresia()
+  + registrar_entrada()
 }
 
 class Membresia {
   <<Plan>>
-  - int id_membresia
   - Boolean pago
   - String fecha_inicio
   - String fecha_fin
   
   + calcular_dias_restantes()
+  + renovar_membresia()
+  + ver_info()
 }
 
 %% =========================
@@ -110,11 +125,17 @@ class Entrenador {
 class SesionEspecial {
   <<Evento>>
   - id_sesion
-  - Entrenador id_entrenador
+  - Entrenador entrenador 
   - int cupos
   - String fecha
   - int maximo_cupos
-  - List~is_cliente~ inscritos
+  - List Cliente inscritos
+  
+  + calcular_dias_restantes()
+  + inscribir_cliente()
+  + editar_inscritos()
+  + mostrar_info()
+  + ver_entrenador()
 }
 
 %% =========================

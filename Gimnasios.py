@@ -1,12 +1,11 @@
 import numpy as np
-import json
 from datetime import date, timedelta, datetime
+import json # Importante para la gestión de datos en formato JSON
 import Utils as ut
 from Utils import PRECIO_MEMBRESIA, PRECIO_ENTRADA_UNICA
 
 from Clientes import Cliente, Membresia
 from Sesiones import Entrenador, SesionEspecial
-
 
 class Gimnasio:
     """_summary_
@@ -45,7 +44,7 @@ class Gimnasio:
         self.__historico_sesiones = 0
         self.__sesiones = []
         self.__sesiones_especiales = ["boxeo", "yoga", "aerobicos"]
-        
+    
     # Métodos accesores y modificadores
     
     def get(self):
@@ -53,19 +52,31 @@ class Gimnasio:
 
     def ver_info(self):
         """_summary_
-            Imprime el nombre y telefono de contacto del gimnasio
+            Imprime el nombre, telefono de contacto del gimnasio y direccion
         """        
         print(f"Gimnasio {self.__nombre}, Tel: {self.__telefono},\nCorreo: {self.__correo_electronico}, nos encontramos ubicados en {self.__direccion}")
 
     #? ============================== Metodos De Creacion ==============================
 
     # R1
-    def crear_cliente(self, nombre=None, documento=None, telefono=None, fecha_registro=None):
+    def crear_cliente(self, nombre: str=None, documento: str=None, telefono: str=None, fecha_registro: str=None):
+        """_summary_
+            Funcion encargada de crear el cliente y agregarlo al array de clientes.
+            Si no se proporcionan datos en los argumentos, se solicita al usuario que los ingrese.
+        Args:
+            nombre (str, optional): Nombre del Cliente. Defaults to None.
+            documento (str, optional): Documento de indentidad del Cliente. Defaults to None.
+            telefono (str, optional): Numero de Telefono del Cliente. Defaults to None.
+            fecha_registro (str, optional): Fecha de Registro del Cliente. Defaults to None.
+        Returns:
+            (bool, Cliente): False para notificar que no se creo el cliente o el Objeto Cliente creado.
+        """        
         
         if self.__numero_clientes >= self.__maximo_clientes:
             print("No se pueden registrar más clientes, el gimnasio ha alcanzado su capacidad máxima.")
             return False
         
+        # Si no hubo datos, se solicita al usuario
         if not nombre or not documento:
             while True:
                 nombre = input("Ingrese el Nombre del Cliente : ")
@@ -86,21 +97,15 @@ class Gimnasio:
                     break
             
         else:
-            if telefono and ( not ut.is_number(telefono, "Telefono")):
+            if telefono and ( not ut.is_number(telefono, "Telefono")): # Si se ingreso algo en el telefono se valida
                 return False
             if not (ut.is_string(nombre, "Nombre") and ut.is_number(documento, "Documento")):
                 return False
         
-        id_cliente = self.__historico_clientes + 1
+        id_cliente = self.__historico_clientes + 1 # Se genera un ID para el cliente basado en el contador de clientes históricos
         
         if not fecha_registro:
-            fecha_registro = date.today().strftime("%Y-%m-%d")
-        else:
-            if isinstance(fecha_registro, str):
-                fecha_registro = datetime.strptime(fecha_registro, "%Y-%m-%d").date()
-            elif not isinstance(fecha_registro, date):
-                print("Fecha de registro inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
-                return False
+            fecha_registro = date.today().strftime("%Y-%m-%d") # Si no se proporciona fecha, se genera un Objeto fecha actual y se convierte a string
         
         # Verificar si el cliente ya está registrado
         for cliente in self.__clientes:
@@ -109,21 +114,29 @@ class Gimnasio:
                 return False
         
         nuevo_cliente = Cliente(id_cliente, nombre.lower(), documento, fecha_registro, telefono)
-        # Forma 1, buscar un espacio vacío en el array de clientes
+        # Guardamos la referencia del cliente en el array de clientes buscando el primer espacio vacío
         for i in range(self.__maximo_clientes):
             if self.__clientes[i] is None:
                 self.__clientes[i] = nuevo_cliente
-                break
-        # # Forma 2, asignar directamente al índice del contador de clientes
-        # self.__clientes[self.__numero_clientes] = nuevo_cliente
-
-        self.__numero_clientes += 1
-        self.__historico_clientes += 1
+                break # Salimos del ciclo una vez que encontramos un espacio vacío
+        
+        self.__numero_clientes += 1 # Incrementamos el contador de clientes
+        self.__historico_clientes += 1 # Incrementamos el contador de clientes históricos
         print(f"ID {id_cliente} : Cliente {nombre} registrado exitosamente. {fecha_registro}")
-        return nuevo_cliente
+        return nuevo_cliente # Objeto Cliente creado
 
     # R3
-    def crear_membresia(self, cliente_encontrado: Cliente, fecha_inicio = None, fecha_fin = None, pago: bool = None):
+    def crear_membresia(self, cliente: Cliente, fecha_inicio: str=None, fecha_fin: str=None, pago: bool=None):
+        """_summary_
+            Funcion encargada de crear la Mebresia del Cliente y asignarala a su respectivo Cliente.
+        Args:
+            cliente (Cliente): Objeto Cliente al que se le asignara la Membresia.
+            fecha_inicio (str, optional): Fecha de inicio de la Membresia. Defaults to None.
+            fecha_fin (str, optional): Fecha de finalizacion de la Membresia. Defaults to None.
+            pago (bool, optional): _description_. Defaults to None.
+        Returns:
+            (bool, Membresia): Retorna el Objeto Membresia creado o False si no se pudo crear.
+        """        
         
         # Validaciones
         
@@ -133,38 +146,19 @@ class Gimnasio:
             return False
         
         if not fecha_inicio:
-            fecha_inicio = date.today()
+            fecha_inicio = date.today() # Si no se proporciona fecha de inicio, se crea el Objeto fecha actual
         else:
-            if isinstance(fecha_inicio, str):
-                fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
-            elif not isinstance(fecha_inicio, date):
-                print("Fecha de inicio inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
-                return False
+            # Convertimos la fecha_inicio de str a objeto date
+            fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
         
-        if not fecha_fin:
+        if not fecha_fin: # Si no se proporciona fecha de fin, se suman 30 dias al Objeto fecha de inicio
             fecha_fin = fecha_inicio + timedelta(days=30)
         else:
-            if isinstance(fecha_fin, str):
-                fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
-            elif not isinstance(fecha_fin, date):
-                print("Fecha de fin inválida. Debe ser un objeto date o una cadena en formato 'YYYY-MM-DD'.")
-                return False
+            # Convertimos la fecha_fin de str a objeto date
+            fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
         
         # Validar la diferencia entre fecha_inicio y fecha_fin cuando ambas son proporcionadas
         if fecha_inicio is not None and fecha_fin is not None:
-            # Asegurarse que ambas fechas sean objetos date
-            if not isinstance(fecha_inicio, date):
-                if isinstance(fecha_inicio, str):
-                    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
-                else:
-                    print("Fecha de inicio inválida para calcular diferencia.")
-                    return False
-            if not isinstance(fecha_fin, date):
-                if isinstance(fecha_fin, str):
-                    fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
-                else:
-                    print("Fecha de fin inválida para calcular diferencia.")
-                    return False
             
             # Calcular la diferencia en días
             diferencia_dias = (fecha_fin - fecha_inicio).days
@@ -177,9 +171,7 @@ class Gimnasio:
                     print(f"Faltan {30 - diferencia_dias} días para completar los 30 días estándar.")
                 
                 # Calcular la fecha de fin correcta (30 días después de la fecha de inicio)
-                fecha_fin_correcta = fecha_inicio + timedelta(days=30)
-                
-                fecha_fin = fecha_fin_correcta
+                fecha_fin= fecha_inicio + timedelta(days=30)
                 print(f"Se ha actualizado la fecha de fin a: {fecha_fin}")
         
         if pago is None:
@@ -188,31 +180,36 @@ class Gimnasio:
                 if ut.valid_yes_no(pagar):
                     break
             
-            pago = ut.yes_no(pagar)
+            pago = ut.yes_no(pagar) # Convertimos el pago a booleano
             
             if pago:
+                # Se registra el pago en Caja con su motivo
                 self.ingreso_caja(PRECIO_MEMBRESIA, "Membresia")
 
-        # Crear la membresía
-        nueva_membresia = Membresia(fecha_inicio, fecha_fin, pago)
-        cliente_encontrado.set_membresia(nueva_membresia)
-        print(f"Membresía creada para {cliente_encontrado.get_nombre()} con ID {cliente_encontrado.get_id_cliente()}")
+        # Crear la membresía y nos aseguramos de guardar las fechas str y no como Objetos date
+        nueva_membresia = Membresia(fecha_inicio.strftime("%Y-%m-%d"), fecha_fin, pago.strftime("%Y-%m-%d"))
+        cliente.set_membresia(nueva_membresia)
+        print(f"Membresía creada para {cliente.get_nombre()} con ID {cliente.get_id_cliente()}")
         print(f"Vigencia: {fecha_inicio} hasta {fecha_fin}")
         print(f"Estado: {'Pagada' if pago else 'Pendiente de pago'}")
         
-        return nueva_membresia
+        return nueva_membresia # Objeto Membresia creado
     
-    def crear_entrenador(self, nombre: str = None, especialidad: str = None, telefono: str = None):
-        """
-        Registra un nuevo entrenador en el gimnasio.
-        
+    def crear_entrenador(self, nombre: str=None, especialidad: str=None, telefono: str=None):
+        """_summary_
+            Funcion encargada de crear un nuevo Entrenador y  agregarlo a la lista de entrenadores.
         Args:
-            nombre (str): Nombre del entrenador
-            especialidad (set): Conjunto de especialidades del entrenador
-            telefono (str, optional): Teléfono del entrenador
+            nombre (str, optional): Nombre del Entrenador. Defaults to None.
+            especialidad (str, optional): Especialidad del Entrenador de la lista 'sesiones_especiales'. Defaults to None.
+            telefono (str, optional): _description_. Defaults to None.
+
+        Returns:
+            (bool, Entrenador): Retorna el Objeto Entrenador creado o False si no se pudo crear.
         """
         
         if not nombre or not especialidad:
+            # Si no se proporcionan datos, se solicita al usuario que los ingrese
+            
             while True:
                 nombre = input("Ingrese el Nombre del Entrenador : ")
                 if ut.is_string(nombre, "Nombre"):
@@ -235,35 +232,37 @@ class Gimnasio:
                 else:
                     break
         else:
+            # Si se proporcionan datos, se validan
             if telefono and ( not ut.is_number(telefono, "Telefono")):
                 return False
             if not (ut.is_string(nombre, "Nombre") and ut.is_string(especialidad, "Especialidad")):
                 return False
-            else:
-                if not especialidad in self.__sesiones_especiales:
-                    print(f"Especialidad no válida. Debe ser una de las siguientes: {self.__sesiones_especiales}")
-                return False
         
-        
-        id_entrenador = self.__historico_entrenadores + 1
+        id_entrenador = self.__historico_entrenadores + 1 # Se genera un ID para el Entrenador basado en el contador de entrenadores históricos
+        # Se crea el Objeto Entrenador y se asigna la especialidad de la lista de sesiones especiales
         nuevo_entrenador = Entrenador(id_entrenador, nombre.lower(), self.__sesiones_especiales[especialidad], telefono)
-        self.__entrenadores+=[nuevo_entrenador]
-        self.__historico_entrenadores += 1
+        self.__entrenadores.append(nuevo_entrenador) # Agregamos el nuevo entrenador a la lista de entrenadores
+        self.__historico_entrenadores += 1 # Incrementamos el contador de entrenadores históricos
         print(f"Entrenador {nombre} especializado en {self.__sesiones_especiales[especialidad]} registrado con ID: {id_entrenador}")
-        return nuevo_entrenador
+        return nuevo_entrenador # Objeto Entrenador creado
     
-    def crear_sesion_especial(self, entrenador=None, fecha: str=None, maximo_cupos: int = None,id_entrenador: int = None):
-        """
-        Crea una nueva sesión especial.
-        
+    def crear_sesion_especial(self, entrenador: Entrenador=None, fecha: str=None, maximo_cupos: int =None, id_entrenador: int=None):
+        """_summary_
+            Funcion encargada de crear una nueva Sesion Especial y agregarla a la lista de sesiones.
+            Si no se proporcionan datos en los argumentos, se solicita al usuario que los ingrese.
         Args:
-            entrenador: Objeto entrenador que dirigirá la sesión
-            fecha (str): Fecha de la sesión
-            maximo_cupos (int, optional): Número máximo de cupos. Defaults to 25.
-        """
+            entrenador (Entrenador, optional): Objeto Entrenador asociado a la SesionEspecial. Defaults to None.
+            fecha (str, optional): Fecha del Evento SesionEspecial. Defaults to None.
+            maximo_cupos (int, optional): Maximo de Clientes que se puede inscribir a la SesionEspecial. Defaults to None.
+            id_entrenador (int, optional): ID del Entrenador. Defaults to None.
+        Returns:
+            (bool, SesionEspesial): Objeto SesionEspecial creado o False si no se pudo crear.
+        """        
+        
         if not fecha:
             while True:
                 fecha = input("Ingrese la fecha de la sesión especial (YYYY-MM-DD): ")
+                # Se usa el try para ahorrarnos hacer validaciones de fecha y evitar errores de formato
                 try:
                     fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
                     break
@@ -274,18 +273,13 @@ class Gimnasio:
         
         if not entrenador:
             if not id_entrenador:
-                entrenador = self.mostrar_entrenadores()
-                if entrenador is None:
-                    print("No se ha seleccionado un entrenador.")
-                    return None
-                else:
-                    id_entrenador = entrenador.get_id_entrenador()
+                print("Debe proporcionar un entrenador o un ID de entrenador.")
+                return False
             else:
+                # si no hay entrenador, buscamos por ID
                 entrenador = self.buscar_entrenador(id_entrenador)
-                if entrenador is None:
-                    print(f"No se encontró un entrenador con ID {id_entrenador}.")
-                    return None
         
+        # Pedimos el máximo de cupos si no se proporciona
         if not maximo_cupos:
             while True:
                 maximo_cupos = input("Ingrese el número máximo de cupos (Enter para usar el valor por defecto 25): ")
@@ -296,25 +290,28 @@ class Gimnasio:
                     maximo_cupos = int(maximo_cupos)
                     break
         
-        id_sesion = self.__historico_sesiones + 1
-        nueva_sesion = SesionEspecial(id_sesion, entrenador, fecha, maximo_cupos)
-        self.__sesiones+=[nueva_sesion]
-        self.__historico_sesiones += 1
+        id_sesion = self.__historico_sesiones + 1 # Generamos un ID para la sesión basado en el contador de sesiones históricas
+        # Creamos la sesión especial y nos aseguramos de que la fecha sea un string y no un Objeto date
+        nueva_sesion = SesionEspecial(id_sesion, entrenador, fecha.strftime("%Y-%m-%d"), maximo_cupos)
+        self.__sesiones.append(nueva_sesion) # Agregamos la nueva sesión a la lista de sesiones
+        self.__historico_sesiones += 1 # Incrementamos el contador de sesiones históricas
         print(f"Sesión especial creada con ID: {id_sesion} para la fecha {fecha}")
         print(f"Entrenador asignado: {entrenador.get_nombre()} ({entrenador.get_especialidad()})")
-        return nueva_sesion
-    
-    
-    
-    
-    
+        return nueva_sesion # Objeto SesionEspecial creado
     
     #? ============================== Metodos De Busqueda y Visualizacion ==============================
     
-    def buscar_cliente(self, op=None):
+    def buscar_cliente(self):
+        """_summary_
+            Funcion encargada de buscar un Cliente en el array de clientes.
+        Returns:
+            _type_: _description_
+        Notes:
+            - Se penso permitir colocar el modo de busqueda en el argumento para evitar el menu y ahorrar reescribir busqueda de Clientes por ID
+        """
         
         # Buqueda por ID, Nombre o Documento
-        
+        # Menu de Busqueda
         print("\n======= Buscar Cliente =======")
         print(30*"=")
         print("Seleccione el tipo de búsqueda :")
@@ -324,7 +321,7 @@ class Gimnasio:
         print("Enter para salir")
         opcion_busqueda = input("Seleccione una opción : ")
         print(30*"=")
-        if opcion_busqueda not in ["1", "2", "3", ""]:
+        if opcion_busqueda not in ["1", "2", "3", ""]: # Si ingresa una opcion fuera de rango termina la ejecución
             print("Saliendo del menú de búsqueda...")
             return None
         

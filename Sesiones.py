@@ -14,13 +14,14 @@ class Entrenador:
         __telefono (int, optional): Número de teléfono del entrenador. Defaults to None.
         __especialidad (set): Especialidades del entrenador (Boxeo, Yoga, Aeróbicos).
     """
-    def __init__(self, id_entrenador: int, nombre: str, especialidad: set, telefono: str = None):
+    def __init__(self, id_entrenador: int, nombre: str, especialidad: str, telefono: str = None):
         self.__id_entrenador = id_entrenador
         self.__nombre = nombre
         self.__telefono = telefono
         self.__especialidad = especialidad
 
-    # Métodos getter
+    # Métodos de acceso y modificación
+    
     def get_id_entrenador(self):
         return self.__id_entrenador
     
@@ -33,8 +34,10 @@ class Entrenador:
     def get_especialidad(self):
         return self.__especialidad
     
-    # Métodos para mostrar información
+    # Métodos
+    
     def mostrar_info(self):
+        """Muestra información del entrenador"""
         telefono = f"Tel: {self.__telefono}" if self.__telefono else "Sin teléfono"
         print(f"Entrenador {self.__nombre} (ID: {self.__id_entrenador}) - {self.__especialidad} - {telefono}")
 
@@ -59,7 +62,8 @@ class SesionEspecial:
         self.__maximo_cupos = maximo_cupos
         self.__inscritos = np.full(maximo_cupos, None, dtype=object) # Estamos guardando el objeto Cliente
     
-    # Métodos getter
+    # Métodos de acceso y modificación
+    
     def get_id_sesion(self):
         return self.__id_sesion
     
@@ -75,7 +79,7 @@ class SesionEspecial:
             return self.__entrenador.get_id_entrenador() 
         else:
             print("No hay entrenador asignado a esta sesión.")
-        
+    
     def get_fecha(self):
         if isinstance(self.__fecha, str):
             return self.__fecha
@@ -100,42 +104,29 @@ class SesionEspecial:
             print("Sesion sin entrenador")
         self.__entrenador = entrenador  # Asigna el objeto Entrenador completo
     
+    # Metodos
+    
     def calcular_dias_restantes(self):
+        # Obtenemos el objeto date de la fecha actual
         fecha_actual = date.today()
         
         # Convertir la fecha de la sesión a objeto date
-        if isinstance(self.__fecha, str):
-            # Asumiendo formato "YYYY-MM-DD"
-            if len(self.__fecha.split('-')) == 3:
-                fecha_sesion = datetime.strptime(self.__fecha, "%Y-%m-%d").date()
-            else:
-                print(f"Formato de fecha inválido: {self.__fecha}")
-                return None
-        elif isinstance(self.__fecha, date):
-            fecha_sesion = self.__fecha
-        else:
-            print("Tipo de fecha no soportado")
-            return None
+        fecha_sesion = datetime.strptime(self.__fecha, "%Y-%m-%d").date()
         
         # Calcular la diferencia en días
         diferencia = (fecha_sesion - fecha_actual).days
-        if not diferencia or diferencia is None or diferencia < 0:
-            return None
-        else:
-            return diferencia
+        
+        return diferencia
     
     # Métodos para gestionar inscripciones
-    def inscribir_cliente(self, cliente=None):
-        """
-        Inscribe un cliente a la sesión especial.
-        
+    def inscribir_cliente(self, cliente: Cliente):
+        """_summary_
+            Inscribe un cliente a la sesión especial.
         Args:
-            cliente: Objeto Cliente a inscribir
-            
+            cliente (Cliente): Objeto Cliente a inscribir
         Returns:
-            bool: True si se inscribió exitosamente, False si no hay cupos
-        """
-        
+            _bool: True si se inscribió exitosamente, False si no hay cupos o no se realizo la inscripción
+        """        
         
         if self.__cupos >= self.__maximo_cupos:
             print(f"No hay cupos disponibles. Sesión llena ({self.__maximo_cupos}/{self.__maximo_cupos})")
@@ -152,18 +143,16 @@ class SesionEspecial:
                 return False
         
         # Inscribir cliente
-        self.__inscritos[self.__cupos] = cliente
-        self.__cupos += 1
+        self.__inscritos[self.__cupos] = cliente # Guarda el objeto Cliente en la posición actual de cupos
+        self.__cupos += 1 # Incrementa el contador de cupos
         print(f"Cliente {cliente.get_nombre()} inscrito exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")
         return True
     
-    def editar_inscritos(self,id_cliente=None):
-        """
-        Cancela la inscripción de un cliente de la sesión.
-        
+    def editar_inscritos(self,id_cliente=None):  
+        """_sumary_
+            Cancela la inscripción de un cliente de la sesión.
         Args:
-            cliente: Objeto Cliente a desinscribir
-            
+            id_cliente (str, optional): id del Cliente a desinscribir o 0 para cancelar todas las inscripciones. Defaults to None.
         Returns:
             bool: True si se canceló exitosamente, False si no estaba inscrito
         """
@@ -172,13 +161,18 @@ class SesionEspecial:
             print("No hay clientes inscritos en esta sesión.")
             return False
         
-        if self.__cupos > 0:
-            print("Clientes inscritos:")
-            for i in range(self.__cupos):
-                if self.__inscritos[i] is not None:
-                    print(f"  - {self.__inscritos[i].get_nombre()} (ID: {self.__inscritos[i].get_id_cliente()})")
+        
         
         if id_cliente is None:
+            # Si no se proporciona un ID, mostramos los inscritos y pedimos por consola
+            
+            if self.__cupos > 0:
+                print("Clientes inscritos:")
+                for i in range(self.__cupos):
+                    if self.__inscritos[i] is not None:
+                        print(f"  - {self.__inscritos[i].get_nombre()} (ID: {self.__inscritos[i].get_id_cliente()})")
+            
+            # Pedimos el ID del cliente a cancelar inscripción
             while True:
                 print("0 para cancelar todas las inscripciones")
                 id_cliente = input("Ingrese el ID del cliente a cancelar inscripción: ")
@@ -195,7 +189,7 @@ class SesionEspecial:
         else:
             
             eliminado = False
-            
+            # Recorremos los inscritos para encontrar el cliente a cancelar inscripción
             for i in range(self.__cupos):
                 cliente = self.__inscritos[i]
                 if cliente is not None and cliente.get_id_cliente() == id_cliente:
@@ -205,8 +199,9 @@ class SesionEspecial:
                     
                     # Limpiar la última posición
                     self.__inscritos[self.__cupos - 1] = None
-                    self.__cupos -= 1
+                    self.__cupos -= 1 # Decrementa el contador de cupos
                     eliminado = True
+                    break # Salimos del bucle una vez encontrado el cliente
             
             if eliminado:
                 print(f"Inscripción del cliente ID {id_cliente} cancelada exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")

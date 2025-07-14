@@ -14,23 +14,24 @@ class Membresia:
         __fecha_inicio (str): Fecha de inicio de la membresía.
         __fecha_fin (str): Fecha de finalización de la membresía.
     """
-    def __init__(self, fecha_inicio, fecha_fin, pago: bool = False):
+    def __init__(self, fecha_inicio: str, fecha_fin: str, pago: bool = False):
         self.__pago = pago
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin
-        
+    
     # Métodos de acceso y modificación
     
     def get_pago(self):
+        # Retorna el Boolean de pago
         return self.__pago
     
     def get_fecha_inicio(self):
         # Retornar como string
-        return self.__fecha_inicio.strftime("%Y-%m-%d")
+        return self.__fecha_inicio
     
     def get_fecha_fin(self):
         # Retornar como string
-        return self.__fecha_fin.strftime("%Y-%m-%d")
+        return self.__fecha_fin
     
     def set_pago(self, estado: bool):
         self.__pago = estado
@@ -38,39 +39,49 @@ class Membresia:
     # Métodos
 
     def calcular_dias_restantes(self):
-        if isinstance(self.__fecha_fin, str):
-            fecha_fin_obj = datetime.strptime(self.__fecha_fin, "%Y-%m-%d").date()
-            self.__fecha_fin = fecha_fin_obj  # Actualizar el atributo para que sea un objeto date
-        else:
-            fecha_fin_obj = self.__fecha_fin
-        return (fecha_fin_obj - date.today()).days
+        """_summary_
+            Calcula los días restantes para que la membresia expire.
+        Returns:
+            int: Número de días restantes.
+        """
+        # Convertimos la fecha fin de str a objeto date
+        fecha_fin_obj = datetime.strptime(self.__fecha_fin, "%Y-%m-%d").date()
+        dias_restantes = (fecha_fin_obj - date.today()).days
+        return dias_restantes
 
-    def renovar_membresia(self,fecha_inicio=None, fecha_fin=None):
-        """Renueva la membresía por 30 días a partir de la fecha de inicio proporcionada o la fecha actual si no se proporciona."""
+    def renovar_membresia(self, fecha_inicio: str=None, fecha_fin: str=None):
+        """_summary_
+            Actualiza la membresia, renovandola por 30 días a partir de la fecha de inicio proporcionada o la fecha actual si no se proporciona.
+        Args:
+            fecha_inicio (str, optional): Fecha de inicio de la membresia. Defaults to None.
+            fecha_fin (str, optional): Fecha de finalizacion de la membresia, 30 dias despues de la fecha de incio. Defaults to None.
+
+        Returns:
+            bool: Booleano indicando si la renovación fue exitosa.
+        """        
+        
         if not self.__pago:
             print("La membresía no ha sido pagada. No se puede renovar.")
-            return
+            return False
         
         if self.calcular_dias_restantes() > 0:
             print("La membresía aún está activa y no necesita renovación.")
-            return
+            return False
         
+        # Obtenemos el objeto date actual si no se nos dia fecha de inicio
         if fecha_inicio is None:
             fecha_inicio = date.today()
-        
-        # Validar que la fecha de inicio sea un objeto date
-        if isinstance(fecha_inicio, str):
+        else:
+            # Si se nos dio una fecha de inicio, la convertimos a objeto date para operar
             fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
         
         if fecha_fin is None:
-            nueva_fecha_fin = fecha_inicio + timedelta(days=30)
+            # Calcular la fecha de fin como 30 días después de el objeto fecha inicio
+            fecha_fin = fecha_inicio + timedelta(days=30)
         else:
-            if not isinstance(fecha_fin, date):
-                if isinstance(fecha_fin, str):
-                    nueva_fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
-                else:
-                    print("Fecha de fin inválida para calcular diferencia.")
-                    return False
+            # Si se nos dio una fecha de fin, la convertimos a objeto date
+            fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+            
             
             # Calcular la diferencia en días
             diferencia_dias = (nueva_fecha_fin - fecha_inicio).days
@@ -83,17 +94,18 @@ class Membresia:
                     print(f"Faltan {30 - diferencia_dias} días para completar los 30 días estándar.")
                 
                 # Calcular la fecha de fin correcta (30 días después de la fecha de inicio)
-                fecha_fin_correcta = fecha_inicio + timedelta(days=30)
+                fecha_fin = fecha_inicio + timedelta(days=30)
                 
-                nueva_fecha_fin = fecha_fin_correcta
-                print(f"Se ha actualizado la fecha de fin a: {nueva_fecha_fin}")
+                print(f"Se ha actualizado la fecha de fin a: {fecha_fin}")
         
-        self.__fecha_inicio = fecha_inicio
-        self.__fecha_fin = nueva_fecha_finGimnasio.renovar_membresia() got an unexpected keyword argument 'cliente'
+        self.__fecha_inicio = fecha_inicio.strftime("%Y-%m-%d") # Convertir a string
+        self.__fecha_fin = fecha_fin.strftime("%Y-%m-%d") # Convertir a string
         print(f"Memebresia actualizada: Inicio: {self.__fecha_inicio}, Fin: {self.__fecha_fin}")
     
     def ver_info(self):
-        """Muestra información de la membresía"""
+        """_summary_
+            Muestra la información de la membresía.
+        """        
         print(f"\n=== Información de Membresía ===")
         print(f"Fecha de inicio: {self.get_fecha_inicio()}")
         print(f"Fecha de fin: {self.get_fecha_fin()}")
@@ -117,7 +129,7 @@ class Cliente:
         __fecha_registro (str): Fecha de registro del cliente en el gimnasio.
         __membresia (Membresia, optional): Objeto Membresía asociada al cliente. Defaults to None.
     """
-    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro, telefono: str = None):
+    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):
         self.__id_cliente = id_cliente
         self.__nombre = nombre
         self.__documento = documento
@@ -141,10 +153,7 @@ class Cliente:
         return self.__telefono
     
     def get_fecha_registro(self):
-        if isinstance(self.__fecha_registro, str):
-            return self.__fecha_registro
-        else:
-            return self.__fecha_registro.strftime("%Y-%m-%d")
+        return self.__fecha_registro
     
     def get_membresia(self):
         return self.__membresia
@@ -155,35 +164,33 @@ class Cliente:
     # Métodos
     
     def info_cliente(self):
-        """Muestra información del cliente"""
+        """_summary_
+            Muestra informacion del cliente
+        """        
         print(f"\n=== Información del Cliente ===")
         print(f"ID: {self.__id_cliente}")
         print(f"Nombre: {self.__nombre}")
         print(f"Documento: {self.__documento}")
         print(f"Teléfono: {self.__telefono if self.__telefono else 'No proporcionado'}")
+        print(f"Fecha de Registro: {self.__fecha_registro}")
         
-        # Manejar tanto objetos date como strings para la fecha
-        if isinstance(self.__fecha_registro, str):
-            print(f"Fecha de Registro: {self.__fecha_registro}")
-        else:
-            print(f"Fecha de Registro: {self.__fecha_registro.strftime('%Y-%m-%d')}")
-            
+        # Verificar si el cliente tiene una membresia
         if self.__membresia:
-            print("Membresía Activa:")
+            print("Membresia Activa:")
             self.info_membresia()
         else:
-            print("No tiene membresía activa.")
+            print("No tiene membresia activa.")
         print("="*40)
     
     def tiene_membresia(self):
-        """Verifica si el cliente tiene una membresía activa"""
+        """Retorna el estado de la membresía del cliente."""
         if self.__membresia:
             return "Con Membresía" , self.estado_pago_membresia(), self.estado_vigencia_membresia()
         else:
             return "Sin Membresía"
     
     def estado_pago_membresia(self):
-        """Verifica el estado de la membresía del cliente"""
+        """Retorna el estado de pago de la membresía del cliente."""
         if self.__membresia:
             if self.__membresia.get_pago():
                 return "Paga"
@@ -193,7 +200,7 @@ class Cliente:
             return "Sin Membresía"
     
     def estado_vigencia_membresia(self):
-        """Verifica si la membresía está vigente"""
+        """Retorna el estado de vigencia de la membresía del cliente."""
         if self.__membresia:
             dias_restantes = self.__membresia.calcular_dias_restantes()
             if dias_restantes > 0:
@@ -216,25 +223,27 @@ class Cliente:
             print(f"Estado de pago: {'Pagada' if self.__membresia.get_pago() else 'Pendiente'}")
             print("="*40)
 
-    def registrar_entrada(self,motivo:str=None):
-        """Registra la entrada del cliente al gimnasio"""
-        formato = "Fecha;Hora;ID;Documento;Nombre;Membresía(False/True/None)"
+    def registrar_entrada(self, motivo: str=None):
+        """_summary_
+            Registra la del cliente al gimnasio, 
+            guardando la fecha, hora, ID, documento, nombre y estado de la membresía
+            En el archivo correspondiente 'registros/Entradas.txt'.
+        Args:
+            motivo (str, optional): _description_. Defaults to None.
+        """           
+        # Fecha;Hora;ID;Documento;Nombre;Membresía(False/True/None)
         
-        fecha = datetime.now().strftime('%Y-%m-%d')
-        hora = datetime.now().strftime('%H:%M:%S')
-        id_cliente = self.__id_cliente
-        documento = self.__documento
-        nombre = self.__nombre
-        estado_membresia = self.__membresia.get_pago() if self.__membresia else "None"
+        registro_entradas = "registros/Entradas.txt"
         
-        # Solución: usar variable auxiliar para evitar anidación de comillas
-        motivo_campo = f";{motivo}" if motivo else ""
-        registro = f"{fecha};{hora};{id_cliente};{documento};{nombre};{estado_membresia}{motivo_campo}\n"
+        fecha = datetime.now().strftime('%Y-%m-%d') # Genera el objeto fecha y hora actual y lo convierte a fecha string
+        hora = datetime.now().strftime('%H:%M:%S') # Genera el objeto fecha y hora actual y lo convierte a hora string
+        estado_membresia = self.__membresia.get_pago() if self.__membresia else "None" # Estado de la membresía (True/False/None)
         
-        with open("registros/Entradas.txt", "a") as entrada_file:
+        motivo_registro = f";{motivo}" if motivo else "" # sise coloco un motivo lo agrega al registro
+        registro = f"{fecha};{hora};{self.__id_cliente};{self.__documento};{self.__nombre};{estado_membresia}{motivo_registro}\n"
+        
+        # Guardar el registro en el archivo
+        with open(registro_entradas, "a") as entrada_file:
             entrada_file.write(registro)
         
-        print(f"✓ Entrada registrada para {nombre} a las {hora}")
-
-
-
+        print(f"✓ Entrada registrada para {self.__nombre} a las {hora}")
