@@ -5,7 +5,7 @@ classDiagram
 %% =========================
 
 class Gimnasio {
-  <<Entidad Principal>>
+  %% <<Entidad Principal>>
   - String nombre
   - String direccion
   - String telefono
@@ -23,7 +23,7 @@ class Gimnasio {
   - List~SesionEspecial~ sesiones
   - List~String~ sesiones_especiales
   
-  + get()
+  %% + get()
   + ver_info()
 
   %% Metodos de Creacion
@@ -63,12 +63,12 @@ class Gimnasio {
 
   %% Metodos de Datos (Exportacion e Importacion)
 
-  + exportar_datos_json()
-  + cargar_datos_json()
+  %% + exportar_datos_json()
+  %% + cargar_datos_json()
   + cargar_clientes()
   + exportar_clientes()
-  + cargar_entrenadores() %% Incompleto
-  + exportar_entrenadores()
+  %% + cargar_entrenadores() %% Incompleto
+  %% + exportar_entrenadores()
 }
 
 %% =========================
@@ -76,7 +76,7 @@ class Gimnasio {
 %% =========================
 
 class Cliente {
-  <<Usuario>>
+  %% <<Usuario>>
   - int id_cliente
   - String nombre
   - String documento
@@ -94,7 +94,7 @@ class Cliente {
 }
 
 class Membresia {
-  <<Plan>>
+  %% <<Plan>>
   - Boolean pago
   - String fecha_inicio
   - String fecha_fin
@@ -109,7 +109,7 @@ class Membresia {
 %% =========================
 
 class Entrenador {
-  <<Personal>>
+  %% <<Personal>>
   - int id_entrenador
   - String nombre
   - String telefono
@@ -119,7 +119,7 @@ class Entrenador {
 }
 
 class SesionEspecial {
-  <<Evento>>
+  %% <<Evento>>
   - id_sesion
   - Entrenador entrenador 
   - int cupos

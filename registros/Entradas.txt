@@ -78,3 +78,5 @@
 2025-07-13;20:47:03;1;21254;emanuel;True;IngresoUnico
 2025-07-13;20:47:13;1;21254;emanuel;True;IngresoUnico
 2025-07-13;20:47:24;20;11012345;fernanda;True;General2025-07-14;09:28:16;1;21254;emanuel;True;IngresoUnico
+2025-07-14;11:22:09;1;21254;emanuel;True;IngresoUnico
+2025-07-14;11:22:12;1;21254;emanuel;True;General

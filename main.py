@@ -151,7 +151,7 @@ def menu_membresia(membresia, cliente=None):
         print("Enter para salir")
         opcion_membresia = input("Seleccione una opción : ")
         
-        if opcion_membresia not in ["1", "2", "3", ""]:
+        if opcion_membresia not in ["1", "2", "3", "4", ""]:
             print("Opción fuera de rango. Por favor, ingrese una opción válida.")
             continue
     
@@ -373,7 +373,7 @@ def App():
     # Gym.exportar_clientes()
     
     # Exportación automática al finalizar (opcional)
-    # exportar_datos_rapido(Gym)
+    exportar_datos_rapido()
     
     # print(Gym.get())
 
