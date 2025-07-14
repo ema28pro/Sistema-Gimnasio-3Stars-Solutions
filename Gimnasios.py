@@ -545,7 +545,7 @@ class Gimnasio:
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
     def pago_ingreso_unico(self, cliente_encontrado: Cliente):
-        ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico")
+        self.ingreso_caja(PRECIO_ENTRADA_UNICA, "PagoIngresoUnico")
         cliente_encontrado.registrar_entrada("IngresoUnico")
     
     def agendar_sesion(self, cliente, id_sesion: int= None):
@@ -722,14 +722,202 @@ class Gimnasio:
 
 
 
-    #! ============================== Metodos Opcionales ==============================
+    #! ============================== Metodos de Analisis ==============================
+    
+    def seguimiento_membresias(self):
+        # Listas para categorizar
+        membresias_en_deuda = []
+        membresias_por_vencer = []  # ≤ 7 días
+        membresias_vencidas = []    # < 0 días
+        clientes_sin_membresia = []
+        
+        for i in range(self.__maximo_clientes):
+            cliente = self.__clientes[i]
+            if cliente is not None:
+                membresia = cliente.get_membresia()
+                if membresia is None:
+                    clientes_sin_membresia.append(cliente)
+                else:
+                    dias_restantes = membresia.calcular_dias_restantes()
+                    if dias_restantes < 0:
+                        membresias_vencidas.append(cliente)
+                    elif dias_restantes <= 7:
+                        membresias_por_vencer.append(cliente)
+                    elif not membresia.get_pago():
+                        membresias_en_deuda.append(cliente)
+        
+        print("\n====== CONTROL DE MEMBRESÍAS ======")
+        print("="*50)
+        print("\n=== CLIENTES SIN MEMBRESÍA ===")
+        print(f"Total de clientes sin membresía: {len(clientes_sin_membresia)}")
+        if clientes_sin_membresia:
+            print("Clientes sin membresía:")
+            for cliente in clientes_sin_membresia:
+                print(f"    - ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}")
+        print("\n===== MEMBRESÍAS EN DEUDA ====")
+        print(f"Total de membresías en deuda: {len(membresias_en_deuda)}")
+        if membresias_en_deuda:
+            print("Clientes con membresías en deuda:")
+            for cliente in membresias_en_deuda:
+                print(f"    - ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}")
+        print("\n==== MEMBRESÍAS POR VENCER ===")
+        print(f"Total de membresías por vencer: {len(membresias_por_vencer)}")
+        if membresias_por_vencer:
+            print("Clientes con membresías por vencer:")
+            for cliente in membresias_por_vencer:
+                dias_restantes = cliente.get_membresia().calcular_dias_restantes()
+                print(f"    - ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Días restantes: {dias_restantes}")
+        print("\n===== MEMBRESÍAS VENCIDAS ====")
+        print(f"Total de membresías vencidas: {len(membresias_vencidas)}")
+        if membresias_vencidas:
+            print("Clientes con membresías vencidas:")
+            for cliente in membresias_vencidas:
+                dias_restantes = cliente.get_membresia().calcular_dias_restantes()
+                print(f"    - ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Días vencida: {dias_restantes}")
+        
+        # Liberamos Memoria
+        
+        del membresias_en_deuda
+        del membresias_por_vencer
+        del membresias_vencidas
+        del clientes_sin_membresia
 
-
-    #! Tarea de Emanuel
 
     def analisis_financiero(self):
-        # lógica de análisis
-        pass
+        """
+        Descripción	El sistema debe permitir generar un análisis financiero. Este análisis incluye ingresos por membresías y ingresos por entradas únicas.
+        Imprimimos los meses
+        Entrada : Mes del Análisis
+        Salida : 
+            -   Ingreso por dia y por monto (Membresia y Ingreso Unico)
+        """
+        print("\n=== ANÁLISIS FINANCIERO ===")
+        
+        registro_caja = "registros/Caja.txt"  # Formato: fecha;hora;tipo;efectivo
+        
+        meses_disponibles = []
+        
+        with open(registro_caja, "r", encoding='utf-8') as archivo:
+            for linea in archivo:
+                datos = linea.strip().split(";")
+                if len(datos) >= 4:
+                    fecha = datos[0]  # Formato YYYY-MM-DD
+                    fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+                    mes_año = fecha_obj.strftime("%m")  # Formato YYYY-MM
+                    # Solo agregar si no está ya en la lista (evitar duplicados)
+                    if mes_año not in meses_disponibles:
+                        meses_disponibles+=[mes_año]
+        
+        if not meses_disponibles:
+            print("❌ No se encontraron registros de entradas en el archivo.")
+            return
+        
+        # Mostrar meses disponibles y permitir selección
+        meses_lista = sorted(meses_disponibles, reverse=True)  # Más recientes primero
+        
+        print(f"\nMeses con registros disponibles:")
+        print("="*40)
+        print(meses_lista)
+        
+        # 1. Solicitar mes y año
+        while True:
+            mes = input("Ingrese el número del mes (1-12) o Enter para cancelar: ")
+            if mes == "":
+                print("Operación cancelada.")
+                return
+            if ut.is_number(mes, "Mes"):
+                mes = int(mes)
+                if mes >= 1 and mes <= 12:
+                    break
+        
+        while True:
+            año = input("Ingrese el año (ej: 2025): ")
+            if ut.is_number(año, "Año"):
+                año = int(año)
+                if año >= 2020 and año <= 2030:
+                    break
+        
+        print(f"\nGenerando análisis financiero para: {mes}/{año}")
+        print("="*50)
+        
+        # 2. Contadores para el análisis
+        total_ingresos = 0.0
+        ingresos_membresia = 0.0
+        ingresos_entrada_unica = 0.0
+        cantidad_membresias = 0
+        cantidad_entradas = 0
+        ingresos_por_dia = {}
+        
+        # 3. Leer archivo de caja y procesar datos del mes
+        with open(registro_caja, "r", encoding='utf-8') as archivo:
+            for linea in archivo:
+                datos = linea.strip().split(";")
+                if len(datos) >= 4:
+                    fecha = datos[0]  # YYYY-MM-DD
+                    tipo = datos[2]   # Tipo de transacción
+                    monto = float(datos[3].replace(",", ""))  # Monto
+                    
+                    # Extraer año y mes de la fecha
+                    partes_fecha = fecha.split("-")
+                    año_transaccion = int(partes_fecha[0])
+                    mes_transaccion = int(partes_fecha[1])
+                    dia_transaccion = int(partes_fecha[2])
+                    
+                    # Solo procesar si es del mes y año seleccionado
+                    if año_transaccion == año and mes_transaccion == mes:
+                        total_ingresos += monto
+                        
+                        # Clasificar por tipo de ingreso
+                        if tipo in ["Membresia", "PagoMembresia"]:
+                            ingresos_membresia += monto
+                            cantidad_membresias += 1
+                        elif tipo in ["PagoIngresoUnico", "IngresoUnico"]:
+                            ingresos_entrada_unica += monto
+                            cantidad_entradas += 1
+                        
+                        # Agrupar por día
+                        if dia_transaccion in ingresos_por_dia:
+                            ingresos_por_dia[dia_transaccion] += monto
+                        else:
+                            ingresos_por_dia[dia_transaccion] = monto
+        
+        # 4. Mostrar resultados
+        print(f"\nRESUMEN FINANCIERO DEL MES:")
+        print(f"    Total de ingresos: ${total_ingresos:,.0f}")
+        print(f"    Ingresos por membresías: ${ingresos_membresia:,.0f} ({cantidad_membresias} ventas)")
+        print(f"    Ingresos por entradas únicas: ${ingresos_entrada_unica:,.0f} ({cantidad_entradas} entradas)")
+        
+        print(f"\nINGRESOS POR DÍA DEL MES:")
+        if ingresos_por_dia:
+            dias_ordenados = sorted(ingresos_por_dia.items())
+            for dia, monto in dias_ordenados:
+                print(f"   Día {dia:2d}: ${monto:,.0f}")
+        else:
+            print("   No se encontraron ingresos para este mes.")
+        
+        # 5. Calcular promedios
+        if ingresos_por_dia:
+            promedio_diario = total_ingresos / len(ingresos_por_dia)
+            print(f"\nESTADÍSTICAS:")
+            print(f"   Promedio diario: ${promedio_diario:,.0f}")
+            print(f"   Días con ingresos: {len(ingresos_por_dia)}")
+            
+            # Día con mayor ingreso
+            dia_mayor = max(ingresos_por_dia.items(), key=lambda x: x[1])
+            print(f"   Día con mayor ingreso: Día {dia_mayor[0]} (${dia_mayor[1]:,.0f})")
+        
+        print("="*50)
+        
+        return {
+            "mes": mes,
+            "año": año,
+            "total_ingresos": total_ingresos,
+            "ingresos_membresia": ingresos_membresia,
+            "ingresos_entrada_unica": ingresos_entrada_unica,
+            "cantidad_membresias": cantidad_membresias,
+            "cantidad_entradas": cantidad_entradas,
+            "ingresos_por_dia": ingresos_por_dia
+        }
 
     def reporte_diario(self):
         """
@@ -1130,6 +1318,8 @@ class Gimnasio:
         membresias_cargadas = 0
         lineas_procesadas = 0
         
+        inval = [None, "None", "none", "", " ", "0", 0]
+        
         print(f"\n📥 Iniciando carga de {rows-1} líneas de datos...")
         
         for i in range(1, rows):
@@ -1148,7 +1338,7 @@ class Gimnasio:
                 
                 # Validación para teléfono: si es "0", "None", "none" o vacío, se convierte a None
                 telefono = linea[2]
-                if telefono and telefono.lower() in ["0", "none", ""]:
+                if telefono and telefono.lower() in inval:
                     telefono = None
                 
                 # Crear el cliente primero
@@ -1160,8 +1350,17 @@ class Gimnasio:
                 )
                 
                 if cliente_creado:
+                    
+                    if (linea[4] in inval) or (linea[5] in inval):
+                        print(f"⚠️  Línea {i+1} tiene datos de membresía inválidos o cliente sin membresia, se omitirá la membresía.")
+                        continue
+                    
+                    if linea[6] in inval:
+                        linea[6] = None  # Si la fecha fin es inválida, la dejamos como None y se calculara en la membresía
+                    
                     clientes_cargados += 1
                     pago_bool = linea[4].strip().lower() == 'true'
+                    
                     membresia_creada = self.crear_membresia(
                         cliente_encontrado=cliente_creado,
                         fecha_inicio=datetime.strptime(linea[5], "%Y-%m-%d").date(),
@@ -1188,11 +1387,21 @@ class Gimnasio:
         print("📊 RESUMEN DE CARGA:")
         print(f"📥 Líneas procesadas: {lineas_procesadas}")
         print(f"✅ Clientes cargados exitosamente: {clientes_cargados}")
-        print(f"✅ Membresias cargadas exitosamente: {membresias_cargadas}")
+        print(f"✅ Membresías cargadas exitosamente: {membresias_cargadas}")
         print(f"❌ Líneas con errores: {len(lineas_error)}")
         if lineas_error:
             print(f"🔍 Líneas con errores: {lineas_error}")
-        print(f"📈 Tasa de éxito: {(membresias_cargadas/lineas_procesadas)*100:.1f}%" if lineas_procesadas > 0 else "0%")
+
+        # Calcular tasa de éxito basada en clientes cargados (más realista)
+        if lineas_procesadas > 0:
+            tasa_exito_general = (clientes_cargados / lineas_procesadas) * 100
+            print(f"📈 Tasa de éxito general: {tasa_exito_general:.1f}%")
+
+        # Mostrar tasa de membresías solo si hay clientes cargados
+        if clientes_cargados > 0:
+            tasa_membresias = (membresias_cargadas / clientes_cargados) * 100
+            print(f"📈 Clientes con membresía: {tasa_membresias:.1f}%")
+            
         print("="*60)
         
         return membresias_cargadas > 0  # Retorna True si se cargó al menos una línea
@@ -1254,7 +1463,7 @@ class Gimnasio:
                 if columns != 4:
                     print(f"⚠️  ADVERTENCIA: Este archivo tiene {columns} columnas.")
                     print("""📋 Formato esperado para entrenadores : """)
-                    
+                    return False
                 self.crear_entrenador()
         except FileNotFoundError:
             print(f"✗ Archivo {nombre_archivo} no encontrado.")

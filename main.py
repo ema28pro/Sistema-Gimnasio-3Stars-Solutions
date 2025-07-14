@@ -60,7 +60,19 @@ def menu():
             case "6":
                 menu_datos()
             case "":
-                break
+                while True:
+                    confirmacion = input("¿Esta seguro de salir? (si/no): ")
+                    if ut.valid_yes_no(confirmacion):
+                        confirmacion = ut.yes_no(confirmacion)
+                        break
+                    else:
+                        print("Por favor, ingrese 'si' o 'no'.")
+                        continue
+                if confirmacion:
+                    print("Saliendo del menú principal...")
+                    break
+                else:
+                    print("Regresando al menú principal...")
 
 def menu_cliente(cliente):
     # Menu Acciones con Cliente
@@ -260,36 +272,43 @@ def menu_sesion(sesion):
 def menu_datos():
     while True:
         print("\n=== Menú de Datos ===")
-        print("1. Exportar Gimansio.JSON")
-        print("2. Exportar Clientes")
-        print("3. Cargar Clientes")
-        print("4. Exportar Entrenadores")
-        print("5. Reporte Diario")
-        print("6. Informe Entradas")
+        print("1. Reporte Diario")
+        print("2. Seguimiento de Membresías")
+        print("3. Informe Entradas")
+        print("4. Análisis Financiero")
+        print("5. Exportar Clientes")
+        print("6. Cargar Clientes")
+        print("7. Exportar Entrenadores")
+        print("10. Exportar Gimansio.JSON")
         print("Enter para salir")
         opcion_datos = input("Seleccione una opción : ")
         
-        if opcion_datos not in ["1", "2", "3", "4", "5", "6", ""]:
+        if opcion_datos not in ["1", "2", "3", "4", "5", "6", "7", "10", ""]:
             print("Opción fuera de rango. Por favor, ingrese una opción válida.")
             continue
         
         match opcion_datos:
             case "1":
+                Gym.reporte_diario()
+                input("\nPresione Enter para continuar...")
+            case "2":
+                Gym.seguimiento_membresias()
+                input("\nPresione Enter para continuar...")
+            case "3":
+                Gym.informe_entrada()
+                input("\nPresione Enter para continuar...")
+            case "4":
+                Gym.analisis_financiero()
+            case "5":
+                Gym.exportar_clientes()
+            case "6":
+                Gym.cargar_clientes()
+            case "7":
+                Gym.exportar_entrenadores()
+            case "10":
                 archivo_creado = Gym.exportar_datos_json()
                 if archivo_creado:
                     print(f"Los datos se han guardado en: {archivo_creado}")
-                input("\nPresione Enter para continuar...")
-            case "2":
-                Gym.exportar_clientes()
-            case "3":
-                Gym.cargar_clientes()
-            case "4":
-                Gym.exportar_entrenadores()
-            case "5":
-                Gym.reporte_diario()
-                input("\nPresione Enter para continuar...")
-            case "6":
-                Gym.informe_entrada()
                 input("\nPresione Enter para continuar...")
             case "":
                 print("Saliendo del menú de datos...")
