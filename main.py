@@ -10,11 +10,11 @@ from Sesiones import Entrenador, SesionEspecial
 def menu():
     ut.sp(1)
     print("="*30)
-    print("====== Menú del Gimnasio =====")
+    print("========= BIENVENIDO =========")
     print("="*30)
     while True:
         print("\n"*3)
-        print("========= BIENVENIDO =========")
+        print("====== Menú del Gimnasio =====")
         print(30*"=")
         print("¿Que desea hacer?")
         print("1. Ver Clientes")
@@ -32,22 +32,29 @@ def menu():
             continue
         match opcion_menu:
             case "1":
-                Gym.visualizar_clientes()
-                input("\nPresione Enter para continuar...")
+                cliente = Gym.visualizar_clientes()
+                if cliente:  # Solo proceder si se eligio un cliente
+                    menu_cliente(cliente)
+                else:
+                    input("\nPresione Enter para continuar...")
             case "2":
                 Gym.visualizar_membresias()
                 input("\nPresione Enter para continuar...")
             case "3":
                 cliente = Gym.crear_cliente()
-                input("\nPresione Enter para continuar...")
+                # input("\nPresione Enter para continuar...")
                 if cliente:  # Solo proceder si se creó el cliente exitosamente
                     menu_cliente(cliente)
+                else:
+                    input("\nPresione Enter para continuar...")
             case "4":
                 # Menu Acciones con Cliente
                 cliente = Gym.buscar_cliente()
-                input("\nPresione Enter para continuar...")
+                # input("\nPresione Enter para continuar...")
                 if cliente:  # Solo proceder si se encontró un cliente
                     menu_cliente(cliente)
+                else:
+                    input("\nPresione Enter para continuar...")
             case "5":
                 menu_eventos()
             case "6":
@@ -63,7 +70,7 @@ def menu_cliente(cliente):
         print(30*"=")
         print("1. Ver información del Cliente")
         print("2. Adquirir Membresía" , "(Sin Membresia)" if cliente.get_membresia() is None else "(Con Membresia)")
-        print("3. Consultar Membresía")
+        print("3. Consultar Membresía" , "(Sin Membresia)" if cliente.get_membresia() is None else "")
         print("4. Agendar Sesión Especial")
         print("5. Pago Ingreso Único")
         print("6. Registrar Entrada")
@@ -86,7 +93,11 @@ def menu_cliente(cliente):
             case "3":
                 membresia = Gym.consultar_membresia(cliente)
                 # Menu Acciones con Membresia
-                menu_membresia(membresia)
+                if membresia:
+                    menu_membresia(membresia)
+                else:
+                    print("El cliente no tiene una membresía activa.")
+                    input("\nPresione Enter para continuar...")
             case "4":
                 Gym.agendar_sesion(cliente)
                 input("\nPresione Enter para continuar...")
@@ -121,20 +132,24 @@ def menu_membresia(membresia):
     while True:
         print("====== ¿Que desea hacer? =====")
         print(30*"=")
-        print("1. Pagar Membresía" , "(Paga)" if membresia.get_pago() else "(Pendiente)")
-        print("2. Eliminar Membresia")
+        print("1. Ver Información de Membresía")
+        print("2. Pagar Membresía" , "(Paga)" if membresia.get_pago() else "(Pendiente)")
+        print("3. Eliminar Membresia")
         print("Enter para salir")
         opcion_membresia = input("Seleccione una opción : ")
         
-        if opcion_membresia not in ["1", "2", ""]:
+        if opcion_membresia not in ["1", "2", "3", ""]:
             print("Opción fuera de rango. Por favor, ingrese una opción válida.")
             continue
     
         match opcion_membresia:
             case "1":
-                Gym.pagar_membresia(membresia)
+                membresia.ver_info()
                 input("\nPresione Enter para continuar...")
             case "2":
+                Gym.pagar_membresia(membresia)
+                input("\nPresione Enter para continuar...")
+            case "3":
                 Gym.eliminar_membresia(membresia) # Pendiente, tmb incluir dias restantes y meter en ciclo
                 input("\nPresione Enter para continuar...")
             case "":
@@ -159,48 +174,24 @@ def menu_eventos():
                 entrenador = Gym.crear_entrenador()
                 if entrenador:
                     menu_entrenador(entrenador)
-                input("\nPresione Enter para continuar...")
+                else:
+                    input("\nPresione Enter para continuar...")
             case "2":
                 entrenador = Gym.buscar_entrenador()
                 if entrenador:
                     menu_entrenador(entrenador)
+                else:
+                    input("\nPresione Enter para continuar...")
             case "3":
                 entrenador = Gym.mostrar_entrenadores()
                 if entrenador:
                     menu_entrenador(entrenador)
-                input("\nPresione Enter para continuar...")
+                else:
+                    input("\nPresione Enter para continuar...")
             case "4":
                 sesion = Gym.mostrar_sesiones()
                 if sesion:
-                    print("\n=== ¿Que desea hacer? ===")
-                    print(30*"=")
-                    print("1. Editar Inscritos")
-                    print("2. Cambiar Entrenador")
-                    print("3. Eliminar Sesión Especial")
-                    print("Enter para salir")
-                    opcion_sesion = input("Seleccione una opción : ")
-                    match opcion_sesion:
-                        case "1":
-                            sesion.editar_inscritos()
-                            input("\nPresione Enter para continuar...")
-                        case "2":
-                            print(f"Sesion con entrenador {sesion.mostrar_entrenador()} :")
-                            while True:
-                                confirmacion = input("¿Estas seguro de cambiar el entrenador? (si/no): ")
-                                if ut.valid_yes_no(confirmacion):
-                                    break
-                            confirmacion = ut.yes_no(confirmacion)
-                            if confirmacion:
-                                entrenador = Gym.mostrar_entrenadores()
-                                sesion.set_entrenador(entrenador)
-                            else:
-                                print("Cambio de entrenador cancelado.")
-                            input("\nPresione Enter para continuar...")
-                        case "3":
-                            Gym.eliminar_sesion_especial(sesion.get_id_sesion())
-                            input("\nPresione Enter para continuar...")
-                        case "":
-                            print("Saliendo del menú de sesión especial...")
+                    menu_sesion(sesion)
                 else:
                     input("\nPresione Enter para continuar...")
             case "":
@@ -214,6 +205,9 @@ def menu_entrenador(entrenador):
     print("2. Eliminar Entrenador")
     print("Enter para salir")
     opcion_entrenador = input("Seleccione una opción : ")
+    if opcion_entrenador not in ["1", "2", ""]:
+        print("Opción fuera de rango. Por favor, ingrese una opción válida.")
+        return
     match opcion_entrenador:
         case "1":
             Gym.crear_sesion_especial(entrenador)
@@ -223,6 +217,45 @@ def menu_entrenador(entrenador):
             input("\nPresione Enter para continuar...")
         case "":
             print("Saliendo del menú de entrenador...")
+
+def menu_sesion(sesion):
+    print("\n=== ¿Que desea hacer? ===")
+    print(30*"=")
+    print("1. Editar Inscritos")
+    print("2. Cambiar Entrenador")
+    print("3. Eliminar Sesión Especial")
+    print("Enter para salir")
+    opcion_sesion = input("Seleccione una opción : ")
+    if opcion_sesion not in ["1", "2", "3", ""]:
+        print("Opción fuera de rango. Por favor, ingrese una opción válida.")
+        continue
+    match opcion_sesion:
+        case "1":
+            sesion.editar_inscritos()
+            input("\nPresione Enter para continuar...")
+        case "2":
+            print(f"=> Sesion con entrenador:")
+            sesion.ver_entrenador()
+            while True:
+                confirmacion = input("¿Estas seguro de cambiar el entrenador? (si/no): ")
+                if ut.valid_yes_no(confirmacion):
+                    break
+            confirmacion = ut.yes_no(confirmacion)
+            if confirmacion:
+                entrenador = Gym.mostrar_entrenadores()
+                if entrenador:
+                    sesion.set_entrenador(entrenador)
+                    print(f"Entrenador cambiado a: {sesion.get_entrenador().get_nombre()}")
+                else:
+                    print("No se encontró un entrenador para cambiar.")
+            else:
+                print("Cambio de entrenador cancelado.")
+            input("\nPresione Enter para continuar...")
+        case "3":
+            Gym.eliminar_sesion(sesion)
+            input("\nPresione Enter para continuar...")
+        case "":
+            print("Saliendo del menú de sesión especial...")
 
 def menu_datos():
     while True:

@@ -46,6 +46,19 @@ class Membresia:
         #     fecha_fin_obj = self.__fecha_fin
         
         return (self.__fecha_fin - date.today()).days
+    
+    def ver_info(self):
+        """Muestra información de la membresía"""
+        print(f"\n=== Información de Membresía ===")
+        print(f"Fecha de inicio: {self.get_fecha_inicio()}")
+        print(f"Fecha de fin: {self.get_fecha_fin()}")
+        print(f"Estado de pago: {'Pagada' if self.__pago else 'Pendiente'}")
+        dias_restantes = self.calcular_dias_restantes()
+        if dias_restantes >= 0:
+            print(f"Días restantes: {dias_restantes}")
+        else:
+            print("La membresía ha expirado.")
+        print("="*40)
 
 class Cliente:
     """

@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import date
+from datetime import date, timedelta, datetime
 import Utils as ut
 
 # ==== ENTRENADORES Y SESIONES ====
@@ -77,7 +77,10 @@ class SesionEspecial:
             print("No hay entrenador asignado a esta sesión.")
         
     def get_fecha(self):
-        return self.__fecha
+        if isinstance(self.__fecha, str):
+            return self.__fecha
+        else:
+            return self.__fecha.strftime("%Y-%m-%d")
     
     def get_cupos(self):
         return self.__cupos
@@ -92,6 +95,30 @@ class SesionEspecial:
         if self.__entrenador is None:
             print("Sesion sin entrenador")
         self.__entrenador = entrenador  # Asigna el objeto Entrenador completo
+    
+    def calcular_dias_restantes(self):
+        fecha_actual = date.today()
+        
+        # Convertir la fecha de la sesión a objeto date
+        if isinstance(self.__fecha, str):
+            # Asumiendo formato "YYYY-MM-DD"
+            if len(self.__fecha.split('-')) == 3:
+                fecha_sesion = datetime.strptime(self.__fecha, "%Y-%m-%d").date()
+            else:
+                print(f"Formato de fecha inválido: {self.__fecha}")
+                return None
+        elif isinstance(self.__fecha, date):
+            fecha_sesion = self.__fecha
+        else:
+            print("Tipo de fecha no soportado")
+            return None
+        
+        # Calcular la diferencia en días
+        diferencia = (fecha_sesion - fecha_actual).days
+        if not diferencia or diferencia is None or diferencia < 0:
+            return None
+        else:
+            return diferencia
     
     # Métodos para gestionar inscripciones
     def inscribir_cliente(self, cliente=None):
@@ -126,7 +153,7 @@ class SesionEspecial:
         print(f"Cliente {cliente.get_nombre()} inscrito exitosamente. Cupos: {self.__cupos}/{self.__maximo_cupos}")
         return True
     
-    def editar_inscritos(self):
+    def editar_inscritos(self,id_cliente=None):
         """
         Cancela la inscripción de un cliente de la sesión.
         
@@ -147,28 +174,20 @@ class SesionEspecial:
                 if self.__inscritos[i] is not None:
                     print(f"  - {self.__inscritos[i].get_nombre()} (ID: {self.__inscritos[i].get_id_cliente()})")
         
-        while True:
-            id_cliente = input("Ingrese el ID del cliente a cancelar inscripción: ")
-            if id_cliente.isdigit():
-                id_cliente = int(id_cliente)
-                break
-        if id_cliente == 0:
+        if id_cliente is None:
             while True:
-                confirmacion = input("Estas seguro de cancelar todas las inscripciónes? (si/no) ")
-                if ut.valid_yes_no(confirmacion):
+                print("0 para cancelar todas las inscripciones")
+                id_cliente = input("Ingrese el ID del cliente a cancelar inscripción: ")
+                if id_cliente.isdigit():
+                    id_cliente = int(id_cliente)
                     break
-            
-            confirmacion = ut.yes_no(confirmacion)
         
-            if not confirmacion:
-                print("Cancelación de inscripción cancelada.")
-                return False
-            else:
-                print("Cancelando todas las inscripciones...")
-                self.__inscritos = np.full(self.__maximo_cupos, None, dtype=object)
-                self.__cupos = 0
-                print(f"Todas las inscripciones canceladas. Cupos: {self.__cupos}/{self.__maximo_cupos}")
-                return True
+        if id_cliente == 0:
+            print("Cancelando todas las inscripciones...")
+            self.__inscritos = np.full(self.__maximo_cupos, None, dtype=object)
+            self.__cupos = 0
+            print(f"Todas las inscripciones canceladas. Cupos: {self.__cupos}/{self.__maximo_cupos}")
+            return True
         else:
             
             eliminado = False
@@ -213,7 +232,7 @@ class SesionEspecial:
         print("="*40)
         return self.__entrenador
 
-    def mostrar_entrenador(self):
+    def ver_entrenador(self):
         """Muestra información del entrenador de la sesión"""
         if self.__entrenador:
             self.__entrenador.mostrar_info()

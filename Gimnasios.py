@@ -19,7 +19,7 @@ class Gimnasio:
         __correo_electronico (str): Correo electrónico de contacto del Gimnasio.
         __efectivo (float, optional): Dinero en efectivo del Gimnasio. Defaults to 0.
         __numero_clientes (int): Contador de clientes registrados.
-        __historia_clientes (int): Contador de clientes históricos.
+        __historico_clientes (int): Contador de clientes históricos.
         __clientes (np.ndarray): Array que almacena los clientes registrados.
         __membresias (np.ndarray): Array que almacena las membresías registradas.
         __numero_membresias (int): Contador de membresías registradas.
@@ -237,9 +237,9 @@ class Gimnasio:
                 try:
                     fecha = datetime.strptime(fecha, "%Y-%m-%d").date()
                     break
-                except Exception as error:
+                except Exception as e:
                     print("Fecha inválida. Debe ser en formato 'YYYY-MM-DD'.")
-                    print(f"Error : {str(error)}")
+                    print(f"Error : {str(e)}")
                     continue
         
         if not entrenador:
@@ -383,6 +383,29 @@ class Gimnasio:
                 print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
         
         print(f"\nNumero de Clientes Registradas : {total_clientes}")
+        
+        id_cliente = input("\nSelecione un Cliente o Enter para continuar... ")
+        if id_cliente == "":
+            print("Saliendo del menú de clientes...")
+            return None
+        else:
+            # Validar que el ID ingresado sea un número
+            if not ut.is_number(id_cliente, "ID de Cliente"):
+                print("ID de cliente inválido. Debe ser un número.")
+                return None
+            if int(id_cliente) < 1:
+                print(f"ID de cliente inválido.")
+                return None
+            
+            id_cliente = int(id_cliente)
+            # Buscar el cliente por ID
+            for cliente in self.__clientes:
+                if cliente is not None and cliente.get_id_cliente() == id_cliente:
+                    print(f"\n===== Cliente Seleccionado ====")
+                    print(f"Cliente ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                    return cliente
+            print(f"No se encontró un cliente con ID {id_cliente}.")
+            return None
     
     def visualizar_membresias(self):
         print("\n=== Membresías Registradas ===")
@@ -391,8 +414,9 @@ class Gimnasio:
             if cliente is not None and cliente.get_membresia() is not None:
                 membresia = cliente.get_membresia()
                 total_membresias += 1
+                dias_restantes = membresia.calcular_dias_restantes()
                 print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_registro_c()}
-                        Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {membresia.calcular_dias_restantes()} \n""")
+                        Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {dias_restantes if dias_restantes < 0 else "Vencida"} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
     
@@ -444,7 +468,11 @@ class Gimnasio:
             for sesion in self.__sesiones:
                 total_sesiones += 1
                 entrenador = sesion.mostrar_info()
-                entrenador.mostrar_info()
+                if entrenador:
+                    entrenador.mostrar_info()
+                else:
+                    print("No se encontró un entrenador para esta sesión.")
+            print(f"\nNumero de Sesiones Especiales Registradas : {total_sesiones}")
         
         id_sesion = input("\nSeleccione una Sesion o Enter para continuar... ")
         
@@ -562,7 +590,13 @@ class Gimnasio:
             sesion_ids = [sesion.get_id_sesion() for sesion in sesiones_disponibles]
             
             while True:
-                id_sesion = input("Ingrese el ID de la sesión a la que desea inscribirse (o '0' para cancelar): ")
+                print("Enter o '0' para cancelar la operación.")
+                id_sesion = input("Ingrese el ID de la sesión a la que desea inscribirse : ")
+                
+                if id_sesion == "":
+                    print("Operación cancelada.")
+                    return
+                
                 if ut.is_number(id_sesion, "ID"):
                     id_sesion = int(id_sesion)
                     if id_sesion == 0:
@@ -605,8 +639,21 @@ class Gimnasio:
         for i in range(len(self.__entrenadores)):
             if self.__entrenadores[i].get_id_entrenador() == id_entrenador:
                 print(f"Entrenador con ID {id_entrenador} y nombre {self.__entrenadores[i].get_nombre()}.")
-                confirmar = input("¿Está seguro de eliminar este entrenador? (si/no): ").strip().lower()
-                if confirmar == 'si':
+                print(f"Tambien se eliminarán las sesiones especiales asociadas a este entrenador.")
+                print(f"===== Sesiones asociadas =====")
+                total_sesiones = 0
+                for sesion in self.__sesiones:
+                    if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador:
+                        total_sesiones += 1
+                        dias_restantes = sesion.calcular_dias_restantes()
+                        estado = f"{dias_restantes} días restantes" if dias_restantes is not None else "Ya pasó"
+                        print(f" - Sesión ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, {estado}")
+                print(f"Total de sesiones asociadas: {total_sesiones}")
+                while True:
+                    confirmacion = input("¿Estas seguro de eliminar el entrenador? (si/no): ")
+                    if ut.valid_yes_no(confirmacion):
+                        break
+                if ut.yes_no(confirmacion):
                     print(f"Eliminando entrenador {self.__entrenadores[i].get_nombre()}...")
                     self.__entrenadores.pop(i)
                     
@@ -614,8 +661,8 @@ class Gimnasio:
                     for sesion in self.__sesiones:
                         if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador:
                             print(f"Eliminando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
-                            self.eliminar_sesion(sesion)
-                    
+                            if not self.eliminar_sesion(sesion): # Si la sesion no se elimino, hay que eliminar la referencia del entrenador
+                                sesion.set_entrenador(None)
                 else:
                     print("Eliminación cancelada.")
                 break
@@ -631,24 +678,32 @@ class Gimnasio:
                     id_sesion = int(id_sesion)
                     break
         else:
-            id_sesion = sesion.get_id_sesion()
+            if isinstance(sesion, SesionEspecial):
+                id_sesion = sesion.get_id_sesion()
+            else:
+                id_sesion = sesion
         
         # Buscar la sesión por ID
         for i in range(len(self.__sesiones)):
-            if self.__sesiones[i].get_id_sesion() == id_sesion:
-                print(f"Sesión especial con ID {id_sesion} y fecha {self.__sesiones[i].get_fecha()}.")
+            sesion = self.__sesiones[i]
+            if sesion.get_id_sesion() == id_sesion:
+                dias_restantes = sesion.calcular_dias_restantes()
+                estado = f"{dias_restantes} días restantes" if dias_restantes is not None else "Ya pasó"
+                print(f"Sesión especial con ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, {estado}")
                 while True:
-                    confirmacion = input("¿Estas seguro de eliminar el entrenador? (si/no): ")
+                    confirmacion = input("¿Estas seguro de eliminar la sesion? (si/no): ")
                     if ut.valid_yes_no(confirmacion):
                         break
                 if ut.yes_no(confirmacion):
-                    print(f"Eliminando sesión especial del {self.__sesiones[i].get_fecha()}...")
+                    print(f"Eliminando sesión especial del {sesion.get_fecha()}...")
                     
                     # Eliminamos la referencia del entrenador de la sesión
-                    self.__sesiones[i].set_entrenador(None)
+                    sesion.set_entrenador(None)
                     # Eliminamos las referencias de clientes inscritos
-                    self.__sesiones[i].editar_inscritos(0)
+                    print("Eliminando inscritos...")
+                    sesion.editar_inscritos(0)
                     # Y finalmente eliminamos la sesión del array
+                    print("Eliminando sesión...")
                     self.__sesiones.pop(i)
                     return True
                 else:
@@ -746,8 +801,8 @@ class Gimnasio:
             
             return nombre_archivo
             
-        except Exception as error:
-            print(f"✗ Error al guardar el archivo JSON: {str(error)}")
+        except Exception as e:
+            print(f"✗ Error al guardar el archivo JSON: {str(e)}")
             return None
     
     def cargar_datos_json(self, nombre_archivo: str):
@@ -780,8 +835,8 @@ class Gimnasio:
         except json.JSONDecodeError:
             print(f"✗ Error al leer el archivo JSON: formato inválido")
             return None
-        except Exception as error:
-            print(f"✗ Error al cargar el archivo: {str(error)}")
+        except Exception as e:
+            print(f"✗ Error al cargar el archivo: {str(e)}")
             return None
     
     def cargar_clientes(self, nombre_archivo=None):
@@ -836,8 +891,8 @@ class Gimnasio:
         except FileNotFoundError:
             print(f"✗ Archivo {nombre_archivo} no encontrado.")
             return False
-        except Exception as error:
-            print(f"✗ Error al leer el archivo: {str(error)}")
+        except Exception as e:
+            print(f"✗ Error al leer el archivo: {str(e)}")
             return False
 
         # Contadores para estadísticas
@@ -894,8 +949,8 @@ class Gimnasio:
                     print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
                     continue
                 
-            except Exception as error:
-                print(f"✗ Error procesando línea {i+1}: {str(error)}")
+            except Exception as e:
+                print(f"✗ Error procesando línea {i+1}: {str(e)}")
                 lineas_error.append(i+1)
                 continue
         
