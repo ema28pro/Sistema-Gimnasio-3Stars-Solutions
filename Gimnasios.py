@@ -475,7 +475,7 @@ class Gimnasio:
                 total_membresias += 1
                 dias_restantes = membresia.calcular_dias_restantes()
                 print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_registro()}
-                        Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {dias_restantes if dias_restantes < 0 else "Vencida"} \n""")
+                        Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {dias_restantes if dias_restantes > 0 else "Vencida"} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
     
