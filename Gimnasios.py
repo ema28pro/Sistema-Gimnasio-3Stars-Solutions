@@ -18,18 +18,15 @@ class Gimnasio:
         __telefono (str): Número de teléfono del Gimnasio.
         __correo_electronico (str): Correo electrónico de contacto del Gimnasio.
         __efectivo (float, optional): Dinero en efectivo del Gimnasio. Defaults to 0.
+        __maximo_clientes (int): Número máximo de clientes que el gimnasio puede registrar. Defaults to 50.
         __numero_clientes (int): Contador de clientes registrados.
         __historico_clientes (int): Contador de clientes históricos.
         __clientes (np.ndarray): Array que almacena los clientes registrados.
-        __membresias (np.ndarray): Array que almacena las membresías registradas.
-        __numero_membresias (int): Contador de membresías registradas.
-        __historico_membresias (int): Contador de membresías históricas.
-        __entrenadores (np.ndarray): Array que almacena los entrenadores registrados.
-        __sesiones (np.ndarray): Array que almacena las sesiones especiales programadas.
-        
-        Notas:
-        - Necesitaremos un contador para membresias y para entrenadores?
-        - Pensar en los registros y como lo llevaremos
+        __historico_entrenadores (int): Contador de entrenadores históricos.
+        __entrenadores (list): Lista que almacena los objetos Entrenadores de los entrenadores registrados.
+        __historico_sesiones (int): Contador de sesiones especiales históricas.
+        __sesiones (list): Lista que almacena los objetos SescionEspecial de las sesiones especiales registradas.
+        __sesiones_especiales (list): Lista de tipos de sesiones especiales disponibles.
     """    
     def __init__(self, nombre: str, direccion: str, telefono: str, correo: str, efectivo: float = 0):   
         self.__nombre = nombre
@@ -54,7 +51,7 @@ class Gimnasio:
     def get(self):
         return self.__clientes, self.__entrenadores, self.__sesiones
 
-    def ver_inf(self):
+    def ver_info(self):
         """_summary_
             Imprime el nombre y telefono de contacto del gimnasio
         """        
@@ -302,7 +299,7 @@ class Gimnasio:
                     if cliente is not None and cliente.get_id_cliente() == int(id_cliente): # Buscar coincidencia
                         cliente_encontrado = cliente # Guardar el cliente encontrado
                         # Imprimir los detalles del cliente encontrado
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
                 if not cliente_encontrado: # Si no se encontró el cliente, informar al usuario
                     print(f"No se encontró un cliente con ID {id_cliente}.")
                     return
@@ -314,7 +311,7 @@ class Gimnasio:
                 for cliente in self.__clientes:
                     if cliente is not None and cliente.get_nombre() == nombre_cliente.lower():
                         cliente_encontrado = cliente
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con nombre {nombre_cliente}.")
                     return
@@ -326,7 +323,7 @@ class Gimnasio:
                 for cliente in self.__clientes:
                     if cliente is not None and cliente.get_documento() == documento:
                         cliente_encontrado = cliente
-                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                        print(f"Cliente encontrado: ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
                 if not cliente_encontrado:
                     print(f"No se encontró un cliente con documento {documento}.")
                     return
@@ -390,7 +387,7 @@ class Gimnasio:
         for cliente in self.__clientes:
             if cliente is not None:
                 total_clientes += 1
-                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                print(f"ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
         
         print(f"\nNumero de Clientes Registradas : {total_clientes}")
         
@@ -412,7 +409,7 @@ class Gimnasio:
             for cliente in self.__clientes:
                 if cliente is not None and cliente.get_id_cliente() == id_cliente:
                     print(f"\n===== Cliente Seleccionado ====")
-                    print(f"Cliente ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_registro_c()}")
+                    print(f"Cliente ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Fecha de Registro: {cliente.get_fecha_regitro()}")
                     return cliente
             print(f"No se encontró un cliente con ID {id_cliente}.")
             return None
@@ -425,7 +422,7 @@ class Gimnasio:
                 membresia = cliente.get_membresia()
                 total_membresias += 1
                 dias_restantes = membresia.calcular_dias_restantes()
-                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_registro_c()}
+                print(f""" - ID: {cliente.get_id_cliente()}, Cliente {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Registrado: {cliente.get_fecha_regitro()}
                         Membresia => Estado: { 'Paga' if membresia.get_pago() else 'Pendiente' }, Fecha Inicio: {membresia.get_fecha_inicio()}, Fecha Fin: {membresia.get_fecha_fin()}, Dias Restantes: {dias_restantes if dias_restantes < 0 else "Vencida"} \n""")
         
         print(f"\nNumero de Membresias Registradas : {total_membresias}")
@@ -1239,7 +1236,7 @@ class Gimnasio:
                     "nombre": cliente.get_nombre(),
                     "documento": cliente.get_documento(),
                     "telefono": cliente.get_telefono(),
-                    "fecha_registro": cliente.get_fecha_registro_c(),
+                    "fecha_registro": cliente.get_fecha_regitro(),
                     "membresia": None
                 }
                 
@@ -1462,13 +1459,14 @@ class Gimnasio:
                 if i is not None:
                     membresia = i.get_membresia()
                     if membresia:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro_c()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
+                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_regitro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
                     else:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro_c()};None;None;None\n")
+                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_regitro()};None;None;None\n")
         
         return nombre_archivo
         print(f"✓ Datos exportados exitosamente a: {nombre_archivo}")
 
+    #! Metodo Incompleto, falta implementar
     def cargar_entrenadores(self, nombre_archivo=None):
         if nombre_archivo is None:
             print("Archivos disponibles en la carpeta 'registros':")
@@ -1599,4 +1597,3 @@ class Gimnasio:
         except Exception as e:
             print(f"✗ Error al guardar el archivo JSON: {str(e)}")
             return None
-            

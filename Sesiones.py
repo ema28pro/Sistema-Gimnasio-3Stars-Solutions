@@ -47,15 +47,15 @@ class SesionEspecial:
         __id_sesion (int): Identificador único de la sesión especial.
         __entrenador (Entrenador): Objeto entrenador que dirige la sesión.
         __fecha (str): Fecha de la sesión especial.
-        __maximo_cupos (int, optional): Numero maximo de cupos. Defaults to 25.
         __cupos (int): Número actual de cupos ocupados.
+        __maximo_cupos (int, optional): Numero maximo de cupos. Defaults to 25.
         __inscritos (np.ndarray): Array que almacena los clientes inscritos en la sesión.
     """
     def __init__(self, id_sesion: int, entrenador, fecha: str, maximo_cupos: int = 25):
         self.__id_sesion = id_sesion
         self.__entrenador = entrenador  # Ahora guarda el objeto Entrenador completo
-        self.__cupos = 0
         self.__fecha = fecha
+        self.__cupos = 0
         self.__maximo_cupos = maximo_cupos
         self.__inscritos = np.full(maximo_cupos, None, dtype=object) # Estamos guardando el objeto Cliente
     

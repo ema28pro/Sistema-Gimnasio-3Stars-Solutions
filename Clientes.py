@@ -38,14 +38,12 @@ class Membresia:
     # Métodos
 
     def calcular_dias_restantes(self):
-        # Si fecha_fin es string, convertirla a date
-        # if isinstance(self.__fecha_fin, str):
-        #     fecha_fin_obj = datetime.strptime(self.__fecha_fin, "%Y-%m-%d").date()
-        #     self.__fecha_fin = fecha_fin_obj  # Actualizar el atributo para que sea un objeto date
-        # else:
-        #     fecha_fin_obj = self.__fecha_fin
-        
-        return (self.__fecha_fin - date.today()).days
+        if isinstance(self.__fecha_fin, str):
+            fecha_fin_obj = datetime.strptime(self.__fecha_fin, "%Y-%m-%d").date()
+            self.__fecha_fin = fecha_fin_obj  # Actualizar el atributo para que sea un objeto date
+        else:
+            fecha_fin_obj = self.__fecha_fin
+        return (self.__fecha_fin_obj - date.today()).days
     
     def ver_info(self):
         """Muestra información de la membresía"""
@@ -70,22 +68,16 @@ class Cliente:
         __documento (str): Documento de identidad del cliente.
         __telefono (str, optional): Número de teléfono del cliente. Defaults to None.
         __fecha_registro (str): Fecha de registro del cliente en el gimnasio.
-        __membresia (Membresia, optional): Membresía asociada al cliente. Defaults to None.
-        __sesiones_especiales (list, optional): Lista de sesiones especiales solicitadas por el cliente. Defaults to [].
-        
-    Notas:
-        - Pensar si es necesario el atributo __sesiones_especiales, ya que podría ser redundante si se gestiona desde la clase SesionEspecial.
-        - Pensar si guardaremos el nombre completo o solo el nombre.
+        __membresia (Membresia, optional): Objeto Membresía asociada al cliente. Defaults to None.
     """
-    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro: str, telefono: str = None):
+    def __init__(self, id_cliente: int, nombre: str, documento: str, fecha_registro, telefono: str = None):
         self.__id_cliente = id_cliente
         self.__nombre = nombre
         self.__documento = documento
         self.__telefono = telefono
         self.__fecha_registro = fecha_registro
 
-        self.__membresia = None  # Inicialmente sin membresía
-        # Se elimina la lista de sesiones especiales, ya que de eliminar una sesión especial, se tendrá que eliminar de la lista de cada cliente.
+        self.__membresia = None 
         
     # Métodos de acceso y modificación
     
@@ -101,8 +93,7 @@ class Cliente:
     def get_telefono(self):
         return self.__telefono
     
-    def get_fecha_registro_c(self):
-        # Retornar como string para compatibilidad con JSON
+    def get_fecha_registro(self):
         if isinstance(self.__fecha_registro, str):
             return self.__fecha_registro
         else:

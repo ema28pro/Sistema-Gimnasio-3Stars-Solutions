@@ -325,7 +325,7 @@ def exportar_datos_rapido():
 
 def App():
     # Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
-    # Gym.ver_inf()
+    # Gym.ver_info()
     
     ut.sp()
     
@@ -373,6 +373,6 @@ def App():
 
 if __name__ == "__main__":
     Gym = Gimnasio("Body Force","Barrio Candelilla", "3001234545", "body@force.com", 45000)
-    Gym.ver_inf()
+    Gym.ver_info()
     App()
     # menu_eventos()
