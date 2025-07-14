@@ -45,6 +45,10 @@ El código está orientado a objetos y dividido en clases:
 - Membresia: Contiene información de suscripciones.
 - Entrenador y SesionEspecial: Control de sesiones grupales.
 
+## Diagrama de Clases
+
+![Diagrama de Clases](ClassDiagram.png)
+
 ## Integrantes
 **Emanuel López Franco :**  
 [![GitHub](https://img.shields.io/badge/GitHub-ema28pro-black?logo=github)](https://github.com/ema28pro)
