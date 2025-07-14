@@ -8,7 +8,7 @@
 <img alt="Numpy" src="https://img.shields.io/badge/Numpy-4B32C2.svg?style=flat&amp;logo=Numpy&amp;logoColor=white" class="inline-block mx-1" style="margin: 0px 2px;">
 <img src="https://img.shields.io/badge/DateTime-blue?style=flat&logo=clockify&logoColor=white"  class="inline-block mx-1" style="margin: 0px 2px;">
 </div>
-
+Santiago
 ---
 
 Proyecto Final del Curso de Lógica y Representación I, Sistema de Gestión de Membresías Gimnasio en Python usando Numpy, DateTime y persitencia en archivos, por 3Stars Solutions.
