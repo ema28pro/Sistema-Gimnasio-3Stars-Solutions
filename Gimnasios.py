@@ -646,7 +646,7 @@ class Gimnasio:
         # Actualizar la membresía
         print(f"Membresía renovada.")
         self.ingreso_caja(PRECIO_MEMBRESIA, "RenovacionMembresia") # Se registra el ingreso en caja con su motivo
-        membresia_.renovar_membresia() # Actualiza la fecha de fin de la membresía
+        membresia.renovar_membresia() # Actualiza la fecha de fin de la membresía
     
     def pago_ingreso_unico(self, cliente):
         """"Metodo encargado de registrar el ingreso unico de un cliente sin tener que adquirir memebreisa, pagando el ingreso unico del Cliente."""
@@ -747,7 +747,6 @@ class Gimnasio:
         Args:
             id_cliente (int, optional): ID del Cliente a eliminar. Defaults to None.
             cliente (Cliente, optional): Objeto Cliente a eliminar. Defaults to None.
-
         Returns:
             bool: Booleano que indica si la eliminación fue exitosa o no.
         """        
@@ -801,7 +800,7 @@ class Gimnasio:
                     sesion.editar_inscritos(cliente.get_id_cliente())
                 
                 # Eliminar cliente del array
-                self.__clientes[i] = None 
+                self.__clientes[indice_cliente] = None 
                 self.__numero_clientes -= 1 
                 print(f"Cliente con ID {id_cliente} eliminado exitosamente.")
                 return True
@@ -1638,7 +1637,7 @@ class Gimnasio:
     def exportar_clientes(self):
         nombre_archivo = f"registros/clientes_{date.today().strftime('%Y%m%d')}.txt"
         
-        with open(nombre_archivo, "w",) as archivo:
+        with open(nombre_archivo, "w") as archivo:
             archivo.write("Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin\n")
             for i in self.__clientes:
                 if i is not None:

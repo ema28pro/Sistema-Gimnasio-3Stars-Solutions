@@ -138,10 +138,22 @@ class SesionEspecial {
 %% RELACIONES PRINCIPALES
 %% =========================
 
+%% Rombos vacios (composición):
+%%    Las relaciones donde Gimnasio crea y destruye objetos.
+%% Rombos rellenos (agregacion):
+%%    Donde la clase tiene una referencia, pero no controla el ciclo de vida.
+
+%% Composicion
 Gimnasio "1" o--> "0..*" Cliente : contiene
-Gimnasio "1" o--> "0..*" Membresia : ofrece
+%% Composicion
+%% Gimnasio "1" o--> "0..*" Membresia : ofrece
+%% Composicion
 Gimnasio "1" o--> "0..*" Entrenador : contrata
+%% Composicion
 Gimnasio "1" o--> "0..*" SesionEspecial : programa
-Cliente "1" *--> "1" Membresia : posee
-SesionEspecial "1" o--> "0..*" Cliente : inscritos
+%% Composicion: Se cambio la relacion de agregacion a composicion
+Cliente "1" o--> "1" Membresia : posee
+%% Agregacion: Se cambio la relacion de composicion a agregacion
+SesionEspecial "1" *--> "0..*" Cliente : inscritos 
+%% Agregacion
 SesionEspecial "1" *--> "1" Entrenador : guiada por
