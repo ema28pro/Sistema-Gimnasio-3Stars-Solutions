@@ -306,12 +306,16 @@ def menu_datos():
                 input("\nPresione Enter para continuar...")
             case "4":
                 Gym.analisis_financiero()
+                input("\nPresione Enter para continuar...")
             case "5":
                 Gym.exportar_clientes()
+                input("\nPresione Enter para continuar...")
             case "6":
                 Gym.cargar_clientes()
+                input("\nPresione Enter para continuar...")
             case "7":
                 Gym.exportar_entrenadores()
+                input("\nPresione Enter para continuar...")
             case "10":
                 archivo_creado = Gym.exportar_datos_json()
                 if archivo_creado:

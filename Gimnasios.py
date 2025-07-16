@@ -792,7 +792,7 @@ class Gimnasio:
                     break
             
             if ut.yes_no(confirmar):
-                self.__clientes[i].set_membresia(None)  # Eliminar membresía si existe, luego implementar eliminar_membresia
+                cliente_encontrado.set_membresia(None)  # Eliminar membresía si existe, luego implementar eliminar_membresia
                 
                 # Buscar si el cliente tiene sesiones especiales
                 for sesion in self.__sesiones:
@@ -1018,7 +1018,6 @@ class Gimnasio:
                 dias_restantes = cliente.get_membresia().calcular_dias_restantes()
                 print(f"    - ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Días vencida: {dias_restantes}")
 
-
     def analisis_financiero(self):
         """_summary_
             Entrega un analisis financiero del gimnasio, mostrando los ingresos por membresías y entradas únicas.
@@ -1129,7 +1128,7 @@ class Gimnasio:
         else:
             print("   No se encontraron ingresos para este mes.")
         
-        # 5. Calcular promedios
+        # Calcular promedios
         if ingresos_por_dia:
             promedio_diario = total_ingresos / len(ingresos_por_dia)
             print(f"\nESTADÍSTICAS:")
@@ -1316,7 +1315,6 @@ class Gimnasio:
                     dia_inicio = dia_inicio - 1  # Convertir a índice (0-6)
                     break
         
-        mes_busqueda = f"{año}-{mes:02d}"  # Formato: 2025-06
         print(f"\n Generando informe para: {mes}/{año}")
         print("="*50)
         
@@ -1526,7 +1524,6 @@ class Gimnasio:
                 print(f"✗ Línea {i+1} malformada (solo {len(linea)} columnas): {lineas[i].strip()}")
                 lineas_error.append(i+1)
                 continue
-
             try:
                 print("="*30)
                 print(f"Procesando línea {i+1}/{rows}: {linea}")
@@ -1563,7 +1560,7 @@ class Gimnasio:
                     
                     # Validar fecha de inicio de membresía (obligatoria)
                     try:
-                        fecha_inicio = datetime.strptime(linea[5], "%Y-%m-%d").date()
+                        datetime.strptime(linea[5], "%Y-%m-%d").date()
                     except Exception as e:
                         print(f"✗ Error en la fecha de inicio de membresía en línea {i+1}: {str(e)}")
                         print("⚠️  Se omitirá la membresía para este cliente.")
@@ -1584,7 +1581,12 @@ class Gimnasio:
                             fecha_fin_valida = None
                     
                     # Procesar el pago
-                    pago_bool = linea[4].strip().lower() == 'true'
+                    if linea[4] in [False, "False", "false", True, "True", "true"]:
+                        pago_bool = linea[4].strip().lower() == 'true'
+                    else:
+                        print("⚠️  Línea {i+1}: Estado de pago inválido. Se omitirá la membresía.")
+                        lineas_error.append(i+1)
+                        continue
                     
                     # Intentar crear la membresía
                     membresia_creada = self.crear_membresia(
@@ -1599,7 +1601,6 @@ class Gimnasio:
                         print(f"✓ Cliente y membresía cargados exitosamente.")
                     else:
                         print(f"⚠️  Cliente creado pero falló la creación de la membresía.")
-                        
                 else:
                     lineas_error.append(i+1)
                     print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
@@ -1632,23 +1633,23 @@ class Gimnasio:
             
         print("="*60)
         
-        return membresias_cargadas > 0  # Retorna True si se cargó al menos una línea
+        return 
     
     def exportar_clientes(self):
         nombre_archivo = f"registros/clientes_{date.today().strftime('%Y%m%d')}.txt"
         
         with open(nombre_archivo, "w") as archivo:
             archivo.write("Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin\n")
-            for i in self.__clientes:
-                if i is not None:
-                    membresia = i.get_membresia()
+            for cliente in self.__clientes:
+                if cliente is not None:
+                    membresia = cliente.get_membresia()
                     if membresia:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
+                        archivo.write(f"{cliente.get_nombre()};{cliente.get_documento()};{cliente.get_telefono()};{cliente.get_fecha_registro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
                     else:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro()};None;None;None\n")
+                        archivo.write(f"{cliente.get_nombre()};{cliente.get_documento()};{cliente.get_telefono()};{cliente.get_fecha_registro()};None;None;None\n")
         
-        return nombre_archivo
         print(f"✓ Datos exportados exitosamente a: {nombre_archivo}")
+        return nombre_archivo
 
     #! Metodo Incompleto, falta implementar
     def cargar_entrenadores(self, nombre_archivo=None):
