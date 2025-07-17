@@ -889,16 +889,19 @@ class Gimnasio:
                         break
                 if ut.yes_no(confirmacion):
                     print(f"Eliminando entrenador {self.__entrenadores[i].get_nombre()}...")
-                    self.__entrenadores.pop(i) # Eliminamos el entrenador de la lsi
+                    self.__entrenadores.pop(i) # Eliminamos el entrenador de la lista
                     
-                    # Buscar sesiones en las que esta
-                    for sesion in self.__sesiones:
-                        if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador:
-                            print(f"Eliminando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
-                            if not self.eliminar_sesion(sesion): # Si la sesion no se elimino, hay que eliminar la referencia del entrenador
-                                sesion.set_entrenador(None)
+                    # Crear una copia de la lista de sesiones para evitar problemas al modificar durante la iteración
+                    sesiones_a_procesar = [sesion for sesion in self.__sesiones if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador]
                     
-                    return True # Si se elimino el entrenador y las sesiones asociadas
+                    # Procesar cada sesión asociada al entrenador
+                    for sesion in sesiones_a_procesar:
+                        print(f"Procesando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
+                        if not self.eliminar_sesion(sesion): # Si la sesion no se eliminó, hay que eliminar la referencia del entrenador
+                            sesion.set_entrenador(None)
+                            print(f"Se eliminó la referencia del entrenador de la sesión {sesion.get_id_sesion()}")
+                    
+                    return True # Si se eliminó el entrenador y se procesaron las sesiones asociadas
                 else:
                     print("Eliminación cancelada.")
                     return False
@@ -1077,8 +1080,10 @@ class Gimnasio:
         total_ingresos = 0.0
         ingresos_membresia = 0.0
         ingresos_entrada_unica = 0.0
+        ingresos_otros = 0.0
         cantidad_membresias = 0
         cantidad_entradas = 0
+        cantidad_otros = 0
         ingresos_por_dia = {}
         
         # Leer archivo de caja y procesar datos del mes
@@ -1107,6 +1112,9 @@ class Gimnasio:
                         elif tipo in ["PagoIngresoUnico", "IngresoUnico"]:
                             ingresos_entrada_unica += monto
                             cantidad_entradas += 1
+                        elif tipo == "Ingreso":
+                            ingresos_otros += monto
+                            cantidad_otros += 1
                         
                         # Agrupar por día
                         if dia_transaccion in ingresos_por_dia:
@@ -1119,6 +1127,7 @@ class Gimnasio:
         print(f"    Total de ingresos: ${total_ingresos:,.0f}")
         print(f"    Ingresos por membresías: ${ingresos_membresia:,.0f} ({cantidad_membresias} ventas)")
         print(f"    Ingresos por entradas únicas: ${ingresos_entrada_unica:,.0f} ({cantidad_entradas} entradas)")
+        print(f"    Ingresos por otros conceptos: ${ingresos_otros:,.0f} ({cantidad_otros} transacciones)")
         
         print(f"\nINGRESOS POR DÍA DEL MES:")
         if ingresos_por_dia:
@@ -1148,8 +1157,10 @@ class Gimnasio:
             "total_ingresos": total_ingresos,
             "ingresos_membresia": ingresos_membresia,
             "ingresos_entrada_unica": ingresos_entrada_unica,
+            "ingresos_otros": ingresos_otros,
             "cantidad_membresias": cantidad_membresias,
             "cantidad_entradas": cantidad_entradas,
+            "cantidad_otros": cantidad_otros,
             "ingresos_por_dia": ingresos_por_dia
         }
 
@@ -1162,7 +1173,7 @@ class Gimnasio:
 
         # Solicitar fecha del reporte
         print("\n=== REPORTE DIARIO ===")
-        ano = datetime.now().year
+        # ano = datetime.now().year
         
         while True:
             fecha_reporte= input("Ingrese la fecha del reporte (YYYY-MM-DD): ")
@@ -1491,6 +1502,7 @@ class Gimnasio:
                     print("""📋 Formato esperado para clientes : 
     Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin""")
                     print("📋 Formato detectado:", ";".join(primera_linea))
+                    return False
                 
                 # Verificar si hay líneas de datos (más de solo encabezados)
                 if rows <= 1:
@@ -1584,7 +1596,7 @@ class Gimnasio:
                     if linea[4] in [False, "False", "false", True, "True", "true"]:
                         pago_bool = linea[4].strip().lower() == 'true'
                     else:
-                        print("⚠️  Línea {i+1}: Estado de pago inválido. Se omitirá la membresía.")
+                        print(f"⚠️  Línea {i+1}: Estado de pago inválido. Se omitirá la membresía.")
                         lineas_error.append(i+1)
                         continue
                     
@@ -1605,7 +1617,6 @@ class Gimnasio:
                     lineas_error.append(i+1)
                     print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
                     continue
-                
             except Exception as e:
                 print(f"✗ Error procesando línea {i+1}: {str(e)}")
                 lineas_error.append(i+1)
