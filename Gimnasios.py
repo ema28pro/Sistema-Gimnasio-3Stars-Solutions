@@ -201,7 +201,7 @@ class Gimnasio:
         Args:
             nombre (str, optional): Nombre del Entrenador. Defaults to None.
             especialidad (str, optional): Especialidad del Entrenador de la lista 'sesiones_especiales'. Defaults to None.
-            telefono (str, optional): _description_. Defaults to None.
+            telefono (str, optional): Numero de telefono del Entrenador. Defaults to None.
 
         Returns:
             (bool, Entrenador): Retorna el Objeto Entrenador creado o False si no se pudo crear.
@@ -557,7 +557,10 @@ class Gimnasio:
                     print(f"\n===== Sesion Seleccionada ====")
                     print(f"Sesión ID: {sesion.get_id_sesion()}, Fecha: {sesion.get_fecha()}, Cupos disponibles: {sesion.get_cupos_disponibles()}")
                     entrenador = sesion.mostrar_info()
-                    entrenador.mostrar_info()
+                    if entrenador:
+                        entrenador.mostrar_info()
+                    else:
+                        print("No se encontró un entrenador para esta sesión.")
                     return sesion
             print(f"No se encontró una sesión con ID {id_sesion}.")
             return None
@@ -600,7 +603,7 @@ class Gimnasio:
         with open("registros/Caja.txt", "a") as caja_file:
             caja_file.write(registro)
     
-    def pagar_membresia(self, membresia: Membresia):
+    def pagar_membresia(self, membresia):
         """_summary_
             Metodo encargado de pagar la Membresia del Cliente si esta en deuda.
         Args:
@@ -615,7 +618,7 @@ class Gimnasio:
             membresia.set_pago(True) # Actualizamos el estado de pago de la membresía
             print(f"Pago realizado exitosamente. Monto: ${PRECIO_MEMBRESIA:,}")
     
-    def renovar_membresia(self, cliente=None ,membresia: Membresia = None):
+    def renovar_membresia(self, cliente=None ,membresia=None):
         """_summary_
             Metodo encargado de renovar la Membresia del Cliente.
         Args:
@@ -643,7 +646,7 @@ class Gimnasio:
         # Actualizar la membresía
         print(f"Membresía renovada.")
         self.ingreso_caja(PRECIO_MEMBRESIA, "RenovacionMembresia") # Se registra el ingreso en caja con su motivo
-        membresia_.renovar_membresia() # Actualiza la fecha de fin de la membresía
+        membresia.renovar_membresia() # Actualiza la fecha de fin de la membresía
     
     def pago_ingreso_unico(self, cliente):
         """"Metodo encargado de registrar el ingreso unico de un cliente sin tener que adquirir memebreisa, pagando el ingreso unico del Cliente."""
@@ -744,7 +747,6 @@ class Gimnasio:
         Args:
             id_cliente (int, optional): ID del Cliente a eliminar. Defaults to None.
             cliente (Cliente, optional): Objeto Cliente a eliminar. Defaults to None.
-
         Returns:
             bool: Booleano que indica si la eliminación fue exitosa o no.
         """        
@@ -790,7 +792,7 @@ class Gimnasio:
                     break
             
             if ut.yes_no(confirmar):
-                self.__clientes[i].set_membresia(None)  # Eliminar membresía si existe, luego implementar eliminar_membresia
+                cliente_encontrado.set_membresia(None)  # Eliminar membresía si existe, luego implementar eliminar_membresia
                 
                 # Buscar si el cliente tiene sesiones especiales
                 for sesion in self.__sesiones:
@@ -798,7 +800,7 @@ class Gimnasio:
                     sesion.editar_inscritos(cliente.get_id_cliente())
                 
                 # Eliminar cliente del array
-                self.__clientes[i] = None 
+                self.__clientes[indice_cliente] = None 
                 self.__numero_clientes -= 1 
                 print(f"Cliente con ID {id_cliente} eliminado exitosamente.")
                 return True
@@ -887,16 +889,19 @@ class Gimnasio:
                         break
                 if ut.yes_no(confirmacion):
                     print(f"Eliminando entrenador {self.__entrenadores[i].get_nombre()}...")
-                    self.__entrenadores.pop(i) # Eliminamos el entrenador de la lsi
+                    self.__entrenadores.pop(i) # Eliminamos el entrenador de la lista
                     
-                    # Buscar sesiones en las que esta
-                    for sesion in self.__sesiones:
-                        if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador:
-                            print(f"Eliminando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
-                            if not self.eliminar_sesion(sesion): # Si la sesion no se elimino, hay que eliminar la referencia del entrenador
-                                sesion.set_entrenador(None)
+                    # Crear una copia de la lista de sesiones para evitar problemas al modificar durante la iteración
+                    sesiones_a_procesar = [sesion for sesion in self.__sesiones if sesion.get_entrenador() and sesion.get_entrenador().get_id_entrenador() == id_entrenador]
                     
-                    return True # Si se elimino el entrenador y las sesiones asociadas
+                    # Procesar cada sesión asociada al entrenador
+                    for sesion in sesiones_a_procesar:
+                        print(f"Procesando sesión especial con ID {sesion.get_id_sesion()} que tenía al entrenador eliminado.")
+                        if not self.eliminar_sesion(sesion): # Si la sesion no se eliminó, hay que eliminar la referencia del entrenador
+                            sesion.set_entrenador(None)
+                            print(f"Se eliminó la referencia del entrenador de la sesión {sesion.get_id_sesion()}")
+                    
+                    return True # Si se eliminó el entrenador y se procesaron las sesiones asociadas
                 else:
                     print("Eliminación cancelada.")
                     return False
@@ -962,6 +967,9 @@ class Gimnasio:
     #! ============================== Metodos de Analisis ==============================
     
     def seguimiento_membresias(self):
+        """_summary_
+            Permite realizar un seguimiento de las membresías de los clientes, mostrando las que están en deuda, por vencer, vencidas y los clientes sin membresía.
+        """        
         # Listas para categorizar
         membresias_en_deuda = []
         membresias_por_vencer = []  # ≤ 7 días
@@ -970,19 +978,20 @@ class Gimnasio:
         
         for i in range(self.__maximo_clientes):
             cliente = self.__clientes[i]
-            if cliente is not None:
-                membresia = cliente.get_membresia()
+            if cliente is not None: # si no es None
+                membresia = cliente.get_membresia() # Obtenemos la membresía del cliente
                 if membresia is None:
-                    clientes_sin_membresia.append(cliente)
+                    clientes_sin_membresia.append(cliente) # Si no tiene membresía, lo agregamos a la lista de clientes sin membresía
                 else:
-                    dias_restantes = membresia.calcular_dias_restantes()
+                    dias_restantes = membresia.calcular_dias_restantes() # Si si tiene membresia calculamos los días restantes de la membresía
                     if dias_restantes < 0:
-                        membresias_vencidas.append(cliente)
+                        membresias_vencidas.append(cliente) # Si los días restantes son negativos, la membresía está vencida
                     elif dias_restantes <= 7:
-                        membresias_por_vencer.append(cliente)
+                        membresias_por_vencer.append(cliente) # Si los días restantes son menores o iguales a 7, la membresía está por vencer
                     elif not membresia.get_pago():
-                        membresias_en_deuda.append(cliente)
+                        membresias_en_deuda.append(cliente) # Si la membresía no está pagada, la agregamos a la lista de membresías en deuda
         
+        # Imprimimos las listas
         print("\n====== CONTROL DE MEMBRESÍAS ======")
         print("="*50)
         print("\n=== CLIENTES SIN MEMBRESÍA ===")
@@ -1011,29 +1020,20 @@ class Gimnasio:
             for cliente in membresias_vencidas:
                 dias_restantes = cliente.get_membresia().calcular_dias_restantes()
                 print(f"    - ID: {cliente.get_id_cliente()}, Nombre: {cliente.get_nombre()}, Documento: {cliente.get_documento()}, Días vencida: {dias_restantes}")
-        
-        # Liberamos Memoria
-        
-        del membresias_en_deuda
-        del membresias_por_vencer
-        del membresias_vencidas
-        del clientes_sin_membresia
-
 
     def analisis_financiero(self):
-        """
-        Descripción	El sistema debe permitir generar un análisis financiero. Este análisis incluye ingresos por membresías y ingresos por entradas únicas.
-        Imprimimos los meses
-        Entrada : Mes del Análisis
-        Salida : 
-            -   Ingreso por dia y por monto (Membresia y Ingreso Unico)
-        """
+        """_summary_
+            Entrega un analisis financiero del gimnasio, mostrando los ingresos por membresías y entradas únicas.
+        Returns:
+            dicionario: diccionario con el resumen del analisis
+        """        
+        
         print("\n=== ANÁLISIS FINANCIERO ===")
         
         registro_caja = "registros/Caja.txt"  # Formato: fecha;hora;tipo;efectivo
         
         meses_disponibles = []
-        
+        # Buscamos los meses disponibles en el archivo de caja
         with open(registro_caja, "r", encoding='utf-8') as archivo:
             for linea in archivo:
                 datos = linea.strip().split(";")
@@ -1044,7 +1044,6 @@ class Gimnasio:
                     # Solo agregar si no está ya en la lista (evitar duplicados)
                     if mes_año not in meses_disponibles:
                         meses_disponibles.append(mes_año)
-        
         if not meses_disponibles:
             print("❌ No se encontraron registros de entradas en el archivo.")
             return
@@ -1056,9 +1055,9 @@ class Gimnasio:
         print("="*40)
         print(meses_lista)
         
-        # 1. Solicitar mes y año
+        # Solicitar mes y año
         while True:
-            mes = input("Ingrese el número del mes (1-12) o Enter para cancelar: ")
+            mes = input(f"Ingrese el número del mes (1-12):{meses_lista} o Enter para cancelar: ")
             if mes == "":
                 print("Operación cancelada.")
                 return
@@ -1077,15 +1076,17 @@ class Gimnasio:
         print(f"\nGenerando análisis financiero para: {mes}/{año}")
         print("="*50)
         
-        # 2. Contadores para el análisis
+        # Contadores para el análisis
         total_ingresos = 0.0
         ingresos_membresia = 0.0
         ingresos_entrada_unica = 0.0
+        ingresos_otros = 0.0
         cantidad_membresias = 0
         cantidad_entradas = 0
+        cantidad_otros = 0
         ingresos_por_dia = {}
         
-        # 3. Leer archivo de caja y procesar datos del mes
+        # Leer archivo de caja y procesar datos del mes
         with open(registro_caja, "r", encoding='utf-8') as archivo:
             for linea in archivo:
                 datos = linea.strip().split(";")
@@ -1111,6 +1112,9 @@ class Gimnasio:
                         elif tipo in ["PagoIngresoUnico", "IngresoUnico"]:
                             ingresos_entrada_unica += monto
                             cantidad_entradas += 1
+                        elif tipo == "Ingreso":
+                            ingresos_otros += monto
+                            cantidad_otros += 1
                         
                         # Agrupar por día
                         if dia_transaccion in ingresos_por_dia:
@@ -1118,11 +1122,12 @@ class Gimnasio:
                         else:
                             ingresos_por_dia[dia_transaccion] = monto
         
-        # 4. Mostrar resultados
+        # Mostrar resultados
         print(f"\nRESUMEN FINANCIERO DEL MES:")
         print(f"    Total de ingresos: ${total_ingresos:,.0f}")
         print(f"    Ingresos por membresías: ${ingresos_membresia:,.0f} ({cantidad_membresias} ventas)")
         print(f"    Ingresos por entradas únicas: ${ingresos_entrada_unica:,.0f} ({cantidad_entradas} entradas)")
+        print(f"    Ingresos por otros conceptos: ${ingresos_otros:,.0f} ({cantidad_otros} transacciones)")
         
         print(f"\nINGRESOS POR DÍA DEL MES:")
         if ingresos_por_dia:
@@ -1132,7 +1137,7 @@ class Gimnasio:
         else:
             print("   No se encontraron ingresos para este mes.")
         
-        # 5. Calcular promedios
+        # Calcular promedios
         if ingresos_por_dia:
             promedio_diario = total_ingresos / len(ingresos_por_dia)
             print(f"\nESTADÍSTICAS:")
@@ -1145,28 +1150,30 @@ class Gimnasio:
         
         print("="*50)
         
+        # Retornar un resumen del análisis
         return {
             "mes": mes,
             "año": año,
             "total_ingresos": total_ingresos,
             "ingresos_membresia": ingresos_membresia,
             "ingresos_entrada_unica": ingresos_entrada_unica,
+            "ingresos_otros": ingresos_otros,
             "cantidad_membresias": cantidad_membresias,
             "cantidad_entradas": cantidad_entradas,
+            "cantidad_otros": cantidad_otros,
             "ingresos_por_dia": ingresos_por_dia
         }
 
     def reporte_diario(self):
-        """
-        Descripción	El sistema debe permitir generar un Reporte Diario. Este reporte incluye, membresías compradas, actualizadas, renovadas en el día, junto con membresías en deuda y cerca finalización.
-        Entrada : Dia del Reporte
-        Salida : 
-            -   Membresías Compradas del Dia
-            -	Balance de Efectivo del Dia
-        """
+        """_summary_
+            Funcion encargada de generar un Reporte Diario del Gimnasio.
+        Returns:
+            diccionario: diccionario con el resumen del reporte
+        """        
+
         # Solicitar fecha del reporte
         print("\n=== REPORTE DIARIO ===")
-        ano = datetime.now().year
+        # ano = datetime.now().year
         
         while True:
             fecha_reporte= input("Ingrese la fecha del reporte (YYYY-MM-DD): ")
@@ -1192,7 +1199,7 @@ class Gimnasio:
         membresias_compradas = 0
         balance_efectivo = 0.0
         
-        # 1. Analizar registros de caja del día
+        # Analizar registros de caja del día
         print("\nBALANCE DE EFECTIVO DEL DÍA:")
         with open(registro_caja, "r", encoding='utf-8') as archivo_caja:
             for linea in archivo_caja:
@@ -1210,7 +1217,7 @@ class Gimnasio:
         print(f"   Total ingresos del día: ${balance_efectivo:,.0f}")
         print(f"   Membresías vendidas: {membresias_compradas}")  # Dividir por 2 porque hay Membresia y PagoMembresia
         
-        # 2. Analizar entradas del día
+        # Analizar entradas del día
         print("\nENTRADAS DEL DÍA:")
         entradas_dia = 0
         entradas_membresia = 0
@@ -1243,6 +1250,7 @@ class Gimnasio:
         print(f"    Total entradas del día: {entradas_dia}")
         print("="*50)
         
+        # Retornar un resumen del reporte
         return {
             "fecha": fecha_reporte_str,
             "balance_efectivo": balance_efectivo,
@@ -1252,21 +1260,17 @@ class Gimnasio:
     
     
     def informe_entrada(self):
-        """
-        Nombre	Informe de Entradas
-        Descripción	El sistema debe permitir generar un informe de entradas. Este informe muestra el número de entradas de clientes en los diferentes días de la semana y cuáles son las horas más frecuentadas
-        Entrada	: Mes del Informe
-        Salida	: 
-            - Número de Entradas al Gimnasio por Días
-            - Horas más Frecuentadas en el Gimnasio
-        """
+        """_summary_
+            Permite generar un informe de entradas del gimnasio, mostrando el número de entradas por días y las horas más frecuentadas.
+        """        
+        
         print("\n=== INFORME DE ENTRADAS ===")
         
         registro_entradas = "registros/Entradas.txt" # Formato Fecha;Hora;ID;Documento;Nombre;Membresía(False:Vencida/True:Activa/None:SinMembresía);Tipo(Entrada Unica/Membresia)
         
         # Leer archivo y extraer meses únicos
         meses_disponibles = []
-        
+        # Buscamos los meses disponibles en el archivo de entradas
         with open(registro_entradas, "r", encoding='utf-8') as archivo:
             for linea in archivo:
                 datos = linea.strip().split(";")
@@ -1322,8 +1326,6 @@ class Gimnasio:
                     dia_inicio = dia_inicio - 1  # Convertir a índice (0-6)
                     break
         
-        # 3. Crear cadena de búsqueda para el mes
-        mes_busqueda = f"{año}-{mes:02d}"  # Formato: 2025-06
         print(f"\n Generando informe para: {mes}/{año}")
         print("="*50)
         
@@ -1333,7 +1335,6 @@ class Gimnasio:
         entradas_por_hora = {}  # 08: 0, 09: 0, etc.
         
         # Inicializar contadores
-        dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
         for dia in dias_semana:
             entradas_por_dia[dia] = 0
         
@@ -1387,12 +1388,10 @@ class Gimnasio:
     #* ============================== Exportar e Importar Datos ==============================
     
     def exportar_datos_json(self, nombre_archivo: str = None):
-        """
+        """_summary_
         Guarda todos los datos de clientes y sus membresías en un archivo JSON.
-        
         Args:
             nombre_archivo (str, optional): Nombre del archivo JSON. Si no se especica se genera automáticamente con la fecha actual.
-        
         Returns:
             str: Ruta del archivo creado
         """
@@ -1459,48 +1458,15 @@ class Gimnasio:
             print(f"✗ Error al guardar el archivo JSON: {str(e)}")
             return None
     
-    def cargar_datos_json(self, nombre_archivo: str):
-        """
-        Carga datos de clientes desde un archivo JSON (método complementario).
-        
-        Args:
-            nombre_archivo (str): Nombre del archivo JSON a cargar
-        
-        Returns:
-            bool: True si la carga fue exitosa, False en caso contrario
-        """
-        
-        nombre_archivo = f"registros/{nombre_archivo}"
-        
-        try:
-            with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
-                datos = json.load(archivo)
-            
-            print(f"✓ Archivo {nombre_archivo} cargado exitosamente")
-            print(f"✓ Datos del gimnasio: {datos['gimnasio']['nombre']}")
-            print(f"✓ Total de clientes en archivo: {len(datos['clientes'])}")
-            print(f"✓ Fecha de exportación: {datos['estadisticas']['fecha_exportacion']}")
-            
-            return datos
-            
-        except FileNotFoundError:
-            print(f"✗ Archivo {nombre_archivo} no encontrado")
-            return None
-        except json.JSONDecodeError:
-            print(f"✗ Error al leer el archivo JSON: formato inválido")
-            return None
-        except Exception as e:
-            print(f"✗ Error al cargar el archivo: {str(e)}")
-            return None
-    
     def cargar_clientes(self, nombre_archivo=None):
         if nombre_archivo is None:
+            
+            # Listar archivos disponibles en la carpeta "registros"
             print("Archivos disponibles en la carpeta 'registros':")
             archivos = [f for f in os.listdir("registros") if f.endswith(".txt")]
             for idx, archivo in enumerate(archivos, 1):
                 print(f"{idx}. {archivo}")
-            nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
-        if nombre_archivo is None:
+            
             nombre_archivo = input("Ingrese el nombre del archivo a cargar (.txt separado por ';'): ")
         if nombre_archivo == 0 or nombre_archivo == "0" or nombre_archivo == "":
             print("Operacion cancelada.")
@@ -1536,6 +1502,7 @@ class Gimnasio:
                     print("""📋 Formato esperado para clientes : 
     Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin""")
                     print("📋 Formato detectado:", ";".join(primera_linea))
+                    return False
                 
                 # Verificar si hay líneas de datos (más de solo encabezados)
                 if rows <= 1:
@@ -1556,6 +1523,7 @@ class Gimnasio:
         lineas_procesadas = 0
         
         inval = [None, "None", "none", "", " ", "0", 0]
+        # Valores inválido
         
         print(f"\n📥 Iniciando carga de {rows-1} líneas de datos...")
         
@@ -1568,7 +1536,6 @@ class Gimnasio:
                 print(f"✗ Línea {i+1} malformada (solo {len(linea)} columnas): {lineas[i].strip()}")
                 lineas_error.append(i+1)
                 continue
-
             try:
                 print("="*30)
                 print(f"Procesando línea {i+1}/{rows}: {linea}")
@@ -1600,11 +1567,12 @@ class Gimnasio:
                     # Verificar si el cliente tiene datos de membresía válidos
                     if (linea[4] in inval) or (linea[5] in inval):
                         print(f"⚠️  Línea {i+1}: Cliente sin membresía o datos de membresía inválidos.")
+                        lineas_error.append(i+1)
                         continue
                     
                     # Validar fecha de inicio de membresía (obligatoria)
                     try:
-                        fecha_inicio = datetime.strptime(linea[5], "%Y-%m-%d").date()
+                        datetime.strptime(linea[5], "%Y-%m-%d").date()
                     except Exception as e:
                         print(f"✗ Error en la fecha de inicio de membresía en línea {i+1}: {str(e)}")
                         print("⚠️  Se omitirá la membresía para este cliente.")
@@ -1625,7 +1593,12 @@ class Gimnasio:
                             fecha_fin_valida = None
                     
                     # Procesar el pago
-                    pago_bool = linea[4].strip().lower() == 'true'
+                    if linea[4] in [False, "False", "false", True, "True", "true"]:
+                        pago_bool = linea[4].strip().lower() == 'true'
+                    else:
+                        print(f"⚠️  Línea {i+1}: Estado de pago inválido. Se omitirá la membresía.")
+                        lineas_error.append(i+1)
+                        continue
                     
                     # Intentar crear la membresía
                     membresia_creada = self.crear_membresia(
@@ -1640,12 +1613,10 @@ class Gimnasio:
                         print(f"✓ Cliente y membresía cargados exitosamente.")
                     else:
                         print(f"⚠️  Cliente creado pero falló la creación de la membresía.")
-                        
                 else:
                     lineas_error.append(i+1)
                     print(f"✗ No se pudo crear el cliente {linea[0]} con documento {linea[1]}.")
                     continue
-                
             except Exception as e:
                 print(f"✗ Error procesando línea {i+1}: {str(e)}")
                 lineas_error.append(i+1)
@@ -1673,23 +1644,23 @@ class Gimnasio:
             
         print("="*60)
         
-        return membresias_cargadas > 0  # Retorna True si se cargó al menos una línea
+        return 
     
     def exportar_clientes(self):
         nombre_archivo = f"registros/clientes_{date.today().strftime('%Y%m%d')}.txt"
         
-        with open(nombre_archivo, "w",) as archivo:
+        with open(nombre_archivo, "w") as archivo:
             archivo.write("Nombre;Documento;Telefono;Fecha Registro;Membresia:Pago;Membresia:Fecha Inicio;Membresia:Fecha Fin\n")
-            for i in self.__clientes:
-                if i is not None:
-                    membresia = i.get_membresia()
+            for cliente in self.__clientes:
+                if cliente is not None:
+                    membresia = cliente.get_membresia()
                     if membresia:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
+                        archivo.write(f"{cliente.get_nombre()};{cliente.get_documento()};{cliente.get_telefono()};{cliente.get_fecha_registro()};{membresia.get_pago()};{membresia.get_fecha_inicio()};{membresia.get_fecha_fin()}\n")
                     else:
-                        archivo.write(f"{i.get_nombre()};{i.get_documento()};{i.get_telefono()};{i.get_fecha_registro()};None;None;None\n")
+                        archivo.write(f"{cliente.get_nombre()};{cliente.get_documento()};{cliente.get_telefono()};{cliente.get_fecha_registro()};None;None;None\n")
         
-        return nombre_archivo
         print(f"✓ Datos exportados exitosamente a: {nombre_archivo}")
+        return nombre_archivo
 
     #! Metodo Incompleto, falta implementar
     def cargar_entrenadores(self, nombre_archivo=None):

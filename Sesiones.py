@@ -161,8 +161,6 @@ class SesionEspecial:
             print("No hay clientes inscritos en esta sesión.")
             return False
         
-        
-        
         if id_cliente is None:
             # Si no se proporciona un ID, mostramos los inscritos y pedimos por consola
             

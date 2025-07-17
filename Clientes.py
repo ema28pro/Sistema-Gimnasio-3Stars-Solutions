@@ -2,7 +2,6 @@ from datetime import date, timedelta, datetime
 import Utils as ut
 from Utils import PRECIO_MEMBRESIA
 
-
 # ==== CLIENTES Y MEMBRESÍA ====
 
 class Membresia:

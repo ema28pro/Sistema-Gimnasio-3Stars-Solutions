@@ -1,0 +1,295 @@
+{
+    "gimnasio": {
+        "nombre": "Body Force",
+        "direccion": "Barrio Candelilla",
+        "telefono": "3001234545",
+        "correo": "body@force.com",
+        "efectivo": 45000
+    },
+    "estadisticas": {
+        "total_clientes": 23,
+        "historico_clientes": 23,
+        "fecha_exportacion": "2025-07-14"
+    },
+    "clientes": [
+        {
+            "id_cliente": 1,
+            "nombre": "emanuel",
+            "documento": "21254",
+            "telefono": "333333",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-05-11",
+                "fecha_fin": "2025-06-10",
+                "dias_restantes": -34
+            }
+        },
+        {
+            "id_cliente": 2,
+            "nombre": "sofia",
+            "documento": "10234567",
+            "telefono": "3201234567",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-06-21",
+                "fecha_fin": "2025-07-21",
+                "dias_restantes": 7
+            }
+        },
+        {
+            "id_cliente": 3,
+            "nombre": "carlos",
+            "documento": "20345678",
+            "telefono": "3112345678",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-06-21",
+                "fecha_fin": "2025-07-21",
+                "dias_restantes": 7
+            }
+        },
+        {
+            "id_cliente": 4,
+            "nombre": "maria",
+            "documento": "30456789",
+            "telefono": "3223456789",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-05-11",
+                "fecha_fin": "2025-06-10",
+                "dias_restantes": -34
+            }
+        },
+        {
+            "id_cliente": 5,
+            "nombre": "andres",
+            "documento": "40567890",
+            "telefono": "3334567890",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-05-11",
+                "fecha_fin": "2025-06-10",
+                "dias_restantes": -34
+            }
+        },
+        {
+            "id_cliente": 6,
+            "nombre": "valentina",
+            "documento": "50678901",
+            "telefono": "3145678901",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-05-11",
+                "fecha_fin": "2025-06-10",
+                "dias_restantes": -34
+            }
+        },
+        {
+            "id_cliente": 7,
+            "nombre": "sebastian",
+            "documento": "60789012",
+            "telefono": "3256789012",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 8,
+            "nombre": "camila",
+            "documento": "70890123",
+            "telefono": "3167890123",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 9,
+            "nombre": "daniel",
+            "documento": "80901234",
+            "telefono": "3278901234",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 10,
+            "nombre": "isabella",
+            "documento": "91012345",
+            "telefono": "3189012345",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 11,
+            "nombre": "miguel",
+            "documento": "12123456",
+            "telefono": "3290123456",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 12,
+            "nombre": "alejandra",
+            "documento": "23234567",
+            "telefono": "3101234567",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 13,
+            "nombre": "felipe",
+            "documento": "34345678",
+            "telefono": "3212345678",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 14,
+            "nombre": "natalia",
+            "documento": "45456789",
+            "telefono": "3123456789",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-06-11",
+                "fecha_fin": "2025-07-11",
+                "dias_restantes": -3
+            }
+        },
+        {
+            "id_cliente": 15,
+            "nombre": "joaquin",
+            "documento": "56567890",
+            "telefono": "3234567890",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": false,
+                "fecha_inicio": "2025-07-11",
+                "fecha_fin": "2025-08-10",
+                "dias_restantes": 27
+            }
+        },
+        {
+            "id_cliente": 16,
+            "nombre": "gabriela",
+            "documento": "67678901",
+            "telefono": "3145678902",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-07-11",
+                "fecha_fin": "2025-08-10",
+                "dias_restantes": 27
+            }
+        },
+        {
+            "id_cliente": 17,
+            "nombre": "nicolas",
+            "documento": "78789012",
+            "telefono": "3256789013",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-07-11",
+                "fecha_fin": "2025-08-10",
+                "dias_restantes": 27
+            }
+        },
+        {
+            "id_cliente": 18,
+            "nombre": "paola",
+            "documento": "89890123",
+            "telefono": "3167890124",
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-07-12",
+                "fecha_fin": "2025-08-11",
+                "dias_restantes": 28
+            }
+        },
+        {
+            "id_cliente": 19,
+            "nombre": "ricardo",
+            "documento": "90901234",
+            "telefono": "3278901235",
+            "fecha_registro": "2025-05-10",
+            "membresia": null
+        },
+        {
+            "id_cliente": 20,
+            "nombre": "fernanda",
+            "documento": "11012345",
+            "telefono": null,
+            "fecha_registro": "2025-05-10",
+            "membresia": {
+                "pago": true,
+                "fecha_inicio": "2025-07-14",
+                "fecha_fin": "2025-08-13",
+                "dias_restantes": 30
+            }
+        },
+        {
+            "id_cliente": 21,
+            "nombre": "alberto",
+            "documento": "11012564",
+            "telefono": null,
+            "fecha_registro": "2025-05-10",
+            "membresia": null
+        },
+        {
+            "id_cliente": 22,
+            "nombre": "yurani",
+            "documento": "54511164",
+            "telefono": null,
+            "fecha_registro": "2025-05-10",
+            "membresia": null
+        },
+        {
+            "id_cliente": 23,
+            "nombre": "yolanda",
+            "documento": "546811164",
+            "telefono": null,
+            "fecha_registro": "2025-05-10",
+            "membresia": null
+        }
+    ]
+}
