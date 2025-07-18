@@ -11,7 +11,6 @@
 </div>
 
 ---
-ggggg
 Proyecto Final del Curso de Lógica y Representación I, Sistema de Gestión de Membresías Gimnasio en Python usando Numpy, DateTime y persitencia en archivos, por 3Stars Solutions.
 
 ## 📌 Descripción del Proyecto
